@@ -16,28 +16,37 @@
     .hero {
       height: 100vh;
       width: 100%;
-      background: url('camera-bg.jpg') no-repeat center center/cover;
+      display: flex;
+      position: relative;
+    }
+
+    .hero-half {
+      flex: 1;
+      background-size: cover;
+      background-position: center;
+    }
+
+    .left {
+      background-image: url('left-camera.jpg'); /* replace with your left image */
+    }
+
+    .right {
+      background-image: url('right-cameras.jpg'); /* replace with your right image */
+    }
+
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
       display: flex;
       justify-content: center;
       align-items: center;
       flex-direction: column;
       text-align: center;
-      position: relative;
-    }
-
-    .hero::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      height: 100%;
-      width: 100%;
-      background: rgba(0,0,0,0.6); /* dark overlay for readability */
-    }
-
-    .hero-content {
-      position: relative;
-      z-index: 1;
+      padding: 0 20px;
     }
 
     h1 {
@@ -67,11 +76,26 @@
     .btn:hover {
       background: #c94600;
     }
+
+    /* Responsive */
+    @media(max-width: 900px) {
+      .hero {
+        flex-direction: column;
+      }
+      h1 {
+        font-size: 3rem;
+      }
+      p {
+        font-size: 1.1rem;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="hero">
-    <div class="hero-content">
+    <div class="hero-half left"></div>
+    <div class="hero-half right"></div>
+    <div class="overlay">
       <h1>KISLAP</h1>
       <p>CAPTURE MOMENTS. CREATE STORIES.</p>
       <a href="explore.php" class="btn">Explore</a>
