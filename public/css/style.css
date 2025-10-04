@@ -1,0 +1,113 @@
+@import url('https://fonts.googleapis.com/css2?family=Alice&display=swap');
+
+* {
+  font-family: "Alice", serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  color: #000000;
+  z-index: 1;
+}
+
+body, html {
+  scroll-padding-top: 150px;
+  scroll-behavior: smooth;
+  min-height: auto;
+  min-width: 100%;
+  max-width: 100%;
+  background-size: cover;
+  background-attachment: fixed;
+  background-color: #000000;
+  flex-wrap: nowrap;
+}
+
+/* HEADER / NAVBAR */
+
+.header {
+  height: 80px;
+  border-radius: 0px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  max-width: 100%;
+  width: 100%;
+  padding: 20px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: url('../static/imgs/homebg.png') no-repeat;
+  background: #000;
+  z-index: 1000;
+  border-bottom: 0.5px solid rgb(123, 123, 123);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+
+
+.logo {
+  margin-top: 0; 
+  justify-content: center;
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 200px; 
+  width: 200px;
+  transition: transform 0.3s ease, opacity 0.3s ease; 
+}
+
+.logo img {
+  width: 100%;
+  height: 100%; 
+  transition: transform 0.3s ease, opacity 0.3s ease; 
+}
+
+.logo:hover {
+  transform: scale(1.1); 
+  opacity: 0.8; 
+}
+
+.logo:hover {
+  color: #828282;
+}
+
+.navbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.navbar a {
+  font-size: 25px;
+  color: #ffffff; 
+  font-weight: 000;
+  letter-spacing: 1px;
+  text-decoration: none;
+  position: relative;
+  margin-left: 15px;
+}
+.navtxt {
+  display: inline-block; 
+  margin-bottom: 5px;         
+
+}
+a svg {
+  stroke: #ffffff; 
+  width: 30px;
+  height: 30px;
+}
+
+.navbar a::before {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #ffffff;
+  transition: 0.5s;
+}
+
+.navbar a:hover::before {
+  width: 100%;
+}
+
