@@ -3,7 +3,7 @@ Kislap
 Kislap is a web-based project developed in PHP (OOP structure) with MySQL as the backend database. It follows an MVC-like structure with Repositories, Services, and Controllers.
 
 Project Structure
-KislapAI/
+Kislap/
  ├── public/               # Entry point (index.php, routes)
  ├── config/               # Database connection (Database.php)
  ├── controllers/          # Controllers handle requests
@@ -19,4 +19,4 @@ Start Apache and MySQL in XAMPP
 Create a database in phpMyAdmin
 Configure config/Database.php with your DB name and credentials
 Open in browser:
-http://localhost/KislapAI/public/
+http://localhost/Kislap/public/
