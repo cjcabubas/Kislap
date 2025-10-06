@@ -10,9 +10,9 @@ class Application
     private ?string $address;
     private ?string $password;
     private ?string $status;
+    private ?DateTime $createdAt;
 
-    public function __construct(?int $application_id, ?string $lastName, ?string $firstName, ?string $middleName, ?string $email, ?string $phoneNumber, ?string $address, ?string $password, ?string $status) {
-        $this->application_id = $application_id;
+    public function __construct(?string $lastName, ?string $firstName, ?string $middleName, ?string $email, ?string $phoneNumber, ?string $address, ?string $password) {
         $this->lastName = $lastName;
         $this->firstName = $firstName;
         $this->middleName = $middleName;
@@ -20,7 +20,6 @@ class Application
         $this->phoneNumber = $phoneNumber;
         $this->address = $address;
         $this->password = $password;
-        $this->status = $status;
     }
 
     public function getApplicationId(): ?int {return $this->application_id; }
@@ -33,6 +32,15 @@ class Application
     public function getPassword(): ?string { return $this->password; }
     public function getStatus(): ?string {return $this->status; }
 
-
+    public function toArray(): array {
+        return [
+            'lastName' => $this->lastName,
+            'firstName' => $this->firstName,
+            'middleName' => $this->middleName,
+            'email' => $this->email,
+            'phoneNumber' => $this->phoneNumber,
+            'address' => $this->address,
+            'password' => $this->password,
+        ];
+    }
 }
-?>
