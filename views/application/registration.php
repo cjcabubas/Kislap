@@ -86,7 +86,7 @@
 
     <div class="form-group">
         <label for="images">Upload Work Samples (Up to 4)</label>
-        <input id="images" type="file" name="images" multiple>
+        <input id="images" type="file" name="images[]" multiple>
     </div>
 
     <div class="form-group">

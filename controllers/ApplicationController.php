@@ -31,8 +31,17 @@ class ApplicationController
             );
 
             try {
-                $this->repo->save($application->toArray());
+                $appId = $this->repo->save($application->toArray());
                 echo "✅ Application submitted successfully!";
+
+
+
+
+
+
+
+
+
             } catch (Exception $e) {
                 echo "❌ Error: " . $e->getMessage();
             }
