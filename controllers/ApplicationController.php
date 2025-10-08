@@ -1,17 +1,21 @@
 <?php
 require_once __DIR__ . "/../model/Application.php";
 require_once __DIR__ . "/../model/repositories/ApplicationRepository.php";
+
 class ApplicationController
 {
-    public function __construct() {
+    public function __construct()
+    {
         $this->repo = new ApplicationRepository();
     }
+
     public function registration(): void
     {
         require "views/application/registration.php";
     }
 
-    public function submit(): void {
+    public function submit(): void
+    {
         // Show the form on GET
         if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             require "views/application/registration.php";
@@ -33,19 +37,50 @@ class ApplicationController
             try {
                 $appId = $this->repo->save($application->toArray());
                 echo "✅ Application submitted successfully!";
+                
+                if (isset($_FILES['resume']) && $_FILES['resume']['error'] === UPLOAD_ERR_OK) {
+                    $filePath = $this->uploadFiles($application, $_FILES['resume'], "resumes", $appId, true);
+                    saveResume($appId, $filePath);
+                }
 
+                if (isset($_FILES['images'])) {
+                    $filePaths = $this->uploadFiles($_FILES['images'], 'works', $appId, false);
 
-
-
-
-
-
-
-
+                    foreach ($filePaths as $path) {
+                        $this->repo->saveWorks($appId, $path);
+                    }
+                }
             } catch (Exception $e) {
                 echo "❌ Error: " . $e->getMessage();
             }
         }
+    }
+
+    public function uploadFiles(array $files, string $folder, int $appId, bool $isResume): array
+    {
+        $uploadedFiles = [];
+        $targetDir = "uploads/application/$folder/";
+        if (!is_dir($targetDir)) {
+            mkdir($targetDir, 0777, true);
+        }
+        if ($isResume) {
+            $extension = pathinfo($files["name"], PATHINFO_EXTENSION);
+            $filename = uniqid() . "resume_application_number_" . $appId . "_" . $extension;
+            move_uploaded_file($files['tmp_name'], $targetDir . $filename);
+            $uploadedFiles[] = $targetDir . $filename;
+        } else {
+            // Multiple works
+            $count = count($files['name']);
+            for ($i = 0; $i < $count && $i < 4; $i++) {
+                if ($files['error'][$i] === UPLOAD_ERR_OK) {
+                    $extension = pathinfo($files['name'][$i], PATHINFO_EXTENSION);
+                    $filename = "work_" . $i . "_app_" . $appId . "_" . uniqid() . "." . $extension;
+                    move_uploaded_file($files['tmp_name'][$i], $targetDir . $filename);
+                    $uploadedFiles[] = $targetDir . $filename;
+                }
+            }
+        }
+        return $uploadedFiles;
     }
 }
 
