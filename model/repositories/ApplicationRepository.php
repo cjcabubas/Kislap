@@ -27,7 +27,7 @@ class ApplicationRepository
 
     public function saveWorks(int $application_id, string $filePath): void {
         $stmt =$this->conn->prepare(
-            "INSERT INTO application_resume (application_id, worksFilePath) 
+            "INSERT INTO application_works (application_id, worksFilePath) 
                     VALUES (:id, :path)"
         );
         $stmt->execute(["id"=>$application_id, "path"=>$filePath]);

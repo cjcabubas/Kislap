@@ -35,21 +35,27 @@ class ApplicationController
             );
 
             try {
+                // save main info
                 $appId = $this->repo->save($application->toArray());
                 echo "✅ Application submitted successfully!";
-                
+
+                // save resume (single file)
                 if (isset($_FILES['resume']) && $_FILES['resume']['error'] === UPLOAD_ERR_OK) {
-                    $filePath = $this->uploadFiles($application, $_FILES['resume'], "resumes", $appId, true);
-                    saveResume($appId, $filePath);
+                    $filePaths = $this->uploadFiles($_FILES['resume'], "resumes", $appId, true);
+                    $this->repo->saveResume($appId, $filePaths[0]); // only one resume file
                 }
 
-                if (isset($_FILES['images'])) {
+                // save works (multiple files)
+                if (isset($_FILES['images']) && !empty($_FILES['images']['name'][0])) {
                     $filePaths = $this->uploadFiles($_FILES['images'], 'works', $appId, false);
 
                     foreach ($filePaths as $path) {
                         $this->repo->saveWorks($appId, $path);
                     }
                 }
+
+                echo "<br>All files uploaded successfully.";
+
             } catch (Exception $e) {
                 echo "❌ Error: " . $e->getMessage();
             }
@@ -65,16 +71,16 @@ class ApplicationController
         }
         if ($isResume) {
             $extension = pathinfo($files["name"], PATHINFO_EXTENSION);
-            $filename = uniqid() . "resume_application_number_" . $appId . "_" . $extension;
+            $filename = "resume_application_number_" . $appId . "_" . $extension;
             move_uploaded_file($files['tmp_name'], $targetDir . $filename);
             $uploadedFiles[] = $targetDir . $filename;
         } else {
             // Multiple works
             $count = count($files['name']);
-            for ($i = 0; $i < $count && $i < 4; $i++) {
+            for ($i = 1; $i < $count && $i < 5; $i++) {
                 if ($files['error'][$i] === UPLOAD_ERR_OK) {
                     $extension = pathinfo($files['name'][$i], PATHINFO_EXTENSION);
-                    $filename = "work_" . $i . "_app_" . $appId . "_" . uniqid() . "." . $extension;
+                    $filename = "work_" . $i . "_app_" . $appId . "." . $extension;
                     move_uploaded_file($files['tmp_name'][$i], $targetDir . $filename);
                     $uploadedFiles[] = $targetDir . $filename;
                 }
