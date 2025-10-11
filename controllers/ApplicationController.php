@@ -77,7 +77,7 @@ class ApplicationController
         } else {
             // Multiple works
             $count = count($files['name']);
-            for ($i = 1; $i < $count && $i < 5; $i++) {
+            for ($i = 0; $i < $count && $i < 4; $i++) {
                 if ($files['error'][$i] === UPLOAD_ERR_OK) {
                     $extension = pathinfo($files['name'][$i], PATHINFO_EXTENSION);
                     $filename = "work_" . $i . "_app_" . $appId . "." . $extension;
