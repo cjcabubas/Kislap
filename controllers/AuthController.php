@@ -2,7 +2,7 @@
 require_once __DIR__ . "/../model/User.php";
 require_once __DIR__ . "/../model/repositories/AuthRepository.php";
 
-class AuthController
+class   AuthController extends BaseController
 {
     public function __construct()
     {

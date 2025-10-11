@@ -2,7 +2,7 @@
 require_once __DIR__ . "/../model/Application.php";
 require_once __DIR__ . "/../model/repositories/ApplicationRepository.php";
 
-class ApplicationController
+class ApplicationController extends BaseController
 {
     public function __construct()
     {
