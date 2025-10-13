@@ -2,7 +2,7 @@
 require_once __DIR__ . "/../model/User.php";
 require_once __DIR__ . "/../model/repositories/AuthRepository.php";
 
-class   AuthController extends BaseController
+class   AuthController
 {
     public function __construct()
     {
@@ -79,13 +79,19 @@ class   AuthController extends BaseController
 
                 if (!$user) {
                     echo "No user with that email or phone number found.";
+                    return;
                 }
 
                 if (!password_verify($password, $user['password'])) {
                     echo "Wrong password.";
                     return;
                 }
-                unset($user->password);
+
+                if (session_status() === PHP_SESSION_NONE) {
+                    session_start();
+                }
+                unset($user['password']);
+
 
                 $_SESSION['user'] = [
                     'user_id'        => $user['user_id'],
@@ -99,7 +105,8 @@ class   AuthController extends BaseController
                     'createdAt'      => $user['createdAt']
 
                 ];
-                echo "✅ Logged in successfully!" . $user['firstName'];
+                header("Location: ../Kislap/views/user/profile.php");
+                exit;
             } catch (Exception $e) {
                 echo "❌ Error: " . $e->getMessage();
             }

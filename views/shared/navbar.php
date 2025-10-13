@@ -1,15 +1,11 @@
-<?php
-session_start();
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <title>Kislap Sign Up</title>
-    <l ink rel="stylesheet" href="public/css/form.css" type="text/css">
-        <link rel="stylesheet" href="public/css/style.css" type="text/css">
+    <link rel="stylesheet" href="public/css/form.css" type="text/css">
+    <link rel="stylesheet" href="public/css/style.css" type="text/css">
 </head>
 
 <body>
@@ -49,5 +45,3 @@ session_start();
     </nav>
 </header>
 
-</body>
-</html>

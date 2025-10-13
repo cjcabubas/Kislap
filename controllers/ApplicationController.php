@@ -89,4 +89,3 @@ class ApplicationController extends BaseController
         return $uploadedFiles;
     }
 }
-
