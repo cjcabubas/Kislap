@@ -4,12 +4,14 @@ class AuthRepository
 {
     private PDO $conn;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->conn = new PDO("mysql:host=localhost;dbname=kislap", "root", "");
     }
 
-    public function signUp(array $user): void {
-        $stmt =$this->conn->prepare(
+    public function signUp(array $user): void
+    {
+        $stmt = $this->conn->prepare(
             "INSERT INTO User (lastName, firstName, middleName, email, phoneNumber, password, address) 
                     VALUES (:lastName, :firstName, :middleName, :email, :phoneNumber, :password, :address)"
         );
@@ -32,7 +34,8 @@ class AuthRepository
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function findByEmail($email) {
+    public function findByEmail($email)
+    {
         $stmt = $this->conn->prepare("SELECT * FROM user WHERE email = ? LIMIT 1");
 
         $stmt->execute([$email]);
@@ -40,7 +43,8 @@ class AuthRepository
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function findByphoneNumber($phoneNumber) {
+    public function findByphoneNumber($phoneNumber)
+    {
         $stmt = $this->conn->prepare("SELECT * FROM user WHERE phoneNumber = ? LIMIT 1");
 
         $stmt->execute([$phoneNumber]);

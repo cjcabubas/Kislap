@@ -9,9 +9,10 @@
     <meta charset="UTF-8">
     <title>Kislap Admin Login</title>
 
-    <link rel="stylesheet" href="public/css/form.css" type="text/css">
-    <link rel="stylesheet" href="public/css/style.css" type="text/css">
-    <link rel="stylesheet" href="public/css/login.css" type="text/css">
+    <link rel="stylesheet" href="../../public/css/form.css" type="text/css">
+    <link rel="stylesheet" href="../../public/css/style.css" type="text/css">
+    <link rel="stylesheet" href="../../public/css/login.css" type="text/css">
+
 </head>
 
 <body>

@@ -57,9 +57,8 @@ class AdminController
                     'createdAt'  => $admin['created_at']
                 ];
 
-                header("Location: /Kislap/views/admin/dashboard.php");
+                header("Location: index.php?controller=Admin&action=showDashboard");
                 exit;
-
             } catch (Exception $e) {
                 echo "Error: " . $e->getMessage();
             }
@@ -78,5 +77,53 @@ class AdminController
         session_destroy();
         header("Location: /Kislap/views/admin/login.php");
         exit;
+    }
+
+    public function showDashboard()
+    {
+        $pending = $this->repo->getPendingApplicationsCount('pending');
+        $accepted = $this->repo->getAcceptedApplicationsCount('accepted');
+        $rejected = $this->repo->getRejectedApplicationsCount('rejected');
+        $userCount = $this->repo->getUserCount();
+
+        require 'views/admin/dashboard.php';
+    }
+
+    public function viewPendingApplications() {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        if (!isset($_SESSION['admin'])) {
+            header("Location: /Kislap/views/admin/login.php");
+            exit;
+        }
+
+        $limit = 10;
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        $offset = ($page - 1) * $limit;
+        $search = $_GET['search'] ?? '';
+
+        $applications = $this->repo->getPendingApplications($limit, $offset, $search);
+        $totalApplications = $this->repo->getPendingCount($search);
+        $totalPages = ceil($totalApplications / $limit);
+
+        require 'views/admin/application.php';
+    }
+
+    public function handleApplicationAction() {
+        $data = json_decode(file_get_contents('php://input'), true);
+        $action = $data['action'] ?? '';
+        $applicationId = $data['application_id'] ?? 0;
+
+        if (!$applicationId || !in_array($action, ['approve','reject'])) {
+            echo json_encode(['success' => false, 'message' => 'Invalid request']);
+            return;
+        }
+
+        $status = $action === 'approve' ? 'accepted' : 'rejected';
+        try {
+            $this->repo->updateApplicationStatus($applicationId, $status);
+            echo json_encode(['success' => true]);
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
     }
 }
