@@ -151,4 +151,253 @@ a svg {
     display: block;
 }
 
+body {
+    margin: 0;
+    font-family: 'Arial Black', sans-serif;
+}
+
+.hero {
+    height: 100vh;
+    background: url('your-background-image.jpg') center/cover no-repeat;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+    color: white;
+    position: relative;
+}
+
+.hero::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.6);
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+}
+
+.hero h1 {
+    font-size: 4rem;
+    font-weight: 900;
+    margin: 0;
+}
+
+.hero p {
+    font-size: 1.5rem;
+    margin: 20px 0;
+    font-family: "Georgia", serif;
+    letter-spacing: 1px;
+}
+
+.hero button {
+    background: #d35400;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.hero button:hover {
+    background: #e67e22;
+}
+
+/* =========================================
+GLOBAL
+========================================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    scroll-behavior: smooth;
+}
+
+:root{
+    --accent: #ff6600;
+    --accent-hover: #ff8533;
+    --bg-dark: #000;
+    --bg-2: #111;
+    --muted: #ccc;
+}
+
+/* BODY */
+body {
+    background-color: var(--bg-dark);
+    color: #fff;
+    overflow-x: hidden;
+}
+
+/* =========================================
+   HERO / HOME (kept in case you need it)
+   ========================================= */
+.hero {
+    height: 100vh;
+    background: url('your-background-image.jpg') center/cover no-repeat;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+    color: white;
+    position: relative;
+}
+
+.hero::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.6);
+}
+
+.hero-content { position: relative; z-index: 1; }
+
+.hero h1 { font-size: 4rem; font-weight: 900; margin: 0; }
+
+.hero p {
+    font-size: 1.5rem;
+    margin: 20px 0;
+    font-family: "Georgia", serif;
+    letter-spacing: 1px;
+}
+
+.hero button {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.hero button:hover { background: var(--accent-hover); }
+
+/* =========================================
+   EXPLORE PAGE - Section common styles
+   ========================================= */
+section {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 60px 8%;
+    flex-wrap: wrap;
+}
+
+/* Buttons / links */
+.btn, a.btn {
+    display: inline-block;
+    background-color: var(--accent);
+    color: white;
+    padding: 10px 25px;
+    border: none;
+    border-radius: 25px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+    text-decoration: none;
+}
+.btn:hover, a.btn:hover { background-color: var(--accent-hover); }
+
+/* === Section 1: Book Now === */
+.section1{ background-color: var(--bg-dark); }
+
+.text-box {
+    flex: 1 1 400px;
+    max-width: 450px;
+}
+
+.text-box h1 {
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+.text-box p {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--muted);
+    margin-bottom: 25px;
+}
+
+.image-box {
+    display: flex;
+    gap: 10px;
+    flex: 1 1 400px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.image-box img {
+    width: 260px;
+    height: 220px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+/* === Section 2: Become a Freelancer === */
+.section2 { background-color: var(--bg-2); }
+
+.freelancer-text {
+    flex: 1 1 400px;
+    max-width: 450px;
+}
+
+.freelancer-text h2 {
+    font-size: 2rem;
+    font-weight: 900;
+    margin-bottom: 25px;
+}
+
+.freelancer-text p {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--muted);
+    margin-bottom: 25px;
+}
+
+.freelancer-image {
+    flex: 1 1 400px;
+    display: flex;
+    justify-content: center;
+}
+
+.freelancer-image img {
+    width: 340px;
+    height: 250px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+/* =========================================
+   RESPONSIVE
+   ========================================= */
+@media (max-width: 900px) {
+    section {
+        flex-direction: column;
+        text-align: center;
+        height: auto;
+        padding: 60px 5%;
+    }
+
+    .image-box, .freelancer-image { margin-top: 30px; }
+
+    .text-box, .freelancer-text { max-width: 90%; }
+
+    .image-box img, .freelancer-image img { width: 85%; height: auto; }
+}
+
+
 

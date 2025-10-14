@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KISLAP - Hire Today</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background-color: #000;
+      color: white;
+      overflow-x: hidden;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 50px;
+    }
+
+    .logo {
+      font-weight: 900;
+      font-size: 1.5rem;
+      letter-spacing: 2px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo img {
+      width: 35px;
+      height: 35px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      font-size: 0.95rem;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: white;
+      font-weight: 500;
+      transition: 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: #ff6600;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    .hero h1 {
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: 3px;
+      margin-bottom: 50px;
+    }
+
+    .cards {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 50px;
+      flex-wrap: wrap;
+    }
+
+    .card {
+      background-color: #111;
+      border-radius: 15px;
+      overflow: hidden;
+      text-align: center;
+      width: 280px;
+      transition: transform 0.3s;
+    }
+
+    .card:hover {
+      transform: translateY(-10px);
+    }
+
+    .card img {
+      width: 100%;
+      height: 250px;
+      object-fit: cover;
+    }
+
+    .btn {
+      display: block;
+      background-color: #ff6600;
+      color: white;
+      font-weight: bold;
+      padding: 12px 0;
+      text-decoration: none;
+      border-radius: 0 0 15px 15px;
+      transition: 0.3s;
+    }
+
+    .btn:hover {
+      background-color: #ff8533;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 2rem;
+      }
+
+      .cards {
+        flex-direction: column;
+        gap: 30px;
+      }
+
+      header {
+        flex-direction: column;
+        gap: 10px;
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">
+      <img src="https://cdn-icons-png.flaticon.com/512/685/685655.png" alt="KISLAP Logo">
+      KISLAP
+    </div>
+
+    <div class="nav-links">
+      <a href="explore.html">Explore Now</a>
+      <a href="#"><i class="fa fa-search"></i></a>
+      <a href="#"><i class="fa fa-user"></i></a>
+      <a href="#"><i class="fa fa-shopping-cart"></i></a>
+    </div>
+  </header>
+
+  <section class="hero">
+    <h1>HIRE TODAY</h1>
+    <div class="cards">
+      <div class="card">
+        <img src="https://images.unsplash.com/photo-1516726817505-f5ed825624d8?auto=format&fit=crop&w=800&q=80" alt="Photographer">
+        <a href="photographer.html" class="btn">PHOTOGRAPHER</a>
+      </div>
+
+      <div class="card">
+        <img src="https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&w=800&q=80" alt="Photobooth">
+        <a href="photobooth.html" class="btn">PHOTOBOOTH</a>
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>
