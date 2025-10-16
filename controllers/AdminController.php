@@ -126,4 +126,40 @@ class AdminController
             echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         }
     }
+
+    public function updateStatus() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $id = $_POST['application_id'] ?? null;
+            $action = $_POST['status'] ?? null;
+
+            if ($id && $action) {
+                // convert to valid enum
+                $status = strtoupper($action === 'approve' ? 'ACCEPTED' : 'REJECTED');
+
+                $this->repo->updateApplicationStatus($id, $status);
+                header("Location: index.php?controller=Admin&action=viewPendingApplications");
+                exit;
+            } else {
+                echo "Missing data.";
+            }
+        } else {
+            echo "Invalid request.";
+        }
+    }
+
+    public function applications()
+    {
+        $adminRepo = new AdminRepository();
+
+        $search = $_GET['search'] ?? '';
+
+        // This calls the repo method that handles DB logic
+        $applications = $adminRepo->getApplications($search);
+
+        require 'views/admin/application.php';
+    }
+
+
+
+
 }
