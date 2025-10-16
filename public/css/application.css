@@ -302,15 +302,15 @@ body {
 }
 
 .btn-approve {
-    background: rgba(255, 133, 51, 0.2);
-    color: #ff8533;
-    border: 1px solid rgba(255, 133, 51, 0.3);
+    background: rgba(173, 255, 51, 0.2);
+    color: #d3ff33;
+    border: 1px solid rgba(102, 255, 51, 0.3);
 }
 
 .btn-approve:hover {
-    background: #ff8533;
+    background: #33ff44;
     color: #000;
-    box-shadow: 0 0 20px rgba(255, 133, 51, 0.5);
+    box-shadow: 0 0 20px rgba(173, 255, 51, 0.5);
 }
 
 .btn-reject {

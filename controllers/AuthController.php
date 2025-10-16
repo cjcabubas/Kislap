@@ -23,7 +23,7 @@ class   AuthController
     {
         // Show the form on GET
         if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-            require "views/application/signUp.php";
+            require "views/user/signup.php";
             return;
         }
 

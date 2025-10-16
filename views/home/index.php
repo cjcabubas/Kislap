@@ -1,53 +1,257 @@
-<?php
-session_start();
-?>
+
 
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <title>Kislap Sign Up</title>
-    <l ink rel="stylesheet" href="public/css/form.css" type="text/css">
-        <link rel="stylesheet" href="public/css/style.css" type="text/css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kislap Home</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/Kislap/public/css/index.css" type="text/css">
 </head>
 
 <body>
 
-<!-- Navbar header -->
-<header class="header">
-    <a href="homepage"><img src="../../imgs/Logo.png" class="logo" alt="DaguPin Logo"></a>
-    <nav class="navbar">
-        <a href="explore now" class="navtxt">Explore Now</a>
-        <a href="messages">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M21 6h-18v12h4v4l4-4h10v-12z"/>
-            </svg>
-        </a>
-        <a href="search">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                 viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                      d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
-            </svg>
-        </a>
-        <a href="profile">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                 stroke-width="1.5" stroke="currentColor" class="size-6">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                      d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/>
-            </svg>
-        </a>
-        <a href="bookings">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                 viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                      d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12V15Zm0 2.25h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75V15Zm0 2.25h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5V15Zm0 2.25h.008v.008H7.5v-.008Zm6.75-4.5h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V15Zm0 2.25h.008v.008h-.008v-.008Zm2.25-4.5h.008v.008H16.5v-.008Zm0 2.25h.008v.008H16.5V15Z"/>
-            </svg>
-        </a>
-        </div>
-    </nav>
-</header>
+<?php require __DIR__ . '/../shared/navbar.php'; ?>
 
+<section class="hero-section">
+    <div class="hero-container">
+        <!-- Left Content -->
+        <div class="hero-content">
+            <h1 class="hero-title">Round off your photography journey</h1>
+            <p class="hero-description">
+                Round off your photography journey with opportunities that matter. Whether you're behind the lens or in front of it, our platform helps you connect, collaborate, and create lasting stories.
+            </p>
+            <a href="booking" class="hero-cta">
+                <span>Book Now</span>
+                <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+
+        <!-- Right Slider -->
+        <div class="hero-slider">
+            <div class="slider-container">
+                <div class="slides-wrapper" id="slidesWrapper">
+                    <div class="slide" style="background-image: url('public/images/homepages/image1.avif')"></div>
+                    <div class="slide" style="background-image: url('public/images/homepages/image2.avif')"></div>
+                    <div class="slide" style="background-image: url('public/images/homepages/image3.avif')"></div>
+                    <div class="slide" style="background-image: url('public/images/homepages/image4.avif')"></div>
+                    <div class="slide" style="background-image: url('public/images/homepages/image5.avif')"></div>
+                </div>
+
+                <!-- Navigation Arrows -->
+                <div class="slider-nav prev" id="prevBtn">
+                    <i class="fas fa-chevron-left"></i>
+                </div>
+                <div class="slider-nav next" id="nextBtn">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+
+                <!-- Indicators -->
+                <div class="slider-indicators">
+                    <div class="indicator active" data-slide="0"></div>
+                    <div class="indicator" data-slide="1"></div>
+                    <div class="indicator" data-slide="2"></div>
+                    <div class="indicator" data-slide="3"></div>
+                    <div class="indicator" data-slide="4"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Content Section (for adding more content below) -->
+<section class="content-section">
+    <div class="content-container">
+        <h2 class="section-title">Ready to Expand?</h2>
+        <p class="section-description">
+            This is where you can add more content sections below the hero.
+            The design maintains the Kislap theme and is fully responsive.
+        </p>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section">
+    <div class="features-container">
+        <div class="features-header">
+            <h2 class="features-title">Why Choose Kislap?</h2>
+            <p class="features-subtitle">
+                Discover the perfect platform where photographers and clients connect seamlessly to create stunning visual stories.
+            </p>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h3 class="feature-title">Find Perfect Matches</h3>
+                <p class="feature-description">
+                    Our advanced matching system connects you with photographers who specialize in your specific needs and style preferences.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3 class="feature-title">Secure Payments</h3>
+                <p class="feature-description">
+                    Protected transactions with escrow services ensure both photographers and clients feel confident in every booking.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-star"></i>
+                </div>
+                <h3 class="feature-title">Quality Guarantee</h3>
+                <p class="feature-description">
+                    All photographers are verified professionals with portfolios and reviews to ensure you get exceptional results.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <h3 class="feature-title">Quick Booking</h3>
+                <p class="feature-description">
+                    Book sessions instantly with real-time availability and automated scheduling that works around your timeline.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <h3 class="feature-title">Mobile Ready</h3>
+                <p class="feature-description">
+                    Manage bookings, communicate, and track projects on-the-go with our fully responsive mobile experience.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-headset"></i>
+                </div>
+                <h3 class="feature-title">24/7 Support</h3>
+                <p class="feature-description">
+                    Get help whenever you need it with our dedicated support team available around the clock for assistance.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="stats-section">
+    <div class="stats-container">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <span class="stat-number">10K+</span>
+                <span class="stat-label">Active Photographers</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">50K+</span>
+                <span class="stat-label">Sessions Completed</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">98%</span>
+                <span class="stat-label">Satisfaction Rate</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">24hr</span>
+                <span class="stat-label">Average Response</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="testimonials-section">
+    <div class="testimonials-container">
+        <div class="testimonials-header">
+            <h2 class="testimonials-title">What Our Community Says</h2>
+            <p class="testimonials-subtitle">
+                Real experiences from photographers and clients who've found success on Kislap.
+            </p>
+        </div>
+
+        <div class="testimonials-grid">
+            <div class="testimonial-card">
+                <p class="testimonial-quote">
+                    "Kislap transformed my photography business. I've booked more sessions in 3 months than I did the entire previous year. The platform is incredibly easy to use."
+                </p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">S</div>
+                    <div class="author-info">
+                        <h4>Sarah Martinez</h4>
+                        <span>Wedding Photographer</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="testimonial-card">
+                <p class="testimonial-quote">
+                    "Finding the perfect photographer for our product launch was effortless. The quality and professionalism exceeded our expectations completely."
+                </p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">M</div>
+                    <div class="author-info">
+                        <h4>Michael Chen</h4>
+                        <span>Business Owner</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="testimonial-card">
+                <p class="testimonial-quote">
+                    "As a client, I love how transparent the process is. Clear pricing, amazing portfolios, and the booking system is so smooth and professional."
+                </p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">E</div>
+                    <div class="author-info">
+                        <h4>Emily Rodriguez</h4>
+                        <span>Event Coordinator</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Freelancer Hero Section -->
+<section class="freelancer-section">
+    <div class="freelancer-container">
+        <div class="freelancer-content">
+            <!-- Left Side - Become Freelancer -->
+            <div class="freelancer-left">
+                <h2 class="freelancer-title">Become a Freelancer</h2>
+                <div class="camera-image"></div>
+            </div>
+
+            <!-- Center Button -->
+            <div class="freelancer-center">
+                <a href="apply-freelancer" class="apply-btn">
+                    <span>Apply Now</span>
+                    <i class="fas fa-camera"></i>
+                </a>
+            </div>
+
+            <!-- Right Side - Work With Us -->
+            <div class="freelancer-right">
+                <h2 class="work-title">Want to work with us?</h2>
+                <p class="work-description">
+                    Are you a talented photographer looking for freelance opportunities? Join our growing community of professionals and get connected with clients who need your skills.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
 </body>
+
+<script src="/Kislap/public/js/slides.js" defer></script>
 </html>
