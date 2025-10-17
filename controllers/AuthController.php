@@ -92,7 +92,6 @@ class   AuthController
                 }
                 unset($user['password']);
 
-
                 $_SESSION['user'] = [
                     'user_id'        => $user['user_id'],
                     'lastName'       => $user['lastName'],
@@ -105,11 +104,20 @@ class   AuthController
                     'createdAt'      => $user['createdAt']
 
                 ];
-                header("Location: ../Kislap/views/user/profile.php");
+                header("Location: index.php?controller=Home&action=homePage");
                 exit;
             } catch (Exception $e) {
                 echo "❌ Error: " . $e->getMessage();
             }
         }
+    }
+
+    public function logout() {
+        session_start();
+        session_unset();
+        session_destroy();
+
+        header("Location: index.php?controller=Home&action=homePage");
+        exit;
     }
 }

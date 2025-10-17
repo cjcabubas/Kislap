@@ -26,4 +26,13 @@ class HomeController
         // Normal homepage after landing
         require __DIR__ . '/../views/home/index.php';
     }
+
+    public function messages()
+    {
+        require __DIR__ . '/../views/home/messages.php';
+    }
+
+    public function bookings() {
+        require __DIR__ . '/../views/home/bookings.php';
+    }
 }

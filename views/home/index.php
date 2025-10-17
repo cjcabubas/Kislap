@@ -1,3 +1,4 @@
+<?php require __DIR__ . '/../shared/navbar.php'; ?>
 
 
 <!DOCTYPE html>
@@ -12,8 +13,6 @@
 </head>
 
 <body>
-
-<?php require __DIR__ . '/../shared/navbar.php'; ?>
 
 <section class="hero-section">
     <div class="hero-container">

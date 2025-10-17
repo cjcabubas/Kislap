@@ -98,7 +98,8 @@ if (!$admin) {
                     <?php $worksFilePath = $app['worksFilePath'] ?? ''; ?>
                     <?php if (!empty($worksFilePath)): ?>
                         <div class="images-section">
-                            <h4><i class="fas fa-images"></i> Application Images (<?php echo count($worksFilePath); ?>)</h4>
+                            <h4><i class="fas fa-images"></i> Application Images (<?php echo count($worksFilePath); ?>)
+                            </h4>
                             <div class="images-grid">
                                 <?php foreach ($worksFilePath as $img): ?>
                                     <div class="image-item"
@@ -180,8 +181,6 @@ if (!$admin) {
                 }
             })
             .catch(() => alert('Request failed.'));
-
-
     }
 
     const searchInput = document.getElementById('searchInput');
@@ -196,8 +195,6 @@ if (!$admin) {
             window.location.href = url.toString();
         }, 600); // delay 600ms after typing stops
     });
-
-
 
 
 </script>

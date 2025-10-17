@@ -6,8 +6,8 @@ if (!isset($_SESSION['user'])) {
     header("Location: /Kislap/views/user/login.php");
     exit;
 }
-$user = $_SESSION['user'];
 
+$user = $_SESSION['user'];
 ?>
 
 <!DOCTYPE html>

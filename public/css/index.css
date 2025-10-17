@@ -3,7 +3,7 @@
    ======================================== */
 
 .hero-section {
-    margin-top: -10px; /* Account for fixed header */
+    margin-top: 27.5px; /* Account for fixed header */
     min-height: calc(100vh - 80px);
     display: flex;
     align-items: center;

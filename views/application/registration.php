@@ -7,6 +7,7 @@
 
     <link rel="stylesheet" href="public/css/form.css" type="text/css">
     <link rel="stylesheet" href="public/css/style.css" type="text/css">
+    <link rel="stylesheet" href="public/css/registration.css" type="text/css">
 </head>
 
 <body>

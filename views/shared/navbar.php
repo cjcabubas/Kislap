@@ -1,3 +1,13 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+$isLoggedIn = isset($_SESSION['user']);
+$user = $_SESSION['user'] ?? null;
+$userType = "Customer";
+
+?>
+
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/Kislap/public/css/style.css" type="text/css">
 
@@ -14,7 +24,7 @@
         <a href="explore-now" class="nav-link">
             <span class="nav-text">Explore</span>
         </a>
-        <a href="messages" class="nav-icon" title="Messages">
+        <a href="index.php?controller=Home&action=messages" class="nav-icon" title="Messages">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
@@ -24,7 +34,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
             </svg>
         </a>
-        <a href="bookings" class="nav-icon" title="Bookings">
+        <a href="index.php?controller=Home&action=bookings" class="nav-icon" title="Bookings">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/>
             </svg>
@@ -45,10 +55,10 @@
                     <div class="dropdown-header">
                         <div class="user-info">
                             <div class="user-avatar">
-                                <?php echo strtoupper(substr($userName, 0, 1)); ?>
+                                <?= htmlspecialchars($user['firstName'].' '.$user['lastName']) ?>
                             </div>
                             <div class="user-details">
-                                <h4><?php echo htmlspecialchars($userName); ?></h4>
+                                <h4><?= htmlspecialchars($user['firstName'].' '.$user['lastName']) ?></h4>
                                 <span class="user-type-badge">
                                     <?php echo $userType === 'photographer' ? 'Photographer' : 'Customer'; ?>
                                 </span>
@@ -125,7 +135,7 @@
     // Logout function
     function logout() {
         if (confirm('Are you sure you want to logout?')) {
-            window.location.href = 'logout.php';
+            window.location.href = 'index.php?controller=Auth&action=logout';
         }
     }
 </script>

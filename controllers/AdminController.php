@@ -132,20 +132,42 @@ class AdminController
             $id = $_POST['application_id'] ?? null;
             $action = $_POST['status'] ?? null;
 
-            if ($id && $action) {
-                // convert to valid enum
-                $status = strtoupper($action === 'approve' ? 'ACCEPTED' : 'REJECTED');
-
-                $this->repo->updateApplicationStatus($id, $status);
-                header("Location: index.php?controller=Admin&action=viewPendingApplications");
-                exit;
-            } else {
+            if (!$id || !$action) {
                 echo "Missing data.";
+                return;
             }
-        } else {
-            echo "Invalid request.";
+
+            // Convert to valid enum
+            $status = strtoupper($action === 'approve' ? 'ACCEPTED' : 'REJECTED');
+
+            // Update application status
+            $this->repo->updateApplicationStatus($id, $status);
+
+            // If approved, transfer applicant data to workers
+            if ($status === 'ACCEPTED') {
+                $application = $this->repo->findApplicationById($id);
+
+                if ($application) {
+                    $this->repo->insertWorker([
+                        'lastName'      => $application['lastName'],
+                        'firstName'     => $application['firstName'],
+                        'middleName'    => $application['middleName'],
+                        'email'         => $application['email'],
+                        'phoneNumber'   => $application['phoneNumber'],
+                        'password'      => $application['password'], // already hashed
+                        'address'       => $application['address'],
+                        'created_at'    => date('Y-m-d H:i:s')
+                    ]);
+                }
+            }
+
+            header("Location: index.php?controller=Admin&action=viewPendingApplications");
+            exit;
         }
+
+        echo "Invalid request.";
     }
+
 
     public function applications()
     {
