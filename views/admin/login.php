@@ -19,15 +19,7 @@ $user = $_SESSION['user'];
 </head>
 
 <body>
-<!-- Navbar header -->
-<header class="header">
-    <a href="../../main pages/index.html"><img src="../../imgs/Logo.png" class="logo" alt="DaguPin Logo"></a>
-    <nav class="navbar">
-        <a href="../../main pages/index.html">Dashboard</a>
-        <a href="../../main pages/gallery.html">Applications</a>
-        <a href="../../main pages/map.html" id="profileBtn">Workers</a>
-    </nav>
-</header>
+<?php require __DIR__ . '/../shared/navbar.php'; ?>
 
 <form class="form" method="POST" action="/Kislap/index.php?controller=Admin&action=handleLogin">
     <div class="form-group">

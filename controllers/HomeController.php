@@ -35,4 +35,8 @@ class HomeController
     public function bookings() {
         require __DIR__ . '/../views/home/bookings.php';
     }
+
+    public function workerAds() {
+        require __DIR__ . '/../views/home/browse.php';
+    }
 }
