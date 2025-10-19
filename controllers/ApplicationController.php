@@ -88,4 +88,33 @@ class ApplicationController
         }
         return $uploadedFiles;
     }
+
+    public function checkStatus(): void {
+
+        require_once __DIR__ . "/../views/application/checkstatus.php";
+
+    }
+
+    public function submitCheckStatus() {
+        $result = null;
+        $errorMessage = null;
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $email = $_POST['email'] ?? '';
+            $identifier = $_POST['identifier'] ?? '';
+
+            $result = $this->repo->findByEmailAndIdentifier($email, $identifier);
+
+            if ($result) {
+                $result['status'] = strtoupper($result['status']);
+            } else {
+                $errorMessage = "No application found with that information.";
+            }
+        }
+
+        include 'views/application/checkstatus.php';
+    }
+
+
+
 }

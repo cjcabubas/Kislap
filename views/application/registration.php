@@ -66,6 +66,17 @@
 
     <button type="submit">Apply</button>
 </form>
+
+<div class="status-check-section">
+    <div class="status-check-card">
+        <i class="fas fa-search-plus"></i>
+        <h3>Already Applied?</h3>
+        <p>Check your application status here</p>
+        <a href="index.php?controller=Application&action=checkStatus" class="btn-check-status">
+            <i class="fas fa-clipboard-check"></i> Check Application Status
+        </a>
+    </div>
+</div>
 <script src="limit-files.js" defer></script>
 </body>
 

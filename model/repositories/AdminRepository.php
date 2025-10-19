@@ -1,4 +1,5 @@
 <?php
+
 class AdminRepository
 {
     private PDO $conn;
@@ -71,7 +72,8 @@ class AdminRepository
         return (int)$result['total'];
     }
 
-    public function getPendingApplications(int $limit, int $offset, string $search = ''): array {
+    public function getPendingApplications(int $limit, int $offset, string $search = ''): array
+    {
         // Step 1: Fetch main pending applications
         $sql = "SELECT application_id, firstName, middleName, lastName, email, phoneNumber, address, status, created_at
             FROM application
@@ -117,7 +119,8 @@ class AdminRepository
         return $applications;
     }
 
-    public function getPendingCount(string $search = ''): int {
+    public function getPendingCount(string $search = ''): int
+    {
         $sql = "SELECT COUNT(*) AS total FROM application WHERE status = 'pending'";
         $params = [];
 
@@ -134,7 +137,8 @@ class AdminRepository
         return (int)$result['total'];
     }
 
-    public function updateApplicationStatus($id, $status) {
+    public function updateApplicationStatus($id, $status)
+    {
         $stmt = $this->conn->prepare("UPDATE application SET status = :status WHERE application_id = :id");
         $stmt->execute([':status' => $status, ':id' => $id]);
     }
@@ -158,7 +162,43 @@ class AdminRepository
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function insertWorker(array $data)
+    {
+        try {
+            $sql = "INSERT INTO workers (
+            application_id, lastName, firstName, middleName, email, phoneNumber, password,
+            address, specialty, experience_years, bio, profile_photo, rating_average,
+            total_ratings, total_bookings, total_earnings, status
+        ) VALUES (
+            :application_id, :lastName, :firstName, :middleName, :email, :phoneNumber, :password,
+            :address, :specialty, 0, NULL, NULL, 0.00, 0, 0, 0.00, 'active'
+        )";
 
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute([
+                ':application_id' => $data['application_id'],
+                ':lastName' => $data['lastName'],
+                ':firstName' => $data['firstName'],
+                ':middleName' => $data['middleName'],
+                ':email' => $data['email'],
+                ':phoneNumber' => $data['phoneNumber'],
+                ':password' => $data['password'],
+                ':address' => $data['address'],
+                ':specialty' => $data['specialty']
+            ]);
+        } catch (PDOException $e) {
+            throw new Exception("Worker insert failed: " . $e->getMessage());
+        }
+    }
+
+
+
+    public function findApplicationById(int $id): ?array
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM application WHERE application_id = ? LIMIT 1");
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    }
 
 
 

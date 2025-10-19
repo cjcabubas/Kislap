@@ -1,3 +1,79 @@
 .form {
     max-width: 800px;
 }
+
+/* Check Application Status Section */
+.status-check-section {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.status-check-card {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    border: 1px solid rgba(255, 107, 0, 0.2);
+    border-radius: 15px;
+    padding: 30px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.status-check-card i {
+    font-size: 40px;
+    color: #ff6b00;
+    margin-bottom: 15px;
+    display: block;
+}
+
+.status-check-card h3 {
+    color: #fff;
+    font-size: 22px;
+    margin-bottom: 10px;
+}
+
+.status-check-card p {
+    color: #999;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.btn-check-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 30px;
+    background: rgba(255, 107, 0, 0.1);
+    color: #ff6b00;
+    border: 2px solid rgba(255, 107, 0, 0.3);
+    border-radius: 10px;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-check-status:hover {
+    background: rgba(255, 107, 0, 0.2);
+    border-color: #ff6b00;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 107, 0, 0.3);
+}
+
+@media (max-width: 768px) {
+    .status-check-section {
+        margin: 30px auto;
+    }
+
+    .status-check-card {
+        padding: 25px 20px;
+    }
+
+    .status-check-card h3 {
+        font-size: 18px;
+    }
+
+    .btn-check-status {
+        width: 100%;
+        justify-content: center;
+    }
+}

@@ -61,7 +61,7 @@ class   AuthController
     {
         // Show the form on GET
         if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-            require "views/application/login.php";
+            require "views/user/login.php";
             return;
         }
 
@@ -101,7 +101,9 @@ class   AuthController
                     'phoneNumber'    => $user['phoneNumber'],
                     'address'        => $user['address'],
                     'profilePhotoUrl'=> $user['profilePhotoUrl'],
-                    'createdAt'      => $user['createdAt']
+                    'createdAt'      => $user['createdAt'],
+                    'role'           => 'user'
+
 
                 ];
                 header("Location: index.php?controller=Home&action=homePage");

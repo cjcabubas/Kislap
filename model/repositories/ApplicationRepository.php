@@ -32,4 +32,22 @@ class ApplicationRepository
         );
         $stmt->execute(["id"=>$application_id, "path"=>$filePath]);
     }
+
+    public function findByEmailAndIdentifier($email, $identifier): ?array
+    {
+        $query = "SELECT status, firstName, lastName, email, phoneNumber, 
+                     application_id, created_at
+              FROM application
+              WHERE email = ?
+              AND (phoneNumber = ? OR application_id = ?) 
+              LIMIT 1";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$email, $identifier, $identifier]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $result ?: null;
+    }
+
+
 }
