@@ -2,11 +2,23 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-$isLoggedIn = isset($_SESSION['user']);
-$user = $_SESSION['user'] ?? null;
-$userType = "Customer";
 
+$user    = $_SESSION['user']   ?? null;
+$worker  = $_SESSION['worker'] ?? null;
+
+// Determine login state and type
+if ($user) {
+    $isLoggedIn = true;
+    $userType   = "Customer";
+} elseif ($worker) {
+    $isLoggedIn = true;
+    $userType   = "Worker";
+} else {
+    $isLoggedIn = false;
+    $userType   = null;
+}
 ?>
+
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/Kislap/public/css/style.css" type="text/css">
@@ -55,21 +67,18 @@ $userType = "Customer";
                     <div class="dropdown-header">
                         <div class="user-info">
                             <div class="user-avatar">
-                                <?= htmlspecialchars($user['firstName'].' '.$user['lastName']) ?>
+                                <?= htmlspecialchars($userType === 'Customer' ? $user['firstName'].' '.$user['lastName'] : $worker['firstName'].' '.$worker['lastName']) ?>
                             </div>
                             <div class="user-details">
-                                <h4><?= htmlspecialchars($user['firstName'].' '.$user['lastName']) ?></h4>
-                                <span class="user-type-badge">
-                                    <?php echo $userType === 'photographer' ? 'Photographer' : 'Customer'; ?>
-                                </span>
+                                <h4><?= htmlspecialchars($userType === 'Customer' ? $user['firstName'].' '.$user['lastName'] : $worker['firstName'].' '.$worker['lastName']) ?></h4>
+                                <span class="user-type-badge"><?= $userType ?></span>
                             </div>
                         </div>
                     </div>
 
-                    <?php if ($userType === 'photographer'): ?>
+                    <?php if ($userType === 'Worker'): ?>
                         <!-- Photographer Menu -->
-                        <a href="profile"><i class="fas fa-user"></i> My Profile</a>
-                        <a href="portfolio"><i class="fas fa-images"></i> Portfolio</a>
+                        <a href="index.php?controller=Worker&action=profile"><i class="fas fa-user"></i> My Profile</a>
                         <a href="bookings"><i class="fas fa-calendar-check"></i> My Bookings</a>
                         <a href="reviews"><i class="fas fa-star"></i> Reviews</a>
                         <div class="menu-divider"></div>

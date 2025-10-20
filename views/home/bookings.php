@@ -3,11 +3,13 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$user = $_SESSION['user'] ?? null;
-if (!$user) {
-    header("Location: /Kislap/index.php?controller=Auth&action=login");
-    exit;
-}
+$user   = $_SESSION['user']   ?? null;
+$worker = $_SESSION['worker'] ?? null;
+
+$isLoggedIn = $user || $worker;
+$userType   = $user ? 'user' : ($worker ? 'worker' : null);
+
+
 
 $bookings = $bookings ?? [];
 $totalBookings = count($bookings);

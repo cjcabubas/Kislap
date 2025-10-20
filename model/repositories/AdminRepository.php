@@ -156,10 +156,10 @@ class AdminRepository
             $params[':search'] = "%$search%";
         }
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute($params);
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute($params);
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function insertWorker(array $data)
@@ -168,29 +168,46 @@ class AdminRepository
             $sql = "INSERT INTO workers (
             application_id, lastName, firstName, middleName, email, phoneNumber, password,
             address, specialty, experience_years, bio, profile_photo, rating_average,
-            total_ratings, total_bookings, total_earnings, status
+            total_ratings, total_bookings, total_earnings, status, created_at
         ) VALUES (
             :application_id, :lastName, :firstName, :middleName, :email, :phoneNumber, :password,
-            :address, :specialty, 0, NULL, NULL, 0.00, 0, 0, 0.00, 'active'
+            :address, :specialty, 0, NULL, NULL, 0.00, 0, 0, 0.00, 'active', NOW()
         )";
 
             $stmt = $this->conn->prepare($sql);
             $stmt->execute([
-                ':application_id' => $data['application_id'],
-                ':lastName' => $data['lastName'],
-                ':firstName' => $data['firstName'],
-                ':middleName' => $data['middleName'],
-                ':email' => $data['email'],
-                ':phoneNumber' => $data['phoneNumber'],
-                ':password' => $data['password'],
-                ':address' => $data['address'],
-                ':specialty' => $data['specialty']
+                ':application_id' => $data['application_id'] ?? null,
+                ':lastName'       => $data['lastName'] ?? '',
+                ':firstName'      => $data['firstName'] ?? '',
+                ':middleName'     => $data['middleName'] ?? '',
+                ':email'          => $data['email'] ?? '',
+                ':phoneNumber'    => $data['phoneNumber'] ?? '',
+                ':password'       => $data['password'] ?? null,
+                ':address'        => $data['address'] ?? null,
+                ':specialty'      => $data['specialty'] ?? null
             ]);
+
+            return (int)$this->conn->lastInsertId(); // return inserted worker ID
         } catch (PDOException $e) {
-            throw new Exception("Worker insert failed: " . $e->getMessage());
+            error_log("Worker insert failed: " . $e->getMessage());
+            return false;
         }
     }
 
+    public function getApplicationWorks(string $applicationId): array
+    {
+        $stmt = $this->conn->prepare("SELECT work_id, worksFilePath FROM application_works WHERE application_id = ?");
+        $stmt->execute([$applicationId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function insertWorkerWork(int $workerId, string $imagePath): bool
+    {
+        $stmt = $this->conn->prepare(
+            "INSERT INTO worker_works (worker_id, image_path, uploaded_at) VALUES (?, ?, NOW())"
+        );
+        return $stmt->execute([$workerId, $imagePath]);
+    }
 
 
     public function findApplicationById(int $id): ?array

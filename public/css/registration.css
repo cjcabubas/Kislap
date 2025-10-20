@@ -1,5 +1,7 @@
 .form {
+    align-content: center;
     max-width: 800px;
+    margin: 100px auto;
 }
 
 /* Check Application Status Section */

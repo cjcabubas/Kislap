@@ -167,21 +167,30 @@ if (!$admin) {
     function handleAction(id, action) {
         if (!confirm(`Are you sure you want to ${action} this application?`)) return;
 
+        console.log('Sending:', { id, action }); // debug
+
         fetch(`/Kislap/index.php?controller=Admin&action=updateStatus`, {
             method: 'POST',
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            body: `application_id=${id}&status=${action}`
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ application_id: id, status: action })
         })
-            .then(response => {
-                if (response.ok) {
-                    alert(`Application ${action}ed successfully`);
+            .then(response => response.json())
+            .then(data => {
+                console.log('Response:', data); // debug
+                if (data.success) {
+                    alert(data.message);
                     location.reload();
                 } else {
-                    alert('Something went wrong.');
+                    alert('Error: ' + data.message);
                 }
             })
-            .catch(() => alert('Request failed.'));
+            .catch(err => {
+                console.error(err);
+                alert('Request failed. Check console for details.');
+            });
     }
+
+
 
     const searchInput = document.getElementById('searchInput');
     let searchTimer;

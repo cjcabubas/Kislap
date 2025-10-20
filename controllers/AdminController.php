@@ -129,43 +129,118 @@ class AdminController
 
     public function updateStatus() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $id = $_POST['application_id'] ?? null;
-            $action = $_POST['status'] ?? null;
+            $data = json_decode(file_get_contents('php://input'), true);
+            $id = $data['application_id'] ?? null;
+            $action = $data['status'] ?? null;
 
             if (!$id || !$action) {
-                echo "Missing data.";
-                return;
+                http_response_code(400);
+                echo json_encode(['success' => false, 'message' => 'Missing application_id or status']);
+                exit;
             }
 
-            // Convert to valid enum
-            $status = strtoupper($action === 'approve' ? 'ACCEPTED' : 'REJECTED');
+            $status = $action === 'approve' ? 'ACCEPTED' : 'REJECTED';
 
-            // Update application status
-            $this->repo->updateApplicationStatus($id, $status);
+            try {
+                $this->repo->updateApplicationStatus($id, $status);
 
-            // If approved, transfer applicant data to workers
-            if ($status === 'ACCEPTED') {
-                $application = $this->repo->findApplicationById($id);
+                if ($status === 'ACCEPTED') {
+                    $application = $this->repo->findApplicationById($id);
+                    if ($application) {
+                        $workerData = [
+                            'application_id' => $application['application_id'],
+                            'lastName'       => $application['lastName'] ?? '',
+                            'firstName'      => $application['firstName'] ?? '',
+                            'middleName'     => $application['middleName'] ?? '',
+                            'email'          => $application['email'] ?? '',
+                            'phoneNumber'    => $application['phoneNumber'] ?? '',
+                            'password'       => $application['password'] ?? null,
+                            'address'        => $application['address'] ?? null,
+                            'specialty'      => $application['service_type'] ?? ''
+                        ];
 
-                if ($application) {
-                    $this->repo->insertWorker([
-                        'lastName'      => $application['lastName'],
-                        'firstName'     => $application['firstName'],
-                        'middleName'    => $application['middleName'],
-                        'email'         => $application['email'],
-                        'phoneNumber'   => $application['phoneNumber'],
-                        'password'      => $application['password'], // already hashed
-                        'address'       => $application['address'],
-                        'created_at'    => date('Y-m-d H:i:s')
-                    ]);
+                        $workerId = $this->repo->insertWorker($workerData);
+
+                        if ($workerId) {
+                            $this->insertWorkerWorks($application['application_id'], $workerId);
+                            echo json_encode(['success' => true, 'message' => 'Worker inserted and works copied']);
+                            exit;
+                        } else {
+                            echo json_encode(['success' => false, 'message' => 'Failed to insert worker']);
+                            exit;
+                        }
+                    }
                 }
+
+                echo json_encode(['success' => true, 'message' => 'Application status updated']);
+            } catch (Exception $e) {
+                http_response_code(500);
+                error_log($e->getMessage()); // log the error instead of printing it
+                echo json_encode(['success' => false, 'message' => 'Server error']);
             }
 
-            header("Location: index.php?controller=Admin&action=viewPendingApplications");
             exit;
         }
 
-        echo "Invalid request.";
+        http_response_code(405);
+        echo json_encode(['success' => false, 'message' => 'Invalid request']);
+    }
+
+    private function insertWorkerWorks(string $applicationId, int $workerId)
+    {
+        $works = $this->repo->getApplicationWorks($applicationId);
+
+        if (empty($works)) {
+            error_log("No works found for application ID: $applicationId");
+            return;
+        }
+
+        $targetDir = __DIR__ . "/../uploads/workers/{$workerId}/";
+        if (!is_dir($targetDir)) {
+            mkdir($targetDir, 0777, true);
+        }
+
+        foreach ($works as $index => $work) {
+            // Check if worksFilePath exists
+            if (empty($work['worksFilePath'])) {
+                error_log("Empty worksFilePath for work_id: " . ($work['work_id'] ?? 'unknown'));
+                continue;
+            }
+
+            // Build source path - adjust this based on your actual file structure
+            $source = __DIR__ . "/../" . $work['worksFilePath'];
+
+            if (!file_exists($source)) {
+                error_log("Source file does not exist: $source");
+                continue;
+            }
+
+            // Get extension from worksFilePath, not image_path
+            $ext = pathinfo($work['worksFilePath'], PATHINFO_EXTENSION);
+            $newFileName = $this->generateWorkerWorkFileName($workerId, $index + 1, $ext);
+            $newPath = $targetDir . $newFileName;
+
+            // Copy the file
+            if (!copy($source, $newPath)) {
+                error_log("Failed to copy $source to $newPath");
+                continue;
+            }
+
+            // Insert into DB using relative path
+            $dbPath = "uploads/workers/{$workerId}/{$newFileName}";
+            $result = $this->repo->insertWorkerWork($workerId, $dbPath);
+
+            if (!$result) {
+                error_log("Failed to insert worker work into DB: worker_id=$workerId, path=$dbPath");
+            } else {
+                error_log("Successfully inserted work: $dbPath"); // Success log for debugging
+            }
+        }
+    }
+
+    private function generateWorkerWorkFileName(int $workerId, int $index, string $ext): string
+    {
+        return "worker{$workerId}_work{$index}." . $ext;
     }
 
 
