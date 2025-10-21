@@ -10,7 +10,6 @@ class WorkerRepository
         $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
 
-    // ===== EXISTING LOGIN METHODS =====
 
     public function findByEmail($email)
     {
@@ -25,8 +24,6 @@ class WorkerRepository
         $stmt->execute([$phoneNumber]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
-
-    // ===== NEW PROFILE MANAGEMENT METHODS =====
 
     public function getWorkerById(int $workerId): ?array
     {
@@ -134,11 +131,106 @@ class WorkerRepository
         return $stmt->execute([$workId, $workerId]);
     }
 
-
     public function getPortfolioImages($workerId): array
     {
         $stmt = $this->conn->prepare("SELECT image_path FROM worker_works WHERE worker_id = ? LIMIT 8");
         $stmt->execute([$workerId]);
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+
+    // ===== NEW PACKAGE MANAGEMENT METHODS =====
+
+    public function getWorkerPackages(int $workerId): array
+    {
+        $stmt = $this->conn->prepare("
+            SELECT * FROM packages 
+            WHERE worker_id = ? 
+            ORDER BY package_id ASC 
+            LIMIT 3
+        ");
+        $stmt->execute([$workerId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function syncWorkerPackages(int $workerId, array $submittedPackages): void
+    {
+
+        $stmt = $this->conn->prepare("SELECT package_id FROM packages WHERE worker_id = ?");
+        $stmt->execute([$workerId]);
+        $dbPackageIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        $submittedPackageIds = [];
+        // Collect IDs from submitted packages that have content
+        foreach ($submittedPackages as $pkg) {
+            if (!empty($pkg['name']) && !empty($pkg['package_id'])) {
+                $submittedPackageIds[] = $pkg['package_id'];
+            }
+        }
+
+        $idsToDelete = array_diff($dbPackageIds, $submittedPackageIds);
+
+        $this->conn->beginTransaction();
+
+        try {
+            // Step 1: Delete packages that were removed from the form
+            if (!empty($idsToDelete)) {
+                $placeholders = implode(',', array_fill(0, count($idsToDelete), '?'));
+                $deleteStmt = $this->conn->prepare(
+                    "DELETE FROM packages WHERE worker_id = ? AND package_id IN ($placeholders)"
+                );
+                $deleteStmt->execute(array_merge([$workerId], $idsToDelete));
+            }
+
+            // Step 2: Upsert (Update or Insert) packages
+            foreach ($submittedPackages as $pkg) {
+                // Only process if the package has a name, otherwise skip
+                if (empty(trim($pkg['name']))) {
+                    continue;
+                }
+
+                if (!empty($pkg['package_id'])) {
+                    // UPDATE existing package
+                    $updateStmt = $this->conn->prepare("
+                        UPDATE packages SET
+                            name = :name, description = :description, price = :price,
+                            duration_hours = :duration_hours, photo_count = :photo_count,
+                            delivery_days = :delivery_days, status = :status
+                        WHERE package_id = :package_id AND worker_id = :worker_id
+                    ");
+                    $updateStmt->execute([
+                        ':name' => $pkg['name'],
+                        ':description' => $pkg['description'],
+                        ':price' => $pkg['price'],
+                        ':duration_hours' => $pkg['duration_hours'],
+                        ':photo_count' => $pkg['photo_count'],
+                        ':delivery_days' => $pkg['delivery_days'],
+                        ':status' => $pkg['status'],
+                        ':package_id' => $pkg['package_id'],
+                        ':worker_id' => $workerId
+                    ]);
+                } else {
+                    // INSERT new package
+                    $insertStmt = $this->conn->prepare("
+                        INSERT INTO packages (worker_id, name, description, price, duration_hours, photo_count, delivery_days, status)
+                        VALUES (:worker_id, :name, :description, :price, :duration_hours, :photo_count, :delivery_days, :status)
+                    ");
+                    $insertStmt->execute([
+                        ':worker_id' => $workerId,
+                        ':name' => $pkg['name'],
+                        ':description' => $pkg['description'],
+                        ':price' => $pkg['price'],
+                        ':duration_hours' => $pkg['duration_hours'],
+                        ':photo_count' => $pkg['photo_count'],
+                        ':delivery_days' => $pkg['delivery_days'],
+                        ':status' => $pkg['status']
+                    ]);
+                }
+            }
+
+            $this->conn->commit();
+        } catch (Exception $e) {
+            $this->conn->rollBack();
+            throw $e; // Re-throw the exception to be caught by the controller
+        }
     }
 }

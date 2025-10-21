@@ -470,21 +470,21 @@ $joinedYear = date('Y', strtotime($joinedDate));
         }
     });
 
+
     // Booking function
     function bookPhotographer(photographerId) {
-        <?php if (isset($_SESSION['user_id'])): ?>
-        window.location.href = `?controller=Booking&action=create&photographer_id=${photographerId}`;
+        <?php if (isset($_SESSION['user'])): ?>
+        window.location.href = `?controller=Chat&action=view&worker_id=${photographerId}`;
         <?php else: ?>
         alert('Please log in to book this photographer');
-        window.location.href = `?controller=Auth&action=login&redirect=?controller=Booking%26action=create%26photographer_id=${photographerId}`;
+        window.location.href = `?controller=Auth&action=login&redirect=${encodeURIComponent('?controller=Chat&action=view&worker_id=' + photographerId)}`;
         <?php endif; ?>
     }
 
     // Message function
     function messagePhotographer(photographerId) {
-        <?php if (isset($_SESSION['user_id'])): ?>
-        alert('Messaging feature coming soon!');
-        // TODO: Implement messaging
+        <?php if (isset($_SESSION['user'])): ?>
+        window.location.href = `?controller=Chat&action=view&worker_id=${photographerId}`;
         <?php else: ?>
         alert('Please log in to send a message');
         window.location.href = '?controller=Auth&action=login';

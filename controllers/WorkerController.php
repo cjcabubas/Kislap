@@ -103,14 +103,12 @@ class WorkerController
             exit;
         }
 
-        // Merge with session data (use DB as primary source)
         $worker = array_merge($worker, $workerData);
 
-        // Get portfolio images
         $existingPortfolio = $this->repo->getWorkerPortfolio($workerId);
 
+        $existingPackages = $this->repo->getWorkerPackages($workerId);
 
-        // Check if we're in edit mode
         $isEditMode = isset($_GET['edit']) && $_GET['edit'] === 'true';
 
         require __DIR__ . '/../views/worker/profile.php';
@@ -175,7 +173,6 @@ class WorkerController
                 }
             }
 
-
             // Update basic profile
             $this->repo->updateWorkerProfile($workerId, $profileData);
 
@@ -209,6 +206,12 @@ class WorkerController
                 $this->repo->updateWorkerPassword($workerId, $newPassword);
             }
 
+            // **MODIFIED**: Handle service packages update
+            $packagesData = $_POST['packages'] ?? [];
+            if (!empty($packagesData)) {
+                $this->repo->syncWorkerPackages($workerId, $packagesData);
+            }
+
             // Handle portfolio images upload
             if (isset($_FILES['portfolio_images']) && !empty($_FILES['portfolio_images']['tmp_name'][0])) {
                 $this->handlePortfolioUpload($_FILES['portfolio_images'], $workerId);
@@ -239,6 +242,7 @@ class WorkerController
             exit;
         }
     }
+
 
     private function handlePortfolioUpload(array $files, int $workerId): void
     {
@@ -342,5 +346,4 @@ class WorkerController
             echo json_encode(['success' => false, 'message' => 'Failed to remove image']);
         }
     }
-
 }

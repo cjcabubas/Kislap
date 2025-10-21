@@ -346,15 +346,16 @@ $sortBy = $_GET['sort'] ?? 'featured';
 
 <script>
     function bookPhotographer(photographerId) {
-        <?php if (isset($_SESSION['user_id'])): ?>
-        // User is logged in, proceed to booking
-        window.location.href = `?controller=Booking&action=create&photographer_id=${photographerId}`;
+        <?php if (isset($_SESSION['user'])): ?>
+        // User is logged in, start AI chat
+        window.location.href = `?controller=Chat&action=view&worker_id=${photographerId}`;
         <?php else: ?>
         // User not logged in, redirect to login
         alert('Please log in to book a photographer');
-        window.location.href = `?controller=Auth&action=login&redirect=?controller=Booking%26action=create%26photographer_id=${photographerId}`;
+        window.location.href = `?controller=Auth&action=login&redirect=${encodeURIComponent('?controller=Chat&action=view&worker_id=' + photographerId)}`;
         <?php endif; ?>
     }
+
 
     // Optional: Add loading state for form submissions
     document.getElementById('filterForm')?.addEventListener('submit', function() {

@@ -364,6 +364,163 @@ $existingPortfolio = $existingPortfolio ?? [];
                 </div>
             </div>
 
+            <!-- Package Deals Section -->
+            <div class="packages-section">
+                <h3><i class="fas fa-box-open"></i> Service Packages</h3>
+                <p class="section-description"><?php echo $isEditMode ? 'Create up to 3 service packages for your clients' : 'Your service offerings'; ?></p>
+
+                <?php if ($isEditMode): ?>
+                    <!-- Edit Mode - Package Forms -->
+                    <div class="packages-grid" id="packagesGrid">
+                        <?php
+                        // Assume $existingPackages is passed from controller (array of max 3 packages)
+                        $existingPackages = $existingPackages ?? [];
+                        $packageCount = count($existingPackages);
+
+                        for ($i = 0; $i < 3; $i++):
+                            $package = $existingPackages[$i] ?? null;
+                            ?>
+                            <div class="package-card <?php echo $package ? 'has-data' : 'empty'; ?>" data-package-index="<?php echo $i; ?>">
+                                <div class="package-header">
+                                    <h4>
+                                        <i class="fas fa-tag"></i>
+                                        Package <?php echo $i + 1; ?>
+                                        <?php if ($i === 0): ?>
+                                            <span class="badge-basic">Basic</span>
+                                        <?php elseif ($i === 1): ?>
+                                            <span class="badge-medium">Medium</span>
+                                        <?php else: ?>
+                                            <span class="badge-premium">Premium</span>
+                                        <?php endif; ?>
+                                    </h4>
+                                    <?php if ($package): ?>
+                                        <button type="button" class="btn-remove-package" onclick="removePackage(<?php echo $i; ?>)">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    <?php endif; ?>
+                                </div>
+
+                                <input type="hidden" name="packages[<?php echo $i; ?>][package_id]" value="<?php echo $package['package_id'] ?? ''; ?>">
+
+                                <div class="form-group">
+                                    <label>Package Name <span class="required">*</span></label>
+                                    <input type="text" name="packages[<?php echo $i; ?>][name]"
+                                           value="<?php echo htmlspecialchars($package['name'] ?? ''); ?>"
+                                           placeholder="e.g., Basic Portrait Session"
+                                            <?php echo !$package ? '' : 'required'; ?>>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Description <span class="required">*</span></label>
+                                    <textarea name="packages[<?php echo $i; ?>][description]" rows="3"
+                                              placeholder="Describe what's included in this package..."
+                                          <?php echo !$package ? '' : 'required'; ?>><?php echo htmlspecialchars($package['description'] ?? ''); ?></textarea>
+                                </div>
+
+                                <div class="package-details-row">
+                                    <div class="form-group">
+                                        <label>Price (₱) <span class="required">*</span></label>
+                                        <input type="number" name="packages[<?php echo $i; ?>][price]"
+                                               value="<?php echo $package['price'] ?? ''; ?>"
+                                               min="0" step="0.01"
+                                               placeholder="1500"
+                                                <?php echo !$package ? '' : 'required'; ?>>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Duration (hrs) <span class="required">*</span></label>
+                                        <input type="number" name="packages[<?php echo $i; ?>][duration_hours]"
+                                               value="<?php echo $package['duration_hours'] ?? ''; ?>"
+                                               min="0.5" step="0.5"
+                                               placeholder="1"
+                                                <?php echo !$package ? '' : 'required'; ?>>
+                                    </div>
+                                </div>
+
+                                <div class="package-details-row">
+                                    <div class="form-group">
+                                        <label>Photo Count <span class="required">*</span></label>
+                                        <input type="number" name="packages[<?php echo $i; ?>][photo_count]"
+                                               value="<?php echo $package['photo_count'] ?? ''; ?>"
+                                               min="1"
+                                               placeholder="15"
+                                                <?php echo !$package ? '' : 'required'; ?>>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Delivery (days) <span class="required">*</span></label>
+                                        <input type="number" name="packages[<?php echo $i; ?>][delivery_days]"
+                                               value="<?php echo $package['delivery_days'] ?? ''; ?>"
+                                               min="1"
+                                               placeholder="3"
+                                                <?php echo !$package ? '' : 'required'; ?>>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Status</label>
+                                    <select name="packages[<?php echo $i; ?>][status]">
+                                        <option value="active" <?php echo ($package['status'] ?? 'active') === 'active' ? 'selected' : ''; ?>>Active</option>
+                                        <option value="inactive" <?php echo ($package['status'] ?? '') === 'inactive' ? 'selected' : ''; ?>>Inactive</option>
+                                    </select>
+                                </div>
+                            </div>
+                        <?php endfor; ?>
+                    </div>
+                <?php else: ?>
+                    <!-- View Mode - Display Packages -->
+                    <div class="packages-display">
+                        <?php if (empty($existingPackages)): ?>
+                            <div class="no-packages">
+                                <i class="fas fa-box-open"></i>
+                                <p>No service packages created yet</p>
+                                <a href="?controller=Worker&action=profile&edit=true" class="btn-add-package">
+                                    <i class="fas fa-plus"></i> Add Packages
+                                </a>
+                            </div>
+                        <?php else: ?>
+                            <div class="packages-view-grid">
+                                <?php foreach ($existingPackages as $index => $package): ?>
+                                    <div class="package-view-card">
+                                        <div class="package-view-header">
+                                            <h4>
+                                                <?php if ($index === 0): ?>
+                                                    <span class="badge-basic">Basic</span>
+                                                <?php elseif ($index === 1): ?>
+                                                    <span class="badge-medium">Medium</span>
+                                                <?php else: ?>
+                                                    <span class="badge-premium">Premium</span>
+                                                <?php endif; ?>
+                                                <?php echo htmlspecialchars($package['name']); ?>
+                                            </h4>
+                                            <span class="status-badge <?php echo $package['status']; ?>">
+                                                <?php echo ucfirst($package['status']); ?>
+                                            </span>
+                                        </div>
+                                        <p class="package-description"><?php echo nl2br(htmlspecialchars($package['description'])); ?></p>
+                                        <div class="package-price">₱<?php echo number_format($package['price'], 2); ?></div>
+                                        <div class="package-details">
+                                            <div class="detail-item">
+                                                <i class="fas fa-clock"></i>
+                                                <span><?php echo $package['duration_hours']; ?> hours</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <i class="fas fa-camera"></i>
+                                                <span><?php echo $package['photo_count']; ?> photos</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <i class="fas fa-calendar"></i>
+                                                <span><?php echo $package['delivery_days']; ?> days delivery</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+
             <!-- Portfolio  Gallery Section -->
             <div class="portfolio-section">
                 <h3><i class="fas fa-images"></i> Portfolio Gallery</h3>
@@ -446,7 +603,62 @@ $existingPortfolio = $existingPortfolio ?? [];
 </div>
 <script>
     <?php if ($isEditMode): ?>
+    // **MODIFIED**: Added function to handle package removal
+    function removePackage(packageIndex) {
+        if (!confirm("Are you sure you want to remove this package? It will be permanently deleted when you save your changes.")) {
+            return;
+        }
+
+        const packageCard = document.querySelector(`.package-card[data-package-index="${packageIndex}"]`);
+        if (!packageCard) return;
+
+        // Clear all visible data fields.
+        // The backend logic will see the empty 'name' field and process it as a deletion
+        // for packages that already exist in the database.
+        packageCard.querySelector('input[name*="[name]"]').value = '';
+        packageCard.querySelector('textarea[name*="[description]"]').value = '';
+        packageCard.querySelector('input[name*="[price]"]').value = '';
+        packageCard.querySelector('input[name*="[duration_hours]"]').value = '';
+        packageCard.querySelector('input[name*="[photo_count]"]').value = '';
+        packageCard.querySelector('input[name*="[delivery_days]"]').value = '';
+
+        // Also clear the `package_id` hidden input to prevent issues,
+        // as the sync logic depends on existing IDs submitted.
+        // An alternative is to keep it, but clearing the name is sufficient.
+        // Let's also clear it to be safe.
+        const packageIdInput = packageCard.querySelector('input[name*="[package_id]"]');
+        if (packageIdInput) {
+            packageIdInput.value = '';
+        }
+
+        // Visually update the card to look empty
+        packageCard.classList.remove('has-data');
+        packageCard.classList.add('empty');
+
+        // Remove the trash button itself as it now represents an empty slot
+        const removeButton = packageCard.querySelector('.btn-remove-package');
+        if (removeButton) {
+            removeButton.remove();
+        }
+
+        alert('Package cleared. Click "Save Changes" to finalize the removal.');
+    }
+
     // Store selected files
+    let selectedPortfolioFiles = [];
+
+    // Profile photo preview
+    document.getElementById('profilePhoto').addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const preview = document.getElementById('photoPreview');
+                preview.innerHTML = `<img src="${e.target.result}" alt="Profile Photo">`;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
     let selectedPortfolioFiles = [];
 
     // Profile photo preview
