@@ -1,5 +1,6 @@
 <?php
-require_once __DIR__ . '/../model/repositories/BrowseRepository.php';
+
+require_once __DIR__ . "/../model/repositories/BrowseRepository.php";
 
 class BrowseController
 {
@@ -10,22 +11,71 @@ class BrowseController
         $this->repo = new BrowseRepository();
     }
 
+    /**
+     * Main browse action
+     */
     public function browse(): void
     {
         // Pagination setup
         $limit = 9; // number of workers per page
-        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1; // Ensure page >= 1
         $offset = ($page - 1) * $limit;
 
-        // Optional search filter
-        $search = $_GET['search'] ?? '';
+        // Filters and Sorting
+        $search = trim($_GET['search'] ?? '');
+        $category = trim($_GET['category'] ?? 'all');
+        $sort = $_GET['sort'] ?? 'featured';
+
+        // Validate sort parameter
+        $validSorts = ['featured', 'rating', 'reviews', 'price_low', 'price_high', 'newest'];
+        if (!in_array($sort, $validSorts)) {
+            $sort = 'featured';
+        }
 
         // Fetch data
-        $workers = $this->repo->getAllWorkers($limit, $offset, $search);
-        $totalWorkers = $this->repo->getWorkerCount($search);
-        $totalPages = ceil($totalWorkers / $limit);
+        $workers = $this->repo->getWorkersWithPortfolio($limit, $offset, $search, $category, $sort);
+        $totalWorkers = $this->repo->getWorkerCount($search, $category);
+        $totalPages = max(1, ceil($totalWorkers / $limit)); // Ensure at least 1 page
 
-        // Load view
+        // Get all available specialties for dynamic category dropdown (optional)
+        $availableSpecialties = $this->repo->getAllSpecialties();
+
+        // Pass all data to the view
         require 'views/home/browse.php';
+    }
+
+    /**
+     * View individual photographer profile
+     */
+    public function viewProfile(): void
+    {
+        $workerId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+
+        if ($workerId <= 0) {
+            // Redirect back to browse if invalid ID
+            header('Location: ?controller=Browse&action=browse');
+            exit;
+        }
+
+        // Fetch single worker with portfolio
+        $workers = $this->repo->getWorkersWithPortfolio(1, 0, '', 'all', 'featured');
+
+        // Filter to get specific worker (you may want to add a dedicated method for this)
+        $worker = null;
+        foreach ($workers as $w) {
+            if ($w['worker_id'] == $workerId) {
+                $worker = $w;
+                break;
+            }
+        }
+
+        if (!$worker) {
+            // Worker not found
+            header('Location: ?controller=Browse&action=browse');
+            exit;
+        }
+
+        // Load profile view (create this view file)
+        require 'views/home/profile.php';
     }
 }

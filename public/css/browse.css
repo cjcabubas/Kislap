@@ -49,6 +49,9 @@
     position: relative;
     flex: 1;
     min-width: 280px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
 }
 
 .search-group i {
@@ -58,10 +61,11 @@
     transform: translateY(-50%);
     color: #ff6b00;
     font-size: 16px;
+    pointer-events: none;
 }
 
 .search-group input {
-    width: 100%;
+    flex: 1;
     padding: 13px 15px 13px 45px;
     background: rgba(255, 107, 0, 0.05);
     border: 1px solid rgba(255, 107, 0, 0.2);
@@ -79,6 +83,44 @@
 
 .search-group input::placeholder {
     color: #666;
+}
+
+/* Search Button */
+.search-btn {
+    padding: 13px 24px;
+    background: linear-gradient(135deg, #ff6b00, #ff8533);
+    color: #000;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    box-shadow: 0 4px 15px rgba(255, 107, 0, 0.3);
+}
+
+.search-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 107, 0, 0.5);
+}
+
+.search-btn:active {
+    transform: translateY(0);
+}
+
+.search-btn:disabled {
+    background: linear-gradient(135deg, #666, #888);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.search-btn i {
+    font-size: 14px;
 }
 
 .filter-group {
@@ -272,6 +314,7 @@
     width: 55px;
     height: 55px;
     flex-shrink: 0;
+    position: relative;
 }
 
 .profile-image img {
@@ -310,13 +353,19 @@
 }
 
 .category-tag {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
     padding: 4px 10px;
     background: rgba(255, 107, 0, 0.15);
     color: #ff8533;
     font-size: 12px;
     border-radius: 6px;
     font-weight: 500;
+}
+
+.category-tag i {
+    font-size: 11px;
 }
 
 .rating-badge {
@@ -371,6 +420,29 @@
 }
 
 .meta-item i {
+    color: #ff6b00;
+    font-size: 13px;
+}
+
+/* Card Stats */
+.card-stats {
+    display: flex;
+    gap: 15px;
+    padding: 10px 12px;
+    margin-bottom: 15px;
+    background: rgba(255, 107, 0, 0.05);
+    border-radius: 8px;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #999;
+    font-size: 13px;
+}
+
+.stat-item i {
     color: #ff6b00;
     font-size: 13px;
 }
@@ -466,6 +538,7 @@
 .btn-reset:hover {
     background: rgba(255, 107, 0, 0.2);
     border-color: #ff6b00;
+    transform: translateY(-2px);
 }
 
 /* Pagination */
@@ -537,52 +610,6 @@
     padding: 0 5px;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .page-header h1 {
-        font-size: 28px;
-    }
-
-    .search-filter-bar {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .search-form {
-        flex-direction: column;
-    }
-
-    .search-group {
-        min-width: 100%;
-    }
-
-    .filter-group {
-        flex-direction: column;
-    }
-
-    .filter-select {
-        width: 100%;
-    }
-
-    .results-count {
-        justify-content: center;
-    }
-
-    .photographers-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .pagination {
-        flex-wrap: wrap;
-    }
-}
-
-@media (max-width: 480px) {
-    .card-actions {
-        grid-template-columns: 1fr;
-    }
-}
-
 /* Custom Select Dropdown */
 .custom-select {
     position: relative;
@@ -634,4 +661,60 @@
 
 .custom-select select:focus + i {
     transform: translateY(-50%) rotate(180deg);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .page-header h1 {
+        font-size: 28px;
+    }
+
+    .search-filter-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-form {
+        flex-direction: column;
+    }
+
+    .search-group {
+        min-width: 100%;
+        flex-direction: column;
+    }
+
+    .search-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .filter-group {
+        flex-direction: column;
+    }
+
+    .filter-select {
+        width: 100%;
+    }
+
+    .custom-select {
+        min-width: 100%;
+    }
+
+    .results-count {
+        justify-content: center;
+    }
+
+    .photographers-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pagination {
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 480px) {
+    .card-actions {
+        grid-template-columns: 1fr;
+    }
 }

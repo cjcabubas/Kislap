@@ -3,29 +3,38 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Ensure the view uses the $workers variable passed from the controller
 $photographers = $workers ?? [];
 
+// Categories mapping (specialty field values)
 $categories = [
-        'all' => 'All Photographers',
-        'event' => 'Event Photographers',
-        'portrait' => 'Portrait Photographers',
-        'product' => 'Product Photographers',
-        'lifestyle' => 'Lifestyle Photographers',
-        'photobooth' => 'Photobooth Providers',
+        'all' => 'All Categories',
+        'event' => 'Event Photography',
+        'portrait' => 'Portrait Photography',
+        'product' => 'Product Photography',
+        'lifestyle' => 'Lifestyle Photography',
+        'photobooth' => 'Photobooth Services',
         'creative' => 'Creative/Conceptual'
 ];
 
-// Pagination
-$currentPage = $_GET['page'] ?? 1;
-$totalPages = 3;
-$totalPhotographers = count($photographers);
+// Merge with available specialties from database if needed
+if (isset($availableSpecialties) && !empty($availableSpecialties)) {
+    foreach ($availableSpecialties as $specialty) {
+        if (!isset($categories[$specialty])) {
+            $categories[$specialty] = ucwords(str_replace('_', ' ', $specialty));
+        }
+    }
+}
 
-// Filters
+// Filters (from Controller)
+$currentPage = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+$totalPages = $totalPages ?? 1;
+$totalPhotographers = $totalWorkers ?? count($photographers);
+
 $selectedCategory = $_GET['category'] ?? 'all';
 $searchQuery = $_GET['search'] ?? '';
 $sortBy = $_GET['sort'] ?? 'featured';
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -37,7 +46,7 @@ $sortBy = $_GET['sort'] ?? 'featured';
     <link rel="stylesheet" href="/Kislap/public/css/browse.css" type="text/css">
 </head>
 <body>
-<?php  require __DIR__ . '/../shared/navbar.php'; ?>
+<?php require __DIR__ . '/../shared/navbar.php'; ?>
 
 <div class="browse-container">
     <!-- Page Header -->
@@ -48,21 +57,28 @@ $sortBy = $_GET['sort'] ?? 'featured';
 
     <!-- Search & Filter Bar -->
     <div class="search-filter-bar">
-        <form action="" method="GET" class="search-form">
+        <form action="" method="GET" class="search-form" id="filterForm">
+            <!-- Preserve controller and action -->
+            <input type="hidden" name="controller" value="Browse">
+            <input type="hidden" name="action" value="browse">
+
             <div class="search-group">
                 <i class="fas fa-search"></i>
                 <input type="text"
                        name="search"
-                       placeholder="Search by name, location, or style..."
+                       placeholder="Search by name, location, or specialty..."
                        value="<?php echo htmlspecialchars($searchQuery); ?>">
+                <button type="submit" class="search-btn">
+                    <i class="fas fa-search"></i> Search
+                </button>
             </div>
 
             <div class="filter-group">
                 <div class="custom-select">
                     <select name="category" onchange="this.form.submit()">
-                        <option value="" disabled>Select Category</option>
                         <?php foreach ($categories as $key => $label): ?>
-                            <option value="<?php echo $key; ?>" <?php echo $selectedCategory === $key ? 'selected' : ''; ?>>
+                            <option value="<?php echo htmlspecialchars($key); ?>"
+                                    <?php echo $selectedCategory === $key ? 'selected' : ''; ?>>
                                 <?php echo htmlspecialchars($label); ?>
                             </option>
                         <?php endforeach; ?>
@@ -72,7 +88,6 @@ $sortBy = $_GET['sort'] ?? 'featured';
 
                 <div class="custom-select">
                     <select name="sort" onchange="this.form.submit()">
-                        <option value="" disabled>Sort By</option>
                         <option value="featured" <?php echo $sortBy === 'featured' ? 'selected' : ''; ?>>Featured</option>
                         <option value="rating" <?php echo $sortBy === 'rating' ? 'selected' : ''; ?>>Top Rated</option>
                         <option value="reviews" <?php echo $sortBy === 'reviews' ? 'selected' : ''; ?>>Most Reviews</option>
@@ -87,7 +102,7 @@ $sortBy = $_GET['sort'] ?? 'featured';
 
         <div class="results-count">
             <i class="fas fa-users"></i>
-            <span><?php echo $totalPhotographers; ?> photographers</span>
+            <span><?php echo $totalPhotographers; ?> photographer<?php echo $totalPhotographers !== 1 ? 's' : ''; ?> found</span>
         </div>
     </div>
 
@@ -98,32 +113,73 @@ $sortBy = $_GET['sort'] ?? 'featured';
                 <i class="fas fa-camera-retro"></i>
                 <h3>No photographers found</h3>
                 <p>Try adjusting your search or filters to find more results</p>
-                <a href="?" class="btn-reset">
+                <a href="?controller=Browse&action=browse" class="btn-reset">
                     <i class="fas fa-redo"></i> Clear Filters
                 </a>
             </div>
         <?php else: ?>
             <?php foreach ($photographers as $photographer): ?>
                 <?php
-                $photogId = $photographer['photographer_id'] ?? 0;
-                $businessName = $photographer['business_name'] ?? 'Unknown';
-                $description = $photographer['description'] ?? 'No description available';
-                $profilePicture = $photographer['profile_picture'] ?? '';
-                $category = $photographer['category'] ?? 'general';
-                $rating = $photographer['rating'] ?? 0;
-                $reviewsCount = $photographer['reviews_count'] ?? 0;
-                $priceRange = $photographer['price_range'] ?? 'Contact for pricing';
-                $location = $photographer['location'] ?? 'Philippines';
-                $yearsExperience = $photographer['years_experience'] ?? 0;
-                $isFeatured = $photographer['is_featured'] ?? false;
-                $portfolioImages = $photographer['portfolio_images'] ?? [];
+                // --- MAPPING WORKER TABLE COLUMNS ---
+                $photogId = $photographer['worker_id'] ?? 0;
 
+                // Full name composition
+                $fullName = trim(
+                        ($photographer['firstName'] ?? '') . ' ' .
+                        ($photographer['middleName'] ?? '') . ' ' .
+                        ($photographer['lastName'] ?? '')
+                );
+                $businessName = $photographer['display_name'] ?? $fullName;
+
+                // Details
+                $description = $photographer['bio'] ?? 'No bio available';
+                $profilePicture = $photographer['profile_photo'] ?? '';
+                $location = $photographer['address'] ?? 'Philippines';
+                $yearsExperience = $photographer['experience_years'] ?? 0;
+
+                // Ratings
+                $rating = floatval($photographer['rating_average'] ?? 0);
+                $reviewsCount = intval($photographer['total_ratings'] ?? 0);
+                $totalBookings = intval($photographer['total_bookings'] ?? 0);
+
+                // Category
+                $categoryKey = $photographer['specialty'] ?? 'general';
+                $categoryLabel = $categories[$categoryKey] ?? ucwords(str_replace('_', ' ', $categoryKey));
+
+                // Featured status (based on bookings and ratings)
+                $isFeatured = ($totalBookings >= 10 && $rating >= 4.5);
+
+                // Price range (using total_earnings as indicator)
+                $totalEarnings = floatval($photographer['total_earnings'] ?? 0);
+                if ($totalEarnings > 100000) {
+                    $priceRange = '₱₱₱₱';
+                } elseif ($totalEarnings > 50000) {
+                    $priceRange = '₱₱₱';
+                } elseif ($totalEarnings > 10000) {
+                    $priceRange = '₱₱';
+                } else {
+                    $priceRange = 'Contact for pricing';
+                }
+
+                // Portfolio images (array of image paths)
+                $portfolioImages = [];
+                if (isset($photographer['portfolio_images']) && is_array($photographer['portfolio_images'])) {
+                    foreach ($photographer['portfolio_images'] as $img) {
+                        if (is_array($img) && isset($img['image_path'])) {
+                            $portfolioImages[] = $img['image_path'];
+                        } elseif (is_string($img)) {
+                            $portfolioImages[] = $img;
+                        }
+                    }
+                }
+
+                // Shorten description
                 $shortDescription = strlen($description) > 120
                         ? substr($description, 0, 120) . '...'
                         : $description;
                 ?>
 
-                <div class="photographer-card">
+                <div class="photographer-card" data-photographer-id="<?php echo $photogId; ?>">
                     <?php if ($isFeatured): ?>
                         <div class="featured-badge">
                             <i class="fas fa-crown"></i> Featured
@@ -134,13 +190,17 @@ $sortBy = $_GET['sort'] ?? 'featured';
                     <div class="portfolio-preview">
                         <?php if (!empty($portfolioImages)): ?>
                             <div class="portfolio-main">
-                                <img src="<?php echo htmlspecialchars($portfolioImages[0]); ?>" alt="Portfolio">
+                                <img src="<?php echo htmlspecialchars($portfolioImages[0]); ?>"
+                                     alt="Portfolio of <?php echo htmlspecialchars($businessName); ?>"
+                                     onerror="this.parentElement.innerHTML='<div class=\'no-portfolio\'><i class=\'fas fa-camera\'></i><p>Image unavailable</p></div>'">
                             </div>
                             <?php if (count($portfolioImages) > 1): ?>
                                 <div class="portfolio-thumbnails">
                                     <?php for ($i = 1; $i <= min(3, count($portfolioImages) - 1); $i++): ?>
                                         <div class="thumbnail">
-                                            <img src="<?php echo htmlspecialchars($portfolioImages[$i]); ?>" alt="Portfolio">
+                                            <img src="<?php echo htmlspecialchars($portfolioImages[$i]); ?>"
+                                                 alt="Portfolio thumbnail"
+                                                 onerror="this.style.display='none'">
                                         </div>
                                     <?php endfor; ?>
                                     <?php if (count($portfolioImages) > 4): ?>
@@ -164,7 +224,12 @@ $sortBy = $_GET['sort'] ?? 'featured';
                             <div class="profile-section">
                                 <div class="profile-image">
                                     <?php if ($profilePicture): ?>
-                                        <img src="<?php echo htmlspecialchars($profilePicture); ?>" alt="<?php echo htmlspecialchars($businessName); ?>">
+                                        <img src="<?php echo htmlspecialchars($profilePicture); ?>"
+                                             alt="<?php echo htmlspecialchars($businessName); ?>"
+                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                        <div class="profile-placeholder" style="display:none;">
+                                            <?php echo strtoupper(substr($businessName, 0, 2)); ?>
+                                        </div>
                                     <?php else: ?>
                                         <div class="profile-placeholder">
                                             <?php echo strtoupper(substr($businessName, 0, 2)); ?>
@@ -174,7 +239,10 @@ $sortBy = $_GET['sort'] ?? 'featured';
 
                                 <div class="profile-info">
                                     <h3><?php echo htmlspecialchars($businessName); ?></h3>
-                                    <span class="category-tag"><?php echo htmlspecialchars(ucfirst($category)); ?></span>
+                                    <span class="category-tag">
+                                        <i class="fas fa-tag"></i>
+                                        <?php echo htmlspecialchars($categoryLabel); ?>
+                                    </span>
                                 </div>
                             </div>
 
@@ -197,13 +265,21 @@ $sortBy = $_GET['sort'] ?? 'featured';
                                 <span><?php echo $yearsExperience; ?>+ years</span>
                             </div>
                             <div class="meta-item">
-                                <i class="fas fa-tag"></i>
+                                <i class="fas fa-dollar-sign"></i>
                                 <span><?php echo htmlspecialchars($priceRange); ?></span>
                             </div>
                         </div>
 
+                        <div class="card-stats">
+                            <div class="stat-item">
+                                <i class="fas fa-calendar-check"></i>
+                                <span><?php echo $totalBookings; ?> bookings</span>
+                            </div>
+                        </div>
+
                         <div class="card-actions">
-                            <a href="?controller=Browse&action=viewProfile&id=<?php echo $photogId; ?>" class="btn-secondary">
+                            <a href="?controller=Browse&action=viewProfile&id=<?php echo $photogId; ?>"
+                               class="btn-secondary">
                                 <i class="fas fa-eye"></i> View Profile
                             </a>
                             <button class="btn-primary" onclick="bookPhotographer(<?php echo $photogId; ?>)">
@@ -219,9 +295,14 @@ $sortBy = $_GET['sort'] ?? 'featured';
     <!-- Pagination -->
     <?php if ($totalPages > 1): ?>
         <div class="pagination">
+            <?php
+            // Build base URL with current filters
+            $baseUrl = "?controller=Browse&action=browse&category=" . urlencode($selectedCategory) .
+                    "&search=" . urlencode($searchQuery) . "&sort=" . urlencode($sortBy);
+            ?>
+
             <?php if ($currentPage > 1): ?>
-                <a href="?page=<?php echo $currentPage - 1; ?>&category=<?php echo $selectedCategory; ?>&search=<?php echo urlencode($searchQuery); ?>&sort=<?php echo $sortBy; ?>"
-                   class="page-btn">
+                <a href="<?php echo $baseUrl; ?>&page=<?php echo $currentPage - 1; ?>" class="page-btn">
                     <i class="fas fa-chevron-left"></i> Previous
                 </a>
             <?php endif; ?>
@@ -232,15 +313,14 @@ $sortBy = $_GET['sort'] ?? 'featured';
                 $endPage = min($totalPages, $currentPage + 2);
 
                 if ($startPage > 1): ?>
-                    <a href="?page=1&category=<?php echo $selectedCategory; ?>&search=<?php echo urlencode($searchQuery); ?>&sort=<?php echo $sortBy; ?>"
-                       class="page-number">1</a>
+                    <a href="<?php echo $baseUrl; ?>&page=1" class="page-number">1</a>
                     <?php if ($startPage > 2): ?>
                         <span class="ellipsis">...</span>
                     <?php endif; ?>
                 <?php endif; ?>
 
                 <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
-                    <a href="?page=<?php echo $i; ?>&category=<?php echo $selectedCategory; ?>&search=<?php echo urlencode($searchQuery); ?>&sort=<?php echo $sortBy; ?>"
+                    <a href="<?php echo $baseUrl; ?>&page=<?php echo $i; ?>"
                        class="page-number <?php echo $i == $currentPage ? 'active' : ''; ?>">
                         <?php echo $i; ?>
                     </a>
@@ -250,14 +330,13 @@ $sortBy = $_GET['sort'] ?? 'featured';
                     <?php if ($endPage < $totalPages - 1): ?>
                         <span class="ellipsis">...</span>
                     <?php endif; ?>
-                    <a href="?page=<?php echo $totalPages; ?>&category=<?php echo $selectedCategory; ?>&search=<?php echo urlencode($searchQuery); ?>&sort=<?php echo $sortBy; ?>"
+                    <a href="<?php echo $baseUrl; ?>&page=<?php echo $totalPages; ?>"
                        class="page-number"><?php echo $totalPages; ?></a>
                 <?php endif; ?>
             </div>
 
             <?php if ($currentPage < $totalPages): ?>
-                <a href="?page=<?php echo $currentPage + 1; ?>&category=<?php echo $selectedCategory; ?>&search=<?php echo urlencode($searchQuery); ?>&sort=<?php echo $sortBy; ?>"
-                   class="page-btn">
+                <a href="<?php echo $baseUrl; ?>&page=<?php echo $currentPage + 1; ?>" class="page-btn">
                     Next <i class="fas fa-chevron-right"></i>
                 </a>
             <?php endif; ?>
@@ -267,8 +346,24 @@ $sortBy = $_GET['sort'] ?? 'featured';
 
 <script>
     function bookPhotographer(photographerId) {
+        <?php if (isset($_SESSION['user_id'])): ?>
+        // User is logged in, proceed to booking
         window.location.href = `?controller=Booking&action=create&photographer_id=${photographerId}`;
+        <?php else: ?>
+        // User not logged in, redirect to login
+        alert('Please log in to book a photographer');
+        window.location.href = `?controller=Auth&action=login&redirect=?controller=Booking%26action=create%26photographer_id=${photographerId}`;
+        <?php endif; ?>
     }
+
+    // Optional: Add loading state for form submissions
+    document.getElementById('filterForm')?.addEventListener('submit', function() {
+        const submitBtn = this.querySelector('.search-btn');
+        if (submitBtn) {
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
+            submitBtn.disabled = true;
+        }
+    });
 </script>
 </body>
 </html>
