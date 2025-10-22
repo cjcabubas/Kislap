@@ -10,7 +10,20 @@
 </head>
 
 <body>
-<?php require __DIR__ . '/../shared/navbar.php'; ?>
+<?php 
+require __DIR__ . '/../shared/navbar.php'; 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+?>
+
+<div class="form-wrapper">
+    <?php if (isset($_SESSION['notification'])): ?>
+        <div class="notification <?php echo htmlspecialchars($_SESSION['notification']['type']); ?>">
+            <?php echo htmlspecialchars($_SESSION['notification']['message']); ?>
+        </div>
+        <?php unset($_SESSION['notification']); ?>
+    <?php endif; ?>
 
 <form class="form" method="POST" action="index.php?controller=Auth&action=signUpDB">
     <div class="fullname">
@@ -54,6 +67,7 @@
 
     <button type="submit">Sign Up</button>
 </form>
+</div>
 
 <script>
     // Add active state to current page

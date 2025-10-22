@@ -1,10 +1,3 @@
-<?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-$user = $_SESSION['user'];
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -19,7 +12,20 @@ $user = $_SESSION['user'];
 </head>
 
 <body>
-<?php require __DIR__ . '/../shared/navbar.php'; ?>
+<?php 
+require __DIR__ . '/../shared/navbar.php'; 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+?>
+
+<div class="form-wrapper">
+    <?php if (isset($_SESSION['notification'])): ?>
+        <div class="notification <?php echo htmlspecialchars($_SESSION['notification']['type']); ?>">
+            <?php echo htmlspecialchars($_SESSION['notification']['message']); ?>
+        </div>
+        <?php unset($_SESSION['notification']); ?>
+    <?php endif; ?>
 
 <form class="form" method="POST" action="/Kislap/index.php?controller=Admin&action=handleLogin">
     <div class="form-group">
@@ -33,6 +39,8 @@ $user = $_SESSION['user'];
     </div>
 
     <button type="submit">Login</button>
+</form>
+</div>
 </body>
 </html>
 

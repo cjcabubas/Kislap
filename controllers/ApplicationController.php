@@ -34,10 +34,13 @@ class ApplicationController
                 password_hash($_POST['password'] ?? '', PASSWORD_BCRYPT),
             );
 
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+
             try {
                 // save main info
                 $appId = $this->repo->save($application->toArray());
-                echo "✅ Application submitted successfully!";
 
                 // save resume (single file)
                 if (isset($_FILES['resume']) && $_FILES['resume']['error'] === UPLOAD_ERR_OK) {
@@ -54,10 +57,20 @@ class ApplicationController
                     }
                 }
 
-                echo "<br>All files uploaded successfully.";
+                $_SESSION['notification'] = [
+                    'type' => 'success',
+                    'message' => 'Application submitted successfully! All files uploaded.'
+                ];
+                header("Location: index.php?controller=Application&action=registration");
+                exit;
 
             } catch (Exception $e) {
-                echo "❌ Error: " . $e->getMessage();
+                $_SESSION['notification'] = [
+                    'type' => 'error',
+                    'message' => 'Error: ' . $e->getMessage()
+                ];
+                header("Location: index.php?controller=Application&action=registration");
+                exit;
             }
         }
     }

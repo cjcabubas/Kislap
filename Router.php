@@ -12,7 +12,7 @@ class Router
 
         $controllerFile = "controllers/" . $controllerName . ".php";
         if (!file_exists($controllerFile)) {
-            die("Controller file does not exist" . $controllerFile);
+            die("Controller file does not exist: " . $controllerFile . "<br>Looking in: " . __DIR__ . "/controllers/");
         }
         require_once $controllerFile;
 
@@ -22,7 +22,7 @@ class Router
         $controller = new $controllerName();
 
         if (!method_exists($controller, $actionName)) {
-            die("Action not found: {$actionName}");
+            die("Action not found: {$actionName} in controller {$controllerName}<br>Available methods: " . implode(', ', get_class_methods($controller)));
         }
         $controller->$actionName(); // call the method
     }

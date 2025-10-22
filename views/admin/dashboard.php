@@ -14,9 +14,9 @@ $admin = $_SESSION['admin'];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kislap Dashboard - Overview</title>
+    <title>Admin Dashboard - Kislap</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="public/css/dashboard.css" type="text/css">
+    <link rel="stylesheet" href="public/css/dashboard.css">
 </head>
 <body>
 
@@ -28,10 +28,12 @@ $admin = $_SESSION['admin'];
             today.</p>
     </div>
 
+    <?php $stats = $stats ?? []; ?>
+
     <div class="stats-grid">
+
         <!-- Pending Applications -->
         <a href="/Kislap/index.php?controller=Admin&action=viewPendingApplications">
-
         <div class="stat-card pending">
                 <div class="stat-icon">
                     <i class="fas fa-clock"></i>

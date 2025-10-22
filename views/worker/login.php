@@ -15,9 +15,21 @@
 </head>
 
 <body>
-<?php require __DIR__ . '/../shared/navbar.php'; ?>
+<?php 
+require __DIR__ . '/../shared/navbar.php'; 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+?>
 
 <div class="form-wrapper">
+    <?php if (isset($_SESSION['notification'])): ?>
+        <div class="notification <?php echo htmlspecialchars($_SESSION['notification']['type']); ?>">
+            <?php echo htmlspecialchars($_SESSION['notification']['message']); ?>
+        </div>
+        <?php unset($_SESSION['notification']); ?>
+    <?php endif; ?>
+    
     <div class="login-header">
         <div class="login-icon">
             <i class="fas fa-camera"></i>

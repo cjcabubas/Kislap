@@ -36,7 +36,7 @@ if ($user) {
         <a href="explore-now" class="nav-link">
             <span class="nav-text">Explore</span>
         </a>
-        <a href="index.php?controller=Home&action=messages" class="nav-icon" title="Messages">
+        <a href="index.php?controller=Chat&action=view" class="nav-icon" title="Messages">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
@@ -79,7 +79,8 @@ if ($user) {
                     <?php if ($userType === 'Worker'): ?>
                         <!-- Photographer Menu -->
                         <a href="index.php?controller=Worker&action=profile"><i class="fas fa-user"></i> My Profile</a>
-                        <a href="bookings"><i class="fas fa-calendar-check"></i> My Bookings</a>
+                        <a href="index.php?controller=Worker&action=bookings"><i class="fas fa-calendar-check"></i> My Bookings</a>
+                        <a href="index.php?controller=Worker&action=manageAvailability"><i class="fas fa-calendar-alt"></i> Availability Calendar</a>
                         <a href="reviews"><i class="fas fa-star"></i> Reviews</a>
                         <div class="menu-divider"></div>
                         <button class="logout-btn" onclick="logout()">
@@ -89,7 +90,7 @@ if ($user) {
                     <?php else: ?>
                         <!-- Customer Menu -->
                         <a href="index.php?controller=User&action=profile"><i class="fas fa-user"></i> My Profile</a>
-                        <a href="my-bookings"><i class="fas fa-calendar"></i> My Bookings</a>
+                        <a href="index.php?controller=Home&action=bookings"><i class="fas fa-calendar"></i> My Bookings</a>
                         <a href="favorites"><i class="fas fa-heart"></i> Favorites</a>
                         <div class="menu-divider"></div>
                         <button class="logout-btn" onclick="logout()">

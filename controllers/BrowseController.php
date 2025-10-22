@@ -37,7 +37,6 @@ class BrowseController
         $totalWorkers = $this->repo->getWorkerCount($search, $category);
         $totalPages = max(1, ceil($totalWorkers / $limit)); // Ensure at least 1 page
 
-        // Get all available specialties for dynamic category dropdown (optional)
         $availableSpecialties = $this->repo->getAllSpecialties();
 
         // Pass all data to the view
@@ -60,7 +59,7 @@ class BrowseController
         // Fetch single worker with portfolio
         $workers = $this->repo->getWorkersWithPortfolio(1, 0, '', 'all', 'featured');
 
-        // Filter to get specific worker (you may want to add a dedicated method for this)
+        // Filter to get specific worker
         $worker = null;
         foreach ($workers as $w) {
             if ($w['worker_id'] == $workerId) {

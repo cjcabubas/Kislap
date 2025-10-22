@@ -39,20 +39,38 @@ class   AuthController
                 $_POST['address'] ?? null
             );
 
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+
             try {
                 // Check for duplicates
                 $existingUser = $this->repo->findByEmailOrPhone($user->getEmail(), $user->getPhoneNumber());
                 if ($existingUser) {
-                    echo "❌ Account with that email or phone number already exists.";
-                    return;
+                    $_SESSION['notification'] = [
+                        'type' => 'error',
+                        'message' => 'Account with that email or phone number already exists.'
+                    ];
+                    header("Location: index.php?controller=Auth&action=signUp");
+                    exit;
                 }
 
                 // Save main info
                 $this->repo->signUp($user->toArray());
-                echo "✅ Account created successfully!";
+                $_SESSION['notification'] = [
+                    'type' => 'success',
+                    'message' => 'Account created successfully!'
+                ];
+                header("Location: index.php?controller=Auth&action=login");
+                exit;
 
             } catch (Exception $e) {
-                echo "❌ Error: " . $e->getMessage();
+                $_SESSION['notification'] = [
+                    'type' => 'error',
+                    'message' => 'Error: ' . $e->getMessage()
+                ];
+                header("Location: index.php?controller=Auth&action=signUp");
+                exit;
             }
         }
     }
@@ -70,6 +88,10 @@ class   AuthController
             $identifier = $_POST['identifier'] ?? null;
             $password = $_POST['password'] ?? null;
 
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+
             try {
                 if (strpos($identifier, '@') !== false) {
                     $user = $this->repo->findByEmail($identifier);
@@ -78,18 +100,23 @@ class   AuthController
                 }
 
                 if (!$user) {
-                    echo "No user with that email or phone number found.";
-                    return;
+                    $_SESSION['notification'] = [
+                        'type' => 'error',
+                        'message' => 'No user with that email or phone number found.'
+                    ];
+                    header("Location: index.php?controller=Auth&action=login");
+                    exit;
                 }
 
                 if (!password_verify($password, $user['password'])) {
-                    echo "Wrong password.";
-                    return;
+                    $_SESSION['notification'] = [
+                        'type' => 'error',
+                        'message' => 'Wrong password.'
+                    ];
+                    header("Location: index.php?controller=Auth&action=login");
+                    exit;
                 }
 
-                if (session_status() === PHP_SESSION_NONE) {
-                    session_start();
-                }
                 unset($user['password']);
 
                 $_SESSION['user'] = [
@@ -109,7 +136,12 @@ class   AuthController
                 header("Location: index.php?controller=Home&action=homePage");
                 exit;
             } catch (Exception $e) {
-                echo "❌ Error: " . $e->getMessage();
+                $_SESSION['notification'] = [
+                    'type' => 'error',
+                    'message' => 'Error: ' . $e->getMessage()
+                ];
+                header("Location: index.php?controller=Auth&action=login");
+                exit;
             }
         }
     }

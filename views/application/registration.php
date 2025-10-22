@@ -12,7 +12,20 @@
 
 <body>
 
-<?php require __DIR__ . '/../shared/navbar.php'; ?>
+<?php 
+require __DIR__ . '/../shared/navbar.php'; 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+?>
+
+<div class="form-wrapper">
+    <?php if (isset($_SESSION['notification'])): ?>
+        <div class="notification <?php echo htmlspecialchars($_SESSION['notification']['type']); ?>">
+            <?php echo htmlspecialchars($_SESSION['notification']['message']); ?>
+        </div>
+        <?php unset($_SESSION['notification']); ?>
+    <?php endif; ?>
 
 <form class="form" method="POST" enctype="multipart/form-data" action="index.php?controller=Application&action=submit">
     <div class="fullname">
@@ -66,6 +79,7 @@
 
     <button type="submit">Apply</button>
 </form>
+</div>
 
 <div class="status-check-section">
     <div class="status-check-card">

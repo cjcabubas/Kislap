@@ -24,26 +24,38 @@ class AdminController
             $username = trim($_POST['username'] ?? '');
             $password = trim($_POST['password'] ?? '');
 
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+
             if ($username === '' || $password === '') {
-                echo "Username and password are required.";
-                return;
+                $_SESSION['notification'] = [
+                    'type' => 'error',
+                    'message' => 'Username and password are required.'
+                ];
+                header("Location: index.php?controller=Admin&action=login");
+                exit;
             }
 
             try {
                 $admin = $this->repo->findByUsername($username);
 
                 if (!$admin) {
-                    echo "No admin account found.";
-                    return;
+                    $_SESSION['notification'] = [
+                        'type' => 'error',
+                        'message' => 'No admin account found.'
+                    ];
+                    header("Location: index.php?controller=Admin&action=login");
+                    exit;
                 }
 
                 if (!password_verify($password, $admin['password'])) {
-                    echo "Incorrect password.";
-                    return;
-                }
-
-                if (session_status() === PHP_SESSION_NONE) {
-                    session_start();
+                    $_SESSION['notification'] = [
+                        'type' => 'error',
+                        'message' => 'Incorrect password.'
+                    ];
+                    header("Location: index.php?controller=Admin&action=login");
+                    exit;
                 }
 
                 unset($admin['password']); // never store plain password
@@ -60,7 +72,12 @@ class AdminController
                 header("Location: index.php?controller=Admin&action=showDashboard");
                 exit;
             } catch (Exception $e) {
-                echo "Error: " . $e->getMessage();
+                $_SESSION['notification'] = [
+                    'type' => 'error',
+                    'message' => 'Error: ' . $e->getMessage()
+                ];
+                header("Location: index.php?controller=Admin&action=login");
+                exit;
             }
         } else {
             $this->login();
@@ -256,7 +273,38 @@ class AdminController
         require 'views/admin/application.php';
     }
 
-
-
+    public function bookings()
+    {
+        require_once __DIR__ . '/../model/repositories/ChatRepository.php';
+        $chatRepo = new ChatRepository();
+        
+        $status = $_GET['status'] ?? 'all';
+        
+        // Get all bookings
+        $stmt = $chatRepo->conn->prepare(
+            "SELECT c.conversation_id, c.booking_status, c.created_at,
+                    u.firstName as user_first, u.lastName as user_last,
+                    w.firstName as worker_first, w.lastName as worker_last,
+                    atb.event_type, atb.event_date, atb.budget, atb.final_price,
+                    atb.deposit_paid, atb.deposit_amount
+             FROM conversations c
+             LEFT JOIN user u ON c.user_id = u.user_id
+             LEFT JOIN workers w ON c.worker_id = w.worker_id
+             LEFT JOIN ai_temp_bookings atb ON c.conversation_id = atb.conversation_id
+             WHERE c.booking_status != 'pending_ai'
+             " . ($status != 'all' ? "AND c.booking_status = ?" : "") . "
+             ORDER BY c.created_at DESC"
+        );
+        
+        if ($status != 'all') {
+            $stmt->execute([$status]);
+        } else {
+            $stmt->execute();
+        }
+        
+        $bookings = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        require 'views/admin/bookings.php';
+    }
 
 }

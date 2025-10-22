@@ -659,23 +659,11 @@ $existingPortfolio = $existingPortfolio ?? [];
             reader.readAsDataURL(file);
         }
     });
-    let selectedPortfolioFiles = [];
-
-    // Profile photo preview
-    document.getElementById('profilePhoto').addEventListener('change', function (e) {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const preview = document.getElementById('photoPreview');
-                preview.innerHTML = `<img src="${e.target.result}" alt="Profile Photo">`;
-            };
-            reader.readAsDataURL(file);
-        }
-    });
 
     // ===== PORTFOLIO IMAGES PREVIEW =====
-    document.getElementById('portfolioImages').addEventListener('change', function(e) {
+    const portfolioImagesInput = document.getElementById('portfolioImages');
+    if (portfolioImagesInput) {
+        portfolioImagesInput.addEventListener('change', function(e) {
         const files = e.target.files;
         const portfolioGrid = document.getElementById('portfolioGrid');
         const currentImages = portfolioGrid.querySelectorAll('.portfolio-item:not([data-preview]), .portfolio-item[data-preview]');
