@@ -18,7 +18,7 @@ class BrowseController
     {
         // Pagination setup
         $limit = 9; // number of workers per page
-        $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1; // Ensure page >= 1
+        $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
         $offset = ($page - 1) * $limit;
 
         // Filters and Sorting
@@ -35,7 +35,7 @@ class BrowseController
         // Fetch data
         $workers = $this->repo->getWorkersWithPortfolio($limit, $offset, $search, $category, $sort);
         $totalWorkers = $this->repo->getWorkerCount($search, $category);
-        $totalPages = max(1, ceil($totalWorkers / $limit)); // Ensure at least 1 page
+        $totalPages = max(1, ceil($totalWorkers / $limit));
 
         $availableSpecialties = $this->repo->getAllSpecialties();
 
@@ -56,25 +56,17 @@ class BrowseController
             exit;
         }
 
-        // Fetch single worker with portfolio
-        $workers = $this->repo->getWorkersWithPortfolio(1, 0, '', 'all', 'featured');
-
-        // Filter to get specific worker
-        $worker = null;
-        foreach ($workers as $w) {
-            if ($w['worker_id'] == $workerId) {
-                $worker = $w;
-                break;
-            }
-        }
+        // Fetch specific worker by ID
+        $worker = $this->repo->getWorkerByIdWithPortfolio($workerId);
 
         if (!$worker) {
-            // Worker not found
+            // Worker not found, redirect to browse
+            $_SESSION['error'] = 'Photographer not found.';
             header('Location: ?controller=Browse&action=browse');
             exit;
         }
 
-        // Load profile view (create this view file)
+        // Load profile view
         require 'views/home/profile.php';
     }
 }

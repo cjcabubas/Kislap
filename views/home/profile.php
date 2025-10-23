@@ -84,7 +84,7 @@ $joinedYear = date('Y', strtotime($joinedDate));
     <title><?php echo htmlspecialchars($businessName); ?> - Photographer Profile | Kislap</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/Kislap/public/css/style.css" type="text/css">
-    <link rel="stylesheet" href="/Kislap/public/css/viewP   rofile.css" type="text/css">
+    <link rel="stylesheet" href="/Kislap/public/css/viewProfile.css" type="text/css">
 </head>
 <body>
 <?php require __DIR__ . '/../shared/navbar.php'; ?>

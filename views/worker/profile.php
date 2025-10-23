@@ -602,6 +602,9 @@ $existingPortfolio = $existingPortfolio ?? [];
 <?php endif; ?>
 </div>
 <script>
+    // Store selected files (needed globally)
+    let selectedPortfolioFiles = [];
+
     <?php if ($isEditMode): ?>
     // **MODIFIED**: Added function to handle package removal
     function removePackage(packageIndex) {
@@ -612,9 +615,7 @@ $existingPortfolio = $existingPortfolio ?? [];
         const packageCard = document.querySelector(`.package-card[data-package-index="${packageIndex}"]`);
         if (!packageCard) return;
 
-        // Clear all visible data fields.
-        // The backend logic will see the empty 'name' field and process it as a deletion
-        // for packages that already exist in the database.
+        // Clear all visible data fields
         packageCard.querySelector('input[name*="[name]"]').value = '';
         packageCard.querySelector('textarea[name*="[description]"]').value = '';
         packageCard.querySelector('input[name*="[price]"]').value = '';
@@ -622,20 +623,15 @@ $existingPortfolio = $existingPortfolio ?? [];
         packageCard.querySelector('input[name*="[photo_count]"]').value = '';
         packageCard.querySelector('input[name*="[delivery_days]"]').value = '';
 
-        // Also clear the `package_id` hidden input to prevent issues,
-        // as the sync logic depends on existing IDs submitted.
-        // An alternative is to keep it, but clearing the name is sufficient.
-        // Let's also clear it to be safe.
         const packageIdInput = packageCard.querySelector('input[name*="[package_id]"]');
         if (packageIdInput) {
             packageIdInput.value = '';
         }
 
-        // Visually update the card to look empty
+        // Visually update the card
         packageCard.classList.remove('has-data');
         packageCard.classList.add('empty');
 
-        // Remove the trash button itself as it now represents an empty slot
         const removeButton = packageCard.querySelector('.btn-remove-package');
         if (removeButton) {
             removeButton.remove();
@@ -643,9 +639,6 @@ $existingPortfolio = $existingPortfolio ?? [];
 
         alert('Package cleared. Click "Save Changes" to finalize the removal.');
     }
-
-    // Store selected files
-    let selectedPortfolioFiles = [];
 
     // Profile photo preview
     document.getElementById('profilePhoto').addEventListener('change', function (e) {
@@ -664,84 +657,85 @@ $existingPortfolio = $existingPortfolio ?? [];
     const portfolioImagesInput = document.getElementById('portfolioImages');
     if (portfolioImagesInput) {
         portfolioImagesInput.addEventListener('change', function(e) {
-        const files = e.target.files;
-        const portfolioGrid = document.getElementById('portfolioGrid');
-        const currentImages = portfolioGrid.querySelectorAll('.portfolio-item:not([data-preview]), .portfolio-item[data-preview]');
-        const currentCount = currentImages.length;
-        const maxImages = 8;
+            const files = e.target.files;
+            const portfolioGrid = document.getElementById('portfolioGrid');
+            const currentImages = portfolioGrid.querySelectorAll('.portfolio-item');
+            const currentCount = currentImages.length;
+            const maxImages = 8;
 
-        console.log(`Current images: ${currentCount}, New files: ${files.length}`);
+            console.log(`Current images: ${currentCount}, New files: ${files.length}`);
 
-        // Remove "no portfolio" placeholder if exists
-        const noPortfolio = portfolioGrid.querySelector('.no-portfolio');
-        if (noPortfolio) {
-            noPortfolio.remove();
-        }
-
-        // Calculate how many we can still add
-        const availableSlots = maxImages - currentCount;
-
-        if (files.length > availableSlots) {
-            alert(`You can only upload ${availableSlots} more image(s). Maximum is ${maxImages} images total.`);
-        }
-
-        // Preview each selected file
-        let successCount = 0;
-        Array.from(files).slice(0, availableSlots).forEach((file, index) => {
-            // Validate file type
-            if (!file.type.startsWith('image/')) {
-                alert(`"${file.name}" is not a valid image file.`);
-                return;
+            // Remove "no portfolio" placeholder if exists
+            const noPortfolio = portfolioGrid.querySelector('.no-portfolio');
+            if (noPortfolio) {
+                noPortfolio.remove();
             }
 
-            // Validate file size (5MB)
-            const maxSize = 5 * 1024 * 1024;
-            if (file.size > maxSize) {
-                alert(`"${file.name}" is too large. Maximum size is 5MB.`);
-                return;
+            // Calculate how many we can still add
+            const availableSlots = maxImages - currentCount;
+
+            if (files.length > availableSlots) {
+                alert(`You can only upload ${availableSlots} more image(s). Maximum is ${maxImages} images total.`);
             }
 
-            // Store the file
-            const fileIndex = selectedPortfolioFiles.length;
-            selectedPortfolioFiles.push(file);
+            // Preview each selected file
+            let successCount = 0;
+            Array.from(files).slice(0, availableSlots).forEach((file) => {
+                // Validate file type
+                if (!file.type.startsWith('image/')) {
+                    alert(`"${file.name}" is not a valid image file.`);
+                    return;
+                }
 
-            // Create preview
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const portfolioItem = document.createElement('div');
-                portfolioItem.className = 'portfolio-item';
-                portfolioItem.setAttribute('data-preview', 'true');
-                portfolioItem.setAttribute('data-file-index', fileIndex);
-                portfolioItem.innerHTML = `
-                <img src="${e.target.result}" alt="Portfolio Preview">
-                <div class="preview-badge">
-                    <i class="fas fa-clock"></i> New - Will upload on save
-                </div>
-                <button type="button" class="btn-remove btn-remove-preview">
-                    <i class="fas fa-times"></i>
-                </button>
-            `;
+                // Validate file size (5MB)
+                const maxSize = 5 * 1024 * 1024;
+                if (file.size > maxSize) {
+                    alert(`"${file.name}" is too large. Maximum size is 5MB.`);
+                    return;
+                }
 
-                // Add click event to the remove button
-                const removeBtn = portfolioItem.querySelector('.btn-remove-preview');
-                removeBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    removePreviewImage(this);
-                });
+                // Store the file
+                const fileIndex = selectedPortfolioFiles.length;
+                selectedPortfolioFiles.push(file);
 
-                portfolioGrid.appendChild(portfolioItem);
-                successCount++;
-                updatePortfolioCount();
-            };
-            reader.readAsDataURL(file);
+                // Create preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const portfolioItem = document.createElement('div');
+                    portfolioItem.className = 'portfolio-item';
+                    portfolioItem.setAttribute('data-preview', 'true');
+                    portfolioItem.setAttribute('data-file-index', fileIndex);
+                    portfolioItem.innerHTML = `
+                        <img src="${e.target.result}" alt="Portfolio Preview">
+                        <div class="preview-badge">
+                            <i class="fas fa-clock"></i> New
+                        </div>
+                        <button type="button" class="btn-remove btn-remove-preview">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+
+                    // Add click event to the remove button
+                    const removeBtn = portfolioItem.querySelector('.btn-remove-preview');
+                    removeBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        removePreviewImage(this);
+                    });
+
+                    portfolioGrid.appendChild(portfolioItem);
+                    successCount++;
+                    updatePortfolioCount();
+                };
+                reader.readAsDataURL(file);
+            });
+
+            console.log(`Added ${successCount} previews`);
+
+            // Reset input
+            this.value = '';
         });
-
-        console.log(`Added ${successCount} previews`);
-
-        // Reset input so same files can be selected again if needed
-        this.value = '';
-    });
+    }
 
     // Remove preview image (before saving)
     function removePreviewImage(button) {
@@ -759,52 +753,13 @@ $existingPortfolio = $existingPortfolio ?? [];
             const remainingItems = portfolioGrid.querySelectorAll('.portfolio-item');
             if (remainingItems.length === 0) {
                 portfolioGrid.innerHTML = `
-                <div class="no-portfolio">
-                    <i class="fas fa-images"></i>
-                    <p>No portfolio images yet</p>
-                </div>
-            `;
+                    <div class="no-portfolio">
+                        <i class="fas fa-images"></i>
+                        <p>No portfolio images yet</p>
+                    </div>
+                `;
             }
         }
-    }
-
-    // Remove existing portfolio image (from database)
-    function removePortfolioImage(workId) {
-        if (!confirm("Are you sure you want to remove this image from your portfolio?")) return;
-
-        fetch("?controller=Worker&action=removePortfolioImage", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ work_id: workId }),
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    // Remove the image div
-                    const imageDiv = document.querySelector(`[data-work-id="${workId}"]`);
-                    if (imageDiv) imageDiv.remove();
-
-                    updatePortfolioCount();
-
-                    // Show "no portfolio" message if no images left
-                    const portfolioGrid = document.getElementById('portfolioGrid');
-                    const remainingItems = portfolioGrid.querySelectorAll('.portfolio-item');
-                    if (remainingItems.length === 0) {
-                        portfolioGrid.innerHTML = `
-                        <div class="no-portfolio">
-                            <i class="fas fa-images"></i>
-                            <p>No portfolio images yet</p>
-                        </div>
-                    `;
-                    }
-                } else {
-                    alert(data.message || "Failed to remove image.");
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                alert("Error removing image.");
-            });
     }
 
     // Update portfolio count
@@ -864,6 +819,59 @@ $existingPortfolio = $existingPortfolio ?? [];
 
     <?php endif; ?>
 
+    // Remove existing portfolio image (from database) - WORKS IN BOTH MODES
+    function removePortfolioImage(workId) {
+        if (!confirm("Are you sure you want to remove this image from your portfolio?")) {
+            return;
+        }
+
+        fetch("?controller=Worker&action=removePortfolioImage", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ work_id: workId }),
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    // Remove the image div
+                    const imageDiv = document.querySelector(`[data-work-id="${workId}"]`);
+                    if (imageDiv) {
+                        imageDiv.remove();
+                    }
+
+                    <?php if ($isEditMode): ?>
+                    updatePortfolioCount();
+                    <?php endif; ?>
+
+                    // Show "no portfolio" message if no images left
+                    const portfolioGrid = document.getElementById('portfolioGrid');
+                    const remainingItems = portfolioGrid.querySelectorAll('.portfolio-item, .portfolio-item-view');
+                    if (remainingItems.length === 0) {
+                        portfolioGrid.innerHTML = `
+                        <div class="no-portfolio">
+                            <i class="fas fa-images"></i>
+                            <p>No portfolio images yet</p>
+                            <?php if ($isEditMode): ?>
+                            <?php else: ?>
+                            <a href="?controller=Worker&action=profile&edit=true" class="btn-add-portfolio">
+                                <i class="fas fa-plus"></i> Add Images
+                            </a>
+                            <?php endif; ?>
+                        </div>
+                    `;
+                    }
+
+                    alert('Image removed successfully!');
+                } else {
+                    alert(data.message || "Failed to remove image.");
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Error removing image. Please try again.");
+            });
+    }
 </script>
+
 </body>
 </html>

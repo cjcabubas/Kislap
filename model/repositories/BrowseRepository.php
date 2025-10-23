@@ -199,6 +199,51 @@ class BrowseRepository
         return (int)$stmt->fetchColumn();
     }
 
+    public function getWorkerByIdWithPortfolio(int $workerId): ?array
+    {
+        try {
+            // Fetch worker details
+            $stmt = $this->conn->prepare("
+                SELECT 
+                    w.*,
+                    COALESCE(w.firstName, '') as firstName,
+                    COALESCE(w.middleName, '') as middleName,
+                    COALESCE(w.lastName, '') as lastName
+                FROM workers w
+                WHERE w.worker_id = ? AND w.status = 'active'
+                LIMIT 1
+            ");
+
+            $stmt->execute([$workerId]);
+            $worker = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$worker) {
+                return null;
+            }
+
+            // Fetch portfolio images for this worker
+            $portfolioStmt = $this->conn->prepare("
+                SELECT image_path, uploaded_at
+                FROM worker_works
+                WHERE worker_id = ?
+                ORDER BY uploaded_at DESC
+                LIMIT 8
+            ");
+
+            $portfolioStmt->execute([$workerId]);
+            $portfolio = $portfolioStmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Attach portfolio to worker data
+            $worker['portfolio_images'] = $portfolio;
+
+            return $worker;
+
+        } catch (PDOException $e) {
+            error_log("Error fetching worker profile: " . $e->getMessage());
+            return null;
+        }
+    }
+
     /**
      * Get all unique specialties from workers table
      */
