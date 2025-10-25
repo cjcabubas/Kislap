@@ -1,0 +1,466 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #0a0a0a;
+    min-height: 100vh;
+    padding: 20px;
+    color: #fff;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Header Section */
+.page-header-wrapper {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 30px 18px;
+    background: #1a1a1a;
+    color: #ff6b00;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-radius: 15px;
+    border: 1px solid #2d2d2d;
+    height: fit-content;
+}
+
+.btn-back i {
+    font-size: 16px;
+    transition: transform 0.3s ease;
+}
+
+.btn-back:hover {
+    border-color: #ff6b00;
+    color: #ff8533;
+    transform: translateY(-2px);
+}
+
+.btn-back:hover i {
+    transform: translateX(-3px);
+}
+
+.page-header {
+    background: #1a1a1a;
+    padding: 30px;
+    border-radius: 15px;
+    border: 1px solid #2d2d2d;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    flex: 1;
+    border-left: 5px solid #28a745;
+}
+
+.page-header h1 {
+    color: #28a745;
+    font-size: 28px;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.page-header h1 i {
+    font-size: 24px;
+    color: #34ce57;
+}
+
+.header-content p {
+    color: #999;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+.filter-section {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* Search Input */
+#searchInput {
+    padding: 12px 15px;
+    border-radius: 8px;
+    border: 1px solid #28a745;
+    background: #2d2d2d;
+    color: #fff;
+    font-size: 14px;
+    min-width: 250px;
+    transition: all 0.3s ease;
+}
+
+#searchInput:focus {
+    outline: none;
+    border-color: #34ce57;
+    background: #333;
+}
+
+#searchInput::placeholder {
+    color: #999;
+}
+
+/* Status Filter Buttons */
+.status-filters {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 10px 16px;
+    border-radius: 6px;
+    border: 1px solid #28a745;
+    background: #2d2d2d;
+    color: #28a745;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.filter-btn:hover {
+    background: #28a745;
+    color: #1a1a1a;
+}
+
+.filter-btn.active {
+    background: #28a745;
+    color: #1a1a1a;
+}
+
+/* Table Container */
+.table-container {
+    background: #1a1a1a;
+    border-radius: 15px;
+    padding: 30px;
+    border: 1px solid #333;
+    overflow-x: auto;
+    border-top: 4px solid #28a745;
+}
+
+/* Worker Table */
+.worker-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 25px;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.worker-table th {
+    background: #2d2d2d;
+    color: #28a745;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 13px;
+    padding: 20px 15px;
+    border-bottom: 2px solid #28a745;
+}
+
+.worker-table td {
+    color: #fff;
+    padding: 18px 15px;
+    border-bottom: 1px solid #333;
+    vertical-align: middle;
+    transition: all 0.3s ease;
+}
+
+.worker-table tr:hover {
+    background: #2d2d2d;
+}
+
+/* Status Badges */
+.status-badge {
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.status-active {
+    background: #28a745;
+    color: #fff;
+}
+
+.status-active::after {
+    content: '●';
+    color: #fff;
+}
+
+.status-suspended {
+    background: #ffc107;
+    color: #1a1a1a;
+}
+
+.status-suspended::after {
+    content: '⏸';
+    color: #1a1a1a;
+}
+
+.status-banned {
+    background: #dc3545;
+    color: #fff;
+}
+
+.status-banned::after {
+    content: '⛔';
+    color: #fff;
+}
+
+/* Action Buttons */
+.action-btns {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.action-btns .btn {
+    padding: 10px 18px;
+    font-size: 12px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    min-width: 80px;
+}
+
+.btn-suspend {
+    background: #ffc107;
+    color: #1a1a1a;
+}
+
+.btn-suspend:hover {
+    background: #ffb300;
+    transform: translateY(-2px);
+}
+
+.btn-ban {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-ban:hover {
+    background: #c82333;
+    transform: translateY(-2px);
+}
+
+.btn-activate {
+    background: #28a745;
+    color: white;
+}
+
+.btn-activate:hover {
+    background: #218838;
+    transform: translateY(-2px);
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 35px;
+    flex-wrap: wrap;
+}
+
+.page-link {
+    padding: 12px 18px;
+    background: #2d2d2d;
+    color: #28a745;
+    text-decoration: none;
+    border-radius: 10px;
+    border: 1px solid #28a745;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    min-width: 45px;
+    text-align: center;
+}
+
+.page-link:hover {
+    background: #28a745;
+    color: #1a1a1a;
+    transform: translateY(-2px);
+}
+
+.page-link.active {
+    background: #28a745;
+    color: #1a1a1a;
+}
+
+/* No Results Message */
+.no-results {
+    text-align: center;
+    color: #999;
+    font-size: 18px;
+    padding: 60px 40px;
+    background: #2d2d2d;
+    border-radius: 15px;
+    border: 2px dashed #28a745;
+}
+
+.no-results::before {
+    content: '📋';
+    display: block;
+    font-size: 48px;
+    margin-bottom: 15px;
+    opacity: 0.5;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 1024px) {
+    .container {
+        padding: 0 15px;
+    }
+
+    #searchInput {
+        min-width: 200px;
+    }
+}
+
+@media (max-width: 768px) {
+    body {
+        padding: 15px;
+    }
+
+    .page-header-wrapper {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .btn-back {
+        width: 100%;
+        justify-content: center;
+        padding: 20px 18px;
+    }
+
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 25px;
+    }
+
+    .page-header h1 {
+        font-size: 24px;
+    }
+
+    .filter-section {
+        width: 100%;
+        justify-content: center;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    #searchInput {
+        min-width: 100%;
+        max-width: 100%;
+    }
+
+    .status-filters {
+        justify-content: center;
+        width: 100%;
+    }
+
+    .table-container {
+        padding: 20px;
+        overflow-x: auto;
+    }
+
+    .worker-table {
+        font-size: 12px;
+        min-width: 700px;
+    }
+
+    .worker-table th,
+    .worker-table td {
+        padding: 12px 8px;
+    }
+
+    .action-btns {
+        flex-direction: column;
+        gap: 6px;
+        min-width: 100px;
+    }
+
+    .action-btns .btn {
+        width: 100%;
+        text-align: center;
+        font-size: 11px;
+        padding: 8px 12px;
+    }
+
+    .pagination {
+        gap: 8px;
+        margin-top: 25px;
+    }
+
+    .page-link {
+        padding: 10px 14px;
+        font-size: 12px;
+        min-width: 40px;
+    }
+
+    .status-badge {
+        font-size: 10px;
+        padding: 6px 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-header h1 {
+        font-size: 20px;
+    }
+
+    .worker-table th,
+    .worker-table td {
+        padding: 10px 6px;
+        font-size: 11px;
+    }
+
+    .table-container {
+        padding: 15px;
+    }
+
+    .no-results {
+        padding: 40px 20px;
+        font-size: 16px;
+    }
+
+    .filter-btn {
+        padding: 8px 12px;
+        font-size: 11px;
+    }
+}

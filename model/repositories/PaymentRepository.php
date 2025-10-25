@@ -1,52 +1,86 @@
 <?php
 
-require_once __DIR__ . '/Repository.php'; // Your base repository with the DB connection
-
-class PaymentRepository extends Repository
+class PaymentRepository
 {
-    /**
-     * Updates the temporary booking to mark the deposit as paid.
-     *
-     * @param string $conversationId The ID of the conversation.
-     * @param float  $depositAmount  The calculated deposit amount.
-     * @return bool True on success, false on failure.
-     */
-    public function markDepositAsPaid(string $conversationId, float $depositAmount): bool
+    private PDO $conn;
+
+    public function __construct()
+    {
+        $this->conn = new PDO("mysql:host=localhost;dbname=kislap", "root", "");
+        $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    }
+
+    public function processDepositPayment(int $conversationId): bool
     {
         try {
+            $this->conn->beginTransaction();
+
             $stmt = $this->conn->prepare(
                 "UPDATE ai_temp_bookings 
-                 SET deposit_amount = ?, 
-                     deposit_paid = TRUE, 
-                     deposit_paid_at = NOW() 
-                 WHERE conversation_id = ?"
+             SET deposit_paid_at = NOW(),
+                 deposit_amount = (final_price * 0.5)
+             WHERE conversation_id = ?"
             );
+            $stmt->execute([$conversationId]);
 
-            return $stmt->execute([$depositAmount, $conversationId]);
+            // Keep status as confirmed after deposit
+            $stmt = $this->conn->prepare(
+                "UPDATE conversations 
+             SET booking_status = 'confirmed'
+             WHERE conversation_id = ?"
+            );
+            $stmt->execute([$conversationId]);
 
-        } catch (PDOException $e) {
-            // In a real app, you would log the error $e->getMessage()
+            $this->conn->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->conn->rollBack();
+            error_log("Error processing deposit: " . $e->getMessage());
             return false;
         }
     }
 
-    /**
-     * Updates the main conversation to mark the booking as 'completed'.
-     */
-    public function markBookingAsCompleted(string $conversationId): bool
+    public function processFullPayment(int $conversationId): bool
     {
         try {
+            $this->conn->beginTransaction();
+
+            $stmt = $this->conn->prepare(
+                "UPDATE ai_temp_bookings 
+             SET completed_at = NOW(),
+                 full_payment_paid_at = NOW()
+             WHERE conversation_id = ?"
+            );
+            $stmt->execute([$conversationId]);
+
+            // Update status to completed
             $stmt = $this->conn->prepare(
                 "UPDATE conversations 
-                 SET booking_status = 'completed' 
-                 WHERE conversation_id = ?"
+             SET booking_status = 'completed'
+             WHERE conversation_id = ?"
             );
+            $stmt->execute([$conversationId]);
 
-            return $stmt->execute([$conversationId]);
-
-        } catch (PDOException $e) {
-            // In a real app, you would log the error $e->getMessage()
+            $this->conn->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->conn->rollBack();
+            error_log("Error processing full payment: " . $e->getMessage());
             return false;
         }
+    }
+
+
+    public function getBookingAmount(int $conversationId): ?float
+    {
+        $stmt = $this->conn->prepare(
+            "SELECT final_price, budget FROM ai_temp_bookings WHERE conversation_id = ?"
+        );
+        $stmt->execute([$conversationId]);
+        $booking = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$booking) return null;
+
+        return $booking['final_price'] ?? $booking['budget'] ?? 0;
     }
 }

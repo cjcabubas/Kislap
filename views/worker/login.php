@@ -56,7 +56,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
     <div class="login-switch">
         <p>Looking to book a photographer?</p>
-        <a href="index.php?controller=Auth&action=login" class="switch-link">
+        <a href="/Kislap/index.php?controller=Auth&action=login" class="switch-link">
             <i class="fas fa-user"></i> Client Login
         </a>
     </div>

@@ -4,11 +4,19 @@ class AuthRepository
 {
     private PDO $conn;
 
+    // ========================================
+    // CONSTRUCTOR
+    // ========================================
+    
     public function __construct()
     {
         $this->conn = new PDO("mysql:host=localhost;dbname=kislap", "root", "");
     }
 
+    // ========================================
+    // USER REGISTRATION
+    // ========================================
+    
     public function signUp(array $user): void
     {
         $stmt = $this->conn->prepare(
@@ -19,6 +27,10 @@ class AuthRepository
         $stmt->execute($user);
     }
 
+    // ========================================
+    // USER LOOKUP
+    // ========================================
+    
     public function findByEmailOrPhone($email = null, $phoneNumber = null)
     {
         $stmt = $this->conn->prepare("

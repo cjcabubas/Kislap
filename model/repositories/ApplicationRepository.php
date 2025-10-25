@@ -3,10 +3,18 @@ class ApplicationRepository
 {
     private PDO $conn;
 
+    // ========================================
+    // CONSTRUCTOR
+    // ========================================
+    
     public function __construct() {
         $this->conn = new PDO("mysql:host=localhost;dbname=kislap", "root", "");
     }
 
+    // ========================================
+    // APPLICATION MANAGEMENT
+    // ========================================
+    
     public function save(array $application): string {
         $stmt =$this->conn->prepare(
             "INSERT INTO application (lastName, firstName, middleName, email, phoneNumber, password, address) 
@@ -33,6 +41,10 @@ class ApplicationRepository
         $stmt->execute(["id"=>$application_id, "path"=>$filePath]);
     }
 
+    // ========================================
+    // APPLICATION LOOKUP
+    // ========================================
+    
     public function findByEmailAndIdentifier($email, $identifier): ?array
     {
         $query = "SELECT status, firstName, lastName, email, phoneNumber, 
@@ -47,6 +59,21 @@ class ApplicationRepository
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
         return $result ?: null;
+    }
+
+    public function findByEmailOrPhone($email, $phoneNumber)
+    {
+        $stmt = $this->conn->prepare("
+            SELECT * FROM application
+            WHERE email = :email OR phoneNumber = :phone
+            LIMIT 1
+        ");
+        $stmt->execute([
+            ':email' => $email,
+            ':phone' => $phoneNumber
+        ]);
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
 

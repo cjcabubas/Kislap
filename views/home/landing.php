@@ -72,11 +72,11 @@
         <div class="cta-section">
             <p class="cta-text">Ready to find your perfect photographer?</p>
             <div class="cta-buttons">
-                <a href="/Kislap/index.php?controller=Customer&action=browse" class="btn btn-primary">
+                <a href="/Kislap/index.php?controller=Browse&action=browse" class="btn btn-primary">
                     <i class="fas fa-search"></i>
                     Browse Photographers
                 </a>
-                <a href="index.php?controller=Auth&action=signUpDB" class="btn btn-secondary">
+                <a href="/Kislap/index.php?controller=Auth&action=signUp" class="btn btn-secondary">
                     <i class="fas fa-user-plus"></i>
                     Create Account
                 </a>

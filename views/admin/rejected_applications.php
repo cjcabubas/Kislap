@@ -1,4 +1,3 @@
-<!-- applications.php -->
 <?php
 if (session_status() === PHP_SESSION_NONE) session_start();
 $admin = $_SESSION['admin'] ?? null;
@@ -6,6 +5,12 @@ if (!$admin) {
     header("Location: /Kislap/views/admin/login.php");
     exit;
 }
+$applications = $applications ?? [];
+$totalApplications = $totalApplications ?? 0;
+$totalPages = $totalPages ?? 1;
+$page = $page ?? 1;
+$limit = $limit ?? 10;
+$search = $search ?? '';
 ?>
 
 <!DOCTYPE html>
@@ -13,9 +18,9 @@ if (!$admin) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kislap - Pending Applications</title>
+    <title>Kislap - Rejected Applications</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="public/css/pending_applications.css" type="text/css">
+    <link rel="stylesheet" href="public/css/rejected_applications.css" type="text/css">
 </head>
 <body>
 
@@ -27,12 +32,12 @@ if (!$admin) {
 
         <div class="page-header">
             <div class="header-content">
-                <h1><i class="fas fa-clock"></i> Pending Applications</h1>
-                <p style="color:#999;">Review and manage photographer applications (<?php echo $totalApplications ?? count($applications ?? []); ?> total)</p>
+                <h1><i class="fas fa-times-circle"></i> Rejected Applications</h1>
+                <p style="color:#999;">Review rejected photographer applications (<?php echo $totalApplications; ?> total)</p>
             </div>
 
             <div class="filter-section">
-                <input type="text" id="searchInput" placeholder="Search by name or email..." value="<?php echo htmlspecialchars($search ?? ''); ?>">
+                <input type="text" id="searchInput" placeholder="Search by name or email..." value="<?php echo htmlspecialchars($search); ?>">
             </div>
         </div>
     </div>
@@ -41,23 +46,24 @@ if (!$admin) {
         <?php if (empty($applications)): ?>
             <div class="empty-state">
                 <i class="fas fa-inbox"></i>
-                <h3>No pending applications found</h3>
-                <p>New applications will appear here for review.</p>
+                <h3>No rejected applications found</h3>
+                <p>All applications are either pending or approved.</p>
             </div>
         <?php else: ?>
-            <div class="applications-grid" id="applicationsContainer">
+            <div class="applications-grid">
                 <?php foreach ($applications as $app): ?>
-                    <div class="application-card pending" data-id="<?php echo $app['application_id']; ?>">
+                    <div class="application-card rejected">
                         <div class="card-header">
                             <div class="applicant-info">
                                 <h3><?php echo htmlspecialchars($app['firstName'] . ' ' . $app['lastName']); ?></h3>
                                 <div class="meta">
-                                    <span><i class="fas fa-calendar"></i> Applied: <?php echo date('M d, Y', strtotime($app['created_at'])); ?></span>
+                                    <span><i class="fas fa-calendar"></i> Rejected: <?php echo date('M d, Y', strtotime($app['updated_at'])); ?></span>
+                                    <span><i class="fas fa-clock"></i> Applied: <?php echo date('M d, Y', strtotime($app['created_at'])); ?></span>
                                 </div>
                             </div>
-                            <div class="status-badge pending">
-                                <i class="fas fa-clock"></i>
-                                Pending
+                            <div class="status-badge rejected">
+                                <i class="fas fa-times-circle"></i>
+                                Rejected
                             </div>
                         </div>
 
@@ -111,33 +117,29 @@ if (!$admin) {
                         <?php endif; ?>
 
                         <div class="actions">
-                            <button class="btn btn-reject" onclick="handleAction(<?php echo $app['application_id']; ?>,'reject')">
-                                <i class="fas fa-times"></i>
-                                Reject
+                            <button class="btn btn-reconsider" onclick="reconsiderApplication(<?php echo $app['application_id']; ?>)">
+                                <i class="fas fa-undo"></i>
+                                Reconsider
                             </button>
-                            <button class="btn btn-approve" onclick="handleAction(<?php echo $app['application_id']; ?>,'approve')">
-                                <i class="fas fa-check"></i>
-                                Approve
+                            <button class="btn btn-delete" onclick="deleteApplication(<?php echo $app['application_id']; ?>)">
+                                <i class="fas fa-trash"></i>
+                                Delete Permanently
                             </button>
                         </div>
                     </div>
                 <?php endforeach; ?>
             </div>
 
-            <?php if (($totalPages ?? 0) > 1): ?>
-                <div class="pagination">
-                    <?php for ($i = 1; $i <= ($totalPages ?? 1); $i++): ?>
-                        <a href="index.php?controller=Admin&action=viewPendingApplications&page=<?php echo $i; ?>&search=<?php echo urlencode($search ?? ''); ?>"
-                           class="page-link <?php echo ($i === ($page ?? 1)) ? 'active' : ''; ?>">
-                            <?php echo $i; ?>
-                        </a>
-                    <?php endfor; ?>
-                </div>
-            <?php endif; ?>
+            <div class="pagination">
+                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                    <a href="index.php?controller=Admin&action=viewRejectedApplications&page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>"
+                       class="page-link <?php echo ($i === $page) ? 'active' : ''; ?>">
+                        <?php echo $i; ?>
+                    </a>
+                <?php endfor; ?>
+            </div>
         <?php endif; ?>
     </div>
-
-
 </div>
 
 <!-- Image Modal -->
@@ -147,18 +149,41 @@ if (!$admin) {
 </div>
 
 <script>
-    function handleAction(id, action) {
-        if (!confirm(`Are you sure you want to ${action} this application?`)) return;
+    function reconsiderApplication(id) {
+        if (!confirm('Are you sure you want to move this application back to pending for reconsideration?')) return;
 
         fetch(`/Kislap/index.php?controller=Admin&action=updateStatus`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ application_id: id, status: action })
+            body: JSON.stringify({ application_id: id, status: 'pending' })
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert(data.message);
+                alert('Application moved to pending for reconsideration');
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Request failed. Check console for details.');
+        });
+    }
+
+    function deleteApplication(id) {
+        if (!confirm('Are you sure you want to PERMANENTLY DELETE this application? This action cannot be undone.')) return;
+
+        fetch(`/Kislap/index.php?controller=Admin&action=deleteApplication`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ application_id: id })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Application deleted permanently');
                 location.reload();
             } else {
                 alert('Error: ' + data.message);
@@ -202,5 +227,6 @@ if (!$admin) {
         }
     });
 </script>
+
 </body>
 </html>

@@ -33,20 +33,20 @@ if ($user) {
         </div>
     </a>
     <nav class="navbar">
-        <a href="explore-now" class="nav-link">
+        <a href="/Kislap/index.php?controller=Browse&action=browse" class="nav-link">
             <span class="nav-text">Explore</span>
         </a>
-        <a href="index.php?controller=Chat&action=view" class="nav-icon" title="Messages">
+        <a href="/Kislap/index.php?controller=Home&action=messages" class="nav-icon" title="Messages">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
         </a>
-        <a href="index.php?controller=Browse&action=browse" class="nav-icon" title="Search">
+        <a href="/Kislap/index.php?controller=Browse&action=browse" class="nav-icon" title="Search">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
             </svg>
         </a>
-        <a href="index.php?controller=Home&action=bookings" class="nav-icon" title="Bookings">
+        <a href="/Kislap/index.php?controller=Home&action=bookings" class="nav-icon" title="Bookings">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/>
             </svg>
@@ -78,10 +78,10 @@ if ($user) {
 
                     <?php if ($userType === 'Worker'): ?>
                         <!-- Photographer Menu -->
-                        <a href="index.php?controller=Worker&action=profile"><i class="fas fa-user"></i> My Profile</a>
-                        <a href="index.php?controller=Worker&action=bookings"><i class="fas fa-calendar-check"></i> My Bookings</a>
-                        <a href="index.php?controller=Worker&action=manageAvailability"><i class="fas fa-calendar-alt"></i> Availability Calendar</a>
-                        <a href="reviews"><i class="fas fa-star"></i> Reviews</a>
+                        <a href="/Kislap/index.php?controller=Worker&action=profile"><i class="fas fa-user"></i> My Profile</a>
+                        <a href="/Kislap/index.php?controller=Worker&action=bookings"><i class="fas fa-calendar-check"></i> My Bookings</a>
+                        <a href="/Kislap/index.php?controller=Worker&action=manageAvailability"><i class="fas fa-calendar-alt"></i> Availability Calendar</a>
+                        <a href="/Kislap/index.php?controller=Worker&action=dashboard"><i class="fas fa-star"></i> Dashboard</a>
                         <div class="menu-divider"></div>
                         <button class="logout-btn" onclick="logout()">
                             <i class="fas fa-sign-out-alt"></i> Logout
@@ -89,9 +89,9 @@ if ($user) {
 
                     <?php else: ?>
                         <!-- Customer Menu -->
-                        <a href="index.php?controller=User&action=profile"><i class="fas fa-user"></i> My Profile</a>
-                        <a href="index.php?controller=Home&action=bookings"><i class="fas fa-calendar"></i> My Bookings</a>
-                        <a href="favorites"><i class="fas fa-heart"></i> Favorites</a>
+                        <a href="/Kislap/index.php?controller=User&action=profile"><i class="fas fa-user"></i> My Profile</a>
+                        <a href="/Kislap/index.php?controller=Home&action=bookings"><i class="fas fa-calendar"></i> My Bookings</a>
+                        <a href="/Kislap/index.php?controller=Browse&action=browse"><i class="fas fa-heart"></i> Browse Photographers</a>
                         <div class="menu-divider"></div>
                         <button class="logout-btn" onclick="logout()">
                             <i class="fas fa-sign-out-alt"></i> Logout
@@ -111,12 +111,12 @@ if ($user) {
                             </div>
                         </div>
                     </div>
-                    <a href="index.php?controller=Auth&action=login"><i class="fas fa-sign-in-alt"></i> Login</a>
-                    <a href="index.php?controller=Auth&action=SignUp"><i class="fas fa-user-plus"></i> Sign Up as Customer</a>
-                    <a href="index.php?controller=Application&action=registration"><i class="fas fa-camera"></i> Sign Up as Photographer</a>
+                    <a href="/Kislap/index.php?controller=Auth&action=login"><i class="fas fa-sign-in-alt"></i> Login</a>
+                    <a href="/Kislap/index.php?controller=Auth&action=signUp"><i class="fas fa-user-plus"></i> Sign Up as Customer</a>
+                    <a href="/Kislap/index.php?controller=Application&action=registration"><i class="fas fa-camera"></i> Sign Up as Photographer</a>
                     <div class="menu-divider"></div>
-                    <a href="about"><i class="fas fa-info-circle"></i> About Kislap</a>
-                    <a href="help"><i class="fas fa-question-circle"></i> Help Center</a>
+                    <a href="/Kislap/index.php?controller=Home&action=homePage"><i class="fas fa-info-circle"></i> About Kislap</a>
+                    <a href="/Kislap/index.php?controller=Browse&action=browse"><i class="fas fa-question-circle"></i> Browse Photographers</a>
                 <?php endif; ?>
             </div>
         </div>
@@ -142,10 +142,16 @@ if ($user) {
         }
     });
 
-    // Logout function
+    // Logout functions
     function logout() {
         if (confirm('Are you sure you want to logout?')) {
-            window.location.href = 'index.php?controller=Auth&action=logout';
+            window.location.href = '/Kislap/index.php?controller=Auth&action=logout';
+        }
+    }
+    
+    function logoutWorker() {
+        if (confirm('Are you sure you want to logout?')) {
+            window.location.href = '/Kislap/index.php?controller=Worker&action=logout';
         }
     }
 </script>

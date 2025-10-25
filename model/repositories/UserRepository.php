@@ -31,4 +31,43 @@ class UserRepository
             ':userId' => $userId
         ]);
     }
+
+    public function getUserById(int $userId): ?array
+    {
+        try {
+            $stmt = $this->conn->prepare("SELECT * FROM user WHERE user_id = ?");
+            $stmt->execute([$userId]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result ?: null;
+        } catch (Exception $e) {
+            error_log("Error fetching user by ID: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    public function findByEmail(string $email): ?array
+    {
+        try {
+            $stmt = $this->conn->prepare("SELECT * FROM user WHERE email = ?");
+            $stmt->execute([$email]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result ?: null;
+        } catch (Exception $e) {
+            error_log("Error finding user by email: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    public function findByPhoneNumber(string $phoneNumber): ?array
+    {
+        try {
+            $stmt = $this->conn->prepare("SELECT * FROM user WHERE phoneNumber = ?");
+            $stmt->execute([$phoneNumber]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result ?: null;
+        } catch (Exception $e) {
+            error_log("Error finding user by phone: " . $e->getMessage());
+            return null;
+        }
+    }
 }

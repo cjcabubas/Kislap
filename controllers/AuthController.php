@@ -2,13 +2,21 @@
 require_once __DIR__ . "/../model/User.php";
 require_once __DIR__ . "/../model/repositories/AuthRepository.php";
 
-class   AuthController
+class AuthController
 {
+    // ========================================
+    // CONSTRUCTOR
+    // ========================================
+    
     public function __construct()
     {
         $this->repo = new AuthRepository();
     }
 
+    // ========================================
+    // VIEW METHODS
+    // ========================================
+    
     public function signUp(): void
     {
         require "views/user/signup.php";
@@ -19,47 +27,68 @@ class   AuthController
         require "views/user/login.php";
     }
 
+    // ========================================
+    // USER REGISTRATION
+    // ========================================
+    
     public function signUpDB(): void
     {
-        // Show the form on GET
         if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             require "views/user/signup.php";
             return;
         }
-
-        // Handle form submit on POST
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $user = new User(
-                $_POST['lastName'] ?? null,
-                $_POST['firstName'] ?? null,
-                $_POST['middleName'] ?? null,
-                $_POST['email'] ?? null,
-                $_POST['phoneNumber'] ?? null,
-                password_hash($_POST['password'] ?? '', PASSWORD_BCRYPT),
-                $_POST['address'] ?? null
-            );
-
+            require_once __DIR__ . '/../model/Validator.php';
+            
             if (session_status() === PHP_SESSION_NONE) {
                 session_start();
             }
 
+            $validation = Validator::validateUserRegistration($_POST);
+            
+            if (!$validation['valid']) {
+                $_SESSION['notification'] = [
+                    'type' => 'error',
+                    'message' => 'Please fix the following errors: ' . implode(', ', $validation['errors'])
+                ];
+                $_SESSION['form_data'] = $_POST;
+                header("Location: index.php?controller=Auth&action=signUp");
+                exit;
+            }
+
+            $userData = $validation['data'];
+            
             try {
-                // Check for duplicates
-                $existingUser = $this->repo->findByEmailOrPhone($user->getEmail(), $user->getPhoneNumber());
+                $existingUser = $this->repo->findByEmailOrPhone($userData['email'], $userData['phoneNumber']);
                 if ($existingUser) {
                     $_SESSION['notification'] = [
                         'type' => 'error',
                         'message' => 'Account with that email or phone number already exists.'
                     ];
+                    $_SESSION['form_data'] = $_POST;
                     header("Location: index.php?controller=Auth&action=signUp");
                     exit;
                 }
 
-                // Save main info
+                $userData['password'] = password_hash($userData['password'], PASSWORD_BCRYPT);
+                
+                $user = new User(
+                    $userData['lastName'],
+                    $userData['firstName'],
+                    $userData['middleName'],
+                    $userData['email'],
+                    $userData['phoneNumber'],
+                    $userData['password'],
+                    $userData['address']
+                );
+
                 $this->repo->signUp($user->toArray());
+                
+                unset($_SESSION['form_data']);
+                
                 $_SESSION['notification'] = [
                     'type' => 'success',
-                    'message' => 'Account created successfully!'
+                    'message' => 'Account created successfully! You can now log in.'
                 ];
                 header("Location: index.php?controller=Auth&action=login");
                 exit;
@@ -67,34 +96,71 @@ class   AuthController
             } catch (Exception $e) {
                 $_SESSION['notification'] = [
                     'type' => 'error',
-                    'message' => 'Error: ' . $e->getMessage()
+                    'message' => 'Error creating account: ' . $e->getMessage()
                 ];
+                $_SESSION['form_data'] = $_POST;
                 header("Location: index.php?controller=Auth&action=signUp");
                 exit;
             }
         }
     }
 
+    // ========================================
+    // USER LOGIN
+    // ========================================
+    
     public function loginDB(): void
     {
-        // Show the form on GET
         if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             require "views/user/login.php";
             return;
         }
 
-        // Handle form submit on POST
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $identifier = $_POST['identifier'] ?? null;
-            $password = $_POST['password'] ?? null;
+            require_once __DIR__ . '/../model/Validator.php';
+            
+            $identifier = trim($_POST['identifier'] ?? '');
+            $password = $_POST['password'] ?? '';
 
             if (session_status() === PHP_SESSION_NONE) {
                 session_start();
             }
 
+            if (empty($identifier) || empty($password)) {
+                $_SESSION['notification'] = [
+                    'type' => 'error',
+                    'message' => 'Please enter both email/phone and password.'
+                ];
+                header("Location: index.php?controller=Auth&action=login");
+                exit;
+            }
+
+            $isEmail = strpos($identifier, '@') !== false;
+            if ($isEmail) {
+                $emailValidation = Validator::validateEmail($identifier);
+                if (!$emailValidation['valid']) {
+                    $_SESSION['notification'] = [
+                        'type' => 'error',
+                        'message' => $emailValidation['message']
+                    ];
+                    header("Location: index.php?controller=Auth&action=login");
+                    exit;
+                }
+            } else {
+                $phoneValidation = Validator::validatePhoneNumber($identifier);
+                if (!$phoneValidation['valid']) {
+                    $_SESSION['notification'] = [
+                        'type' => 'error',
+                        'message' => $phoneValidation['message']
+                    ];
+                    header("Location: index.php?controller=Auth&action=login");
+                    exit;
+                }
+            }
+
             try {
-                if (strpos($identifier, '@') !== false) {
-                    $user = $this->repo->findByEmail($identifier);
+                if ($isEmail) {
+                    $user = $this->repo->findByEmail(strtolower($identifier));
                 } else {
                     $user = $this->repo->findByphoneNumber($identifier);
                 }
@@ -102,7 +168,7 @@ class   AuthController
                 if (!$user) {
                     $_SESSION['notification'] = [
                         'type' => 'error',
-                        'message' => 'No user with that email or phone number found.'
+                        'message' => 'No account found with that email or phone number.'
                     ];
                     header("Location: index.php?controller=Auth&action=login");
                     exit;
@@ -111,7 +177,7 @@ class   AuthController
                 if (!password_verify($password, $user['password'])) {
                     $_SESSION['notification'] = [
                         'type' => 'error',
-                        'message' => 'Wrong password.'
+                        'message' => 'Incorrect password. Please try again.'
                     ];
                     header("Location: index.php?controller=Auth&action=login");
                     exit;
@@ -130,15 +196,16 @@ class   AuthController
                     'profilePhotoUrl'=> $user['profilePhotoUrl'],
                     'createdAt'      => $user['createdAt'],
                     'role'           => 'user'
-
-
                 ];
+                
                 header("Location: index.php?controller=Home&action=homePage");
                 exit;
+                
             } catch (Exception $e) {
+                error_log("Login error: " . $e->getMessage());
                 $_SESSION['notification'] = [
                     'type' => 'error',
-                    'message' => 'Error: ' . $e->getMessage()
+                    'message' => 'Login failed. Please try again.'
                 ];
                 header("Location: index.php?controller=Auth&action=login");
                 exit;
@@ -146,6 +213,10 @@ class   AuthController
         }
     }
 
+    // ========================================
+    // LOGOUT
+    // ========================================
+    
     public function logout() {
         session_start();
         session_unset();

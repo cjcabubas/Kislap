@@ -16,7 +16,9 @@ $totalBookings = count($bookings);
 $totalAmount = 0;
 
 foreach ($bookings as $booking) {
-    $totalAmount += $booking['price'] ?? 0;
+    // Use final_price if available, otherwise use budget or package_price
+    $price = $booking['final_price'] ?? $booking['budget'] ?? $booking['package_price'] ?? 0;
+    $totalAmount += $price;
 }
 ?>
 
@@ -55,19 +57,29 @@ foreach ($bookings as $booking) {
 
     <!-- Filter Tabs -->
     <div class="filter-tabs">
-        <button class="tab-btn active" data-status="all">
+        <?php $currentStatus = $_GET['status'] ?? 'all'; ?>
+        <button class="tab-btn <?php echo $currentStatus === 'all' || !$currentStatus ? 'active' : ''; ?>" 
+                onclick="filterBookings('')">
             <i class="fas fa-list"></i> All Bookings
         </button>
-        <button class="tab-btn" data-status="pending">
+        <button class="tab-btn <?php echo in_array($currentStatus, ['pending_details', 'pending_worker', 'collecting_info']) ? 'active' : ''; ?>" 
+                onclick="filterBookings('pending')">
             <i class="fas fa-clock"></i> Pending
         </button>
-        <button class="tab-btn" data-status="confirmed">
+        <button class="tab-btn <?php echo $currentStatus === 'negotiating' ? 'active' : ''; ?>" 
+                onclick="filterBookings('negotiating')">
+            <i class="fas fa-handshake"></i> Negotiating
+        </button>
+        <button class="tab-btn <?php echo $currentStatus === 'confirmed' ? 'active' : ''; ?>" 
+                onclick="filterBookings('confirmed')">
             <i class="fas fa-check-circle"></i> Confirmed
         </button>
-        <button class="tab-btn" data-status="completed">
+        <button class="tab-btn <?php echo in_array($currentStatus, ['completed', 'rated']) ? 'active' : ''; ?>" 
+                onclick="filterBookings('completed')">
             <i class="fas fa-star"></i> Completed
         </button>
-        <button class="tab-btn" data-status="cancelled">
+        <button class="tab-btn <?php echo $currentStatus === 'cancelled' ? 'active' : ''; ?>" 
+                onclick="filterBookings('cancelled')">
             <i class="fas fa-times-circle"></i> Cancelled
         </button>
     </div>
@@ -88,26 +100,58 @@ foreach ($bookings as $booking) {
             <?php else: ?>
                 <?php foreach ($bookings as $booking): ?>
                     <?php
-                    $bookingId = $booking['booking_id'] ?? 0;
+                    $conversationId = $booking['conversation_id'] ?? 0;
                     $photographerName = $booking['photographer_name'] ?? 'Unknown Photographer';
-                    $photographerAvatar = $booking['photographer_avatar'] ?? '';
-                    $serviceType = $booking['service_type'] ?? 'Photography Session';
-                    $bookingDate = $booking['booking_date'] ?? '';
-                    $bookingTime = $booking['booking_time'] ?? '';
-                    $duration = $booking['duration'] ?? 0;
-                    $location = $booking['location'] ?? 'Not specified';
-                    $price = $booking['price'] ?? 0;
-                    $status = $booking['status'] ?? 'pending';
-                    $notes = $booking['notes'] ?? '';
+                    $photographerAvatar = $booking['photographer_photo'] ?? '';
+                    $serviceType = $booking['event_type'] ?? 'Photography Session';
+                    $bookingDate = $booking['event_date'] ?? '';
+                    $bookingTime = $booking['event_time'] ?? '';
+                    $duration = $booking['duration'] ?? 'Not specified';
+                    $location = $booking['event_location'] ?? 'Not specified';
+                    $price = $booking['final_price'] ?? $booking['budget'] ?? $booking['package_price'] ?? 0;
+                    $status = $booking['booking_status'] ?? 'pending';
+                    $notes = $booking['special_requests'] ?? '';
                     $createdAt = $booking['created_at'] ?? '';
+                    $packageName = $booking['package_name'] ?? null;
+                    $photographerSpecialty = $booking['photographer_specialty'] ?? '';
+
+                    // Map database status to display status
+                    $displayStatus = $status;
+                    switch($status) {
+                        case 'collecting_info':
+                        case 'pending_details':
+                            $displayStatus = 'pending';
+                            break;
+                        case 'pending_worker':
+                        case 'pending_confirmation':
+                            $displayStatus = 'pending';
+                            break;
+                        case 'negotiating':
+                            $displayStatus = 'negotiating';
+                            break;
+                        case 'confirmed':
+                            $displayStatus = 'confirmed';
+                            break;
+                        case 'completed':
+                        case 'rated':
+                            $displayStatus = 'completed';
+                            break;
+                        case 'cancelled':
+                            $displayStatus = 'cancelled';
+                            break;
+                    }
 
                     // Status styling
                     $statusClass = '';
                     $statusIcon = '';
-                    switch($status) {
+                    switch($displayStatus) {
                         case 'pending':
                             $statusClass = 'status-pending';
                             $statusIcon = 'fa-clock';
+                            break;
+                        case 'negotiating':
+                            $statusClass = 'status-negotiating';
+                            $statusIcon = 'fa-handshake';
                             break;
                         case 'confirmed':
                             $statusClass = 'status-confirmed';
@@ -123,7 +167,7 @@ foreach ($bookings as $booking) {
                             break;
                     }
                     ?>
-                    <div class="booking-card" data-status="<?php echo $status; ?>">
+                    <div class="booking-card" data-status="<?php echo $displayStatus; ?>">
                         <div class="booking-header">
                             <div class="photographer-info">
                                 <div class="photographer-avatar">
@@ -135,12 +179,12 @@ foreach ($bookings as $booking) {
                                 </div>
                                 <div class="photographer-details">
                                     <h3><?php echo htmlspecialchars($photographerName); ?></h3>
-                                    <p class="service-type"><?php echo htmlspecialchars($serviceType); ?></p>
+                                    <p class="service-type"><?php echo htmlspecialchars($photographerSpecialty ? ucwords(str_replace('_', ' ', $photographerSpecialty)) : $serviceType); ?></p>
                                 </div>
                             </div>
                             <div class="booking-status <?php echo $statusClass; ?>">
                                 <i class="fas <?php echo $statusIcon; ?>"></i>
-                                <span><?php echo ucfirst($status); ?></span>
+                                <span><?php echo ucfirst($displayStatus); ?></span>
                             </div>
                         </div>
 
@@ -185,35 +229,128 @@ foreach ($bookings as $booking) {
                             </div>
                         <?php endif; ?>
 
+                        <!-- Show photographer's proposal if exists -->
+                        <?php if ($status === 'negotiating' && (!empty($booking['worker_proposed_price']) || !empty($booking['worker_proposed_date']))): ?>
+                            <div class="proposal-section">
+                                <div class="proposal-header">
+                                    <i class="fas fa-handshake"></i>
+                                    <h4>Photographer's Proposal</h4>
+                                </div>
+                                <div class="proposal-content">
+                                    <?php if (!empty($booking['worker_proposed_price'])): ?>
+                                        <div class="proposal-item">
+                                            <span class="proposal-label">Proposed Price:</span>
+                                            <span class="proposal-value price">₱<?php echo number_format($booking['worker_proposed_price'], 2); ?></span>
+                                        </div>
+                                    <?php endif; ?>
+                                    <?php if (!empty($booking['worker_proposed_date'])): ?>
+                                        <div class="proposal-item">
+                                            <span class="proposal-label">Proposed Date:</span>
+                                            <span class="proposal-value"><?php echo date('M d, Y', strtotime($booking['worker_proposed_date'])); ?></span>
+                                        </div>
+                                    <?php endif; ?>
+                                    <?php if (!empty($booking['worker_proposed_time'])): ?>
+                                        <div class="proposal-item">
+                                            <span class="proposal-label">Proposed Time:</span>
+                                            <span class="proposal-value"><?php echo date('h:i A', strtotime($booking['worker_proposed_time'])); ?></span>
+                                        </div>
+                                    <?php endif; ?>
+                                    <?php if (!empty($booking['worker_notes'])): ?>
+                                        <div class="proposal-item full-width">
+                                            <span class="proposal-label">Notes:</span>
+                                            <span class="proposal-value"><?php echo nl2br(htmlspecialchars($booking['worker_notes'])); ?></span>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+
                         <div class="booking-footer">
                             <div class="booking-price">
                                 <span class="price-label">Total Price</span>
                                 <span class="price-amount">₱<?php echo number_format($price, 2); ?></span>
                             </div>
                             <div class="booking-actions">
-                                <?php if ($status === 'pending'): ?>
-                                    <button class="btn-action btn-cancel" onclick="cancelBooking(<?php echo $bookingId; ?>)">
-                                        <i class="fas fa-times"></i> Cancel
+                                <?php if ($packageName): ?>
+                                    <div class="package-info">
+                                        <i class="fas fa-box"></i>
+                                        <span>Package: <?php echo htmlspecialchars($packageName); ?></span>
+                                    </div>
+                                <?php endif; ?>
+                                
+                                <!-- Actions based on booking status -->
+                                <?php if ($status === 'collecting_info' || $status === 'pending_details'): ?>
+                                    <button class="btn-action btn-edit" onclick="editBookingDetails(<?php echo $conversationId; ?>)">
+                                        <i class="fas fa-edit"></i> Complete Details
                                     </button>
-                                    <button class="btn-action btn-message" onclick="messagePhotographer(<?php echo $booking['photographer_id'] ?? 0; ?>)">
+                                    <button class="btn-action btn-message" onclick="openConversation(<?php echo $conversationId; ?>)">
                                         <i class="fas fa-comment"></i> Message
                                     </button>
+                                    <button class="btn-action btn-cancel" onclick="cancelBooking(<?php echo $conversationId; ?>)">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </button>
+                                
+                                <?php elseif ($status === 'pending_worker'): ?>
+                                    <button class="btn-action btn-message" onclick="openConversation(<?php echo $conversationId; ?>)">
+                                        <i class="fas fa-comment"></i> Message
+                                    </button>
+                                    <button class="btn-action btn-edit" onclick="editBookingDetails(<?php echo $conversationId; ?>)">
+                                        <i class="fas fa-edit"></i> Edit Details
+                                    </button>
+                                    <button class="btn-action btn-cancel" onclick="cancelBooking(<?php echo $conversationId; ?>)">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </button>
+                                
+                                <?php elseif ($status === 'negotiating'): ?>
+                                    <?php 
+                                    // Check if photographer proposed something
+                                    $hasProposal = !empty($booking['worker_proposed_price']) || !empty($booking['worker_proposed_date']);
+                                    ?>
+                                    <?php if ($hasProposal): ?>
+                                        <button class="btn-action btn-accept" onclick="acceptProposal(<?php echo $conversationId; ?>)">
+                                            <i class="fas fa-check"></i> Accept Proposal
+                                        </button>
+                                        <button class="btn-action btn-reject" onclick="rejectProposal(<?php echo $conversationId; ?>)">
+                                            <i class="fas fa-times"></i> Reject Proposal
+                                        </button>
+                                    <?php endif; ?>
+                                    <button class="btn-action btn-message" onclick="openConversation(<?php echo $conversationId; ?>)">
+                                        <i class="fas fa-comment"></i> Message
+                                    </button>
+                                    <button class="btn-action btn-cancel" onclick="cancelBooking(<?php echo $conversationId; ?>)">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </button>
+                                
                                 <?php elseif ($status === 'confirmed'): ?>
-                                    <button class="btn-action btn-cancel" onclick="cancelBooking(<?php echo $bookingId; ?>)">
-                                        <i class="fas fa-times"></i> Cancel
-                                    </button>
-                                    <button class="btn-action btn-message" onclick="messagePhotographer(<?php echo $booking['photographer_id'] ?? 0; ?>)">
+                                    <button class="btn-action btn-message" onclick="openConversation(<?php echo $conversationId; ?>)">
                                         <i class="fas fa-comment"></i> Message
                                     </button>
-                                    <button class="btn-action btn-details">
-                                        <i class="fas fa-info-circle"></i> Details
+                                    <button class="btn-action btn-details" onclick="showBookingDetails(<?php echo htmlspecialchars(json_encode($booking)); ?>)">
+                                        <i class="fas fa-info-circle"></i> View Details
                                     </button>
-                                <?php elseif ($status === 'completed'): ?>
-                                    <button class="btn-action btn-review">
-                                        <i class="fas fa-star"></i> Leave Review
+                                    <button class="btn-action btn-edit" onclick="editBookingDetails(<?php echo $conversationId; ?>)">
+                                        <i class="fas fa-edit"></i> Edit Details
                                     </button>
-                                    <button class="btn-action btn-rebook">
+                                
+                                <?php elseif ($status === 'completed' || $status === 'rated'): ?>
+                                    <button class="btn-action btn-message" onclick="openConversation(<?php echo $conversationId; ?>)">
+                                        <i class="fas fa-comment"></i> Message
+                                    </button>
+                                    <button class="btn-action btn-details" onclick="showBookingDetails(<?php echo htmlspecialchars(json_encode($booking)); ?>)">
+                                        <i class="fas fa-info-circle"></i> View Details
+                                    </button>
+                                    <button class="btn-action btn-rebook" onclick="bookAgain(<?php echo $booking['worker_id']; ?>)">
                                         <i class="fas fa-redo"></i> Book Again
+                                    </button>
+                                
+                                <?php else: ?>
+                                    <button class="btn-action btn-message" onclick="openConversation(<?php echo $conversationId; ?>)">
+                                        <i class="fas fa-comment"></i> Message
+                                    </button>
+                                    <button class="btn-action btn-details" onclick="showBookingDetails(<?php echo htmlspecialchars(json_encode($booking)); ?>)">
+                                        <i class="fas fa-info-circle"></i> View Details
+                                    </button>
+                                <?php endif; ?>
                                     </button>
                                 <?php endif; ?>
                             </div>
@@ -319,28 +456,209 @@ foreach ($bookings as $booking) {
 </div>
 
 <script>
-    // Filter tabs functionality
-    const tabButtons = document.querySelectorAll('.tab-btn');
-    const bookingCards = document.querySelectorAll('.booking-card');
+    // Filter bookings by status
+    function filterBookings(status) {
+        const url = new URL(window.location.href);
+        if (status) {
+            url.searchParams.set('status', status);
+        } else {
+            url.searchParams.delete('status');
+        }
+        window.location.href = url.toString();
+    }
 
-    tabButtons.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const status = this.getAttribute('data-status');
+    // Booking action functions
+    function openConversation(conversationId) {
+        window.location.href = `?controller=Chat&action=view&conversation_id=${conversationId}`;
+    }
 
-            // Update active tab
-            tabButtons.forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
+    function bookAgain(workerId) {
+        window.location.href = `?controller=Chat&action=startBooking&worker_id=${workerId}`;
+    }
 
-            // Filter bookings
-            bookingCards.forEach(card => {
-                if (status === 'all' || card.getAttribute('data-status') === status) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
+    function editBookingDetails(conversationId) {
+        // Redirect to chat to edit details
+        window.location.href = `?controller=Chat&action=view&conversation_id=${conversationId}&edit=true`;
+    }
+
+    async function acceptProposal(conversationId) {
+        if (!confirm('Accept the photographer\'s proposal?')) return;
+        
+        try {
+            const response = await fetch('?controller=Chat&action=acceptProposal', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `conversation_id=${conversationId}`
             });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showNotification('success', 'Proposal accepted! Booking confirmed.');
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                showNotification('error', result.error || 'Failed to accept proposal');
+            }
+        } catch (error) {
+            console.error('Error accepting proposal:', error);
+            showNotification('error', 'Failed to accept proposal');
+        }
+    }
+
+    async function rejectProposal(conversationId) {
+        const reason = prompt('Please provide a reason for rejecting (optional):');
+        if (reason === null) return; // User cancelled
+        
+        try {
+            const response = await fetch('?controller=Chat&action=rejectProposal', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `conversation_id=${conversationId}&reason=${encodeURIComponent(reason)}`
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showNotification('success', 'Proposal rejected. You can continue negotiating.');
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                showNotification('error', result.error || 'Failed to reject proposal');
+            }
+        } catch (error) {
+            console.error('Error rejecting proposal:', error);
+            showNotification('error', 'Failed to reject proposal');
+        }
+    }
+
+    async function cancelBooking(conversationId) {
+        const reason = prompt('Please provide a reason for cancellation:');
+        if (!reason) return;
+        
+        if (!confirm('Are you sure you want to cancel this booking? This action cannot be undone.')) return;
+        
+        try {
+            const response = await fetch('?controller=Chat&action=cancelBooking', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `conversation_id=${conversationId}&reason=${encodeURIComponent(reason)}`
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showNotification('success', 'Booking cancelled successfully.');
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                showNotification('error', result.error || 'Failed to cancel booking');
+            }
+        } catch (error) {
+            console.error('Error cancelling booking:', error);
+            showNotification('error', 'Failed to cancel booking');
+        }
+    }
+
+    function showBookingDetails(booking) {
+        // Create and show booking details modal
+        const modal = document.createElement('div');
+        modal.className = 'booking-details-modal';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Booking Details</h3>
+                    <button class="close-btn" onclick="this.parentElement.parentElement.parentElement.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <strong>Photographer:</strong>
+                            <span>${booking.photographer_name}</span>
+                        </div>
+                        <div class="detail-item">
+                            <strong>Event Type:</strong>
+                            <span>${booking.event_type || 'Not specified'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <strong>Date:</strong>
+                            <span>${booking.event_date ? new Date(booking.event_date).toLocaleDateString() : 'TBD'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <strong>Time:</strong>
+                            <span>${booking.event_time || 'TBD'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <strong>Location:</strong>
+                            <span>${booking.event_location || 'Not specified'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <strong>Duration:</strong>
+                            <span>${booking.duration || 'Not specified'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <strong>Budget:</strong>
+                            <span>₱${parseFloat(booking.budget || 0).toLocaleString()}</span>
+                        </div>
+                        ${booking.final_price ? `
+                        <div class="detail-item">
+                            <strong>Final Price:</strong>
+                            <span>₱${parseFloat(booking.final_price).toLocaleString()}</span>
+                        </div>
+                        ` : ''}
+                        ${booking.special_requests ? `
+                        <div class="detail-item full-width">
+                            <strong>Special Requests:</strong>
+                            <span>${booking.special_requests}</span>
+                        </div>
+                        ` : ''}
+                        ${booking.worker_notes ? `
+                        <div class="detail-item full-width">
+                            <strong>Photographer Notes:</strong>
+                            <span>${booking.worker_notes}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-action btn-message" onclick="openConversation(${booking.conversation_id})">
+                        <i class="fas fa-comment"></i> Open Chat
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Close modal when clicking outside
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                modal.remove();
+            }
         });
-    });
+    }
+
+    // Notification system
+    function showNotification(type, message) {
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.innerHTML = `
+            <div class="notification-content">
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                <span>${message}</span>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 100);
+        
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
 
 </script>
 </body>

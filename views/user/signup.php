@@ -25,44 +25,75 @@ if (session_status() === PHP_SESSION_NONE) {
         <?php unset($_SESSION['notification']); ?>
     <?php endif; ?>
 
+<?php 
+$formData = $_SESSION['form_data'] ?? [];
+unset($_SESSION['form_data']);
+?>
+
 <form class="form" method="POST" action="index.php?controller=Auth&action=signUpDB">
     <div class="fullname">
         <div class="form-group">
-            <label for="lastName">Last Name</label>
-            <input id="lastName" name="lastName" type="text" required placeholder="Enter your Last Name">
+            <label for="lastName">Last Name <span class="required">*</span></label>
+            <input id="lastName" name="lastName" type="text" required 
+                   placeholder="Enter your Last Name" 
+                   pattern="[a-zA-Z\s\-\'\.]{2,50}"
+                   title="Name must be 2-50 characters, letters only"
+                   value="<?php echo htmlspecialchars($formData['lastName'] ?? ''); ?>">
         </div>
 
         <div class="form-group">
-            <label for="firstName">First Name</label>
-            <input id="firstName" name="firstName" type="text" required placeholder="Enter your First Name">
+            <label for="firstName">First Name <span class="required">*</span></label>
+            <input id="firstName" name="firstName" type="text" required 
+                   placeholder="Enter your First Name"
+                   pattern="[a-zA-Z\s\-\'\.]{2,50}"
+                   title="Name must be 2-50 characters, letters only"
+                   value="<?php echo htmlspecialchars($formData['firstName'] ?? ''); ?>">
         </div>
 
         <div class="form-group">
             <label for="middleName">Middle Name</label>
-            <input id="middleName" name="middleName" type="text" required placeholder="Enter your Middle Name">
+            <input id="middleName" name="middleName" type="text" 
+                   placeholder="Enter your Middle Name (Optional)"
+                   pattern="[a-zA-Z\s\-\'\.]{2,50}"
+                   title="Name must be 2-50 characters, letters only"
+                   value="<?php echo htmlspecialchars($formData['middleName'] ?? ''); ?>">
         </div>
     </div>
 
     <div class="form-group">
-        <label for="phoneNumber">Phone Number</label>
+        <label for="phoneNumber">Phone Number <span class="required">*</span></label>
         <input id="phoneNumber" type="tel" name="phoneNumber" required
-               placeholder="Enter Your Phone Number ex. 09XXXXXXXXX">
+               placeholder="09XXXXXXXXX (Philippine mobile number)"
+               pattern="^(09[0-9]{9}|639[0-9]{9}|\+639[0-9]{9})$"
+               title="Enter a valid Philippine phone number (e.g., 09123456789)"
+               value="<?php echo htmlspecialchars($formData['phoneNumber'] ?? ''); ?>">
     </div>
 
     <div class="form-group">
-        <label for="email">Email</label>
-        <input id="email" type="email" name="email" required placeholder="example@example.com">
+        <label for="email">Email Address <span class="required">*</span></label>
+        <input id="email" type="email" name="email" required 
+               placeholder="user@example.com"
+               title="Enter a valid email address"
+               value="<?php echo htmlspecialchars($formData['email'] ?? ''); ?>">
     </div>
 
     <div class="form-group">
-        <label for="address">Address</label>
+        <label for="address">Complete Address <span class="required">*</span></label>
         <input id="address" type="text" name="address" required
-               placeholder="123 Example District, Example City, Example, 1234">
+               placeholder="House No., Street, Barangay, City, Province"
+               minlength="10" maxlength="255"
+               title="Enter your complete address (at least 10 characters)"
+               value="<?php echo htmlspecialchars($formData['address'] ?? ''); ?>">
     </div>
 
     <div class="form-group">
-        <label for="password">Password</label>
-        <input id="password" type="password" name="password" required placeholder="Enter your Password">
+        <label for="password">Password <span class="required">*</span></label>
+        <input id="password" type="password" name="password" required 
+               placeholder="Enter a strong password"
+               minlength="8" maxlength="128"
+               pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':&quot;\\|,.<>\/?]).{8,}$"
+               title="Password must be at least 8 characters with uppercase, lowercase, number, and special character">
+        <small class="form-help">Password must contain: uppercase, lowercase, number, and special character</small>
     </div>
 
     <button type="submit">Sign Up</button>

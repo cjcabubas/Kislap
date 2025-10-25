@@ -1,3 +1,7 @@
+/* ========================================
+   GLOBAL STYLES
+   ======================================== */
+
 * {
     margin: 0;
     padding: 0;
@@ -16,6 +20,10 @@ body {
     margin: 0 auto;
 }
 
+/* ========================================
+   DASHBOARD HEADER
+   ======================================== */
+
 .dashboard-header {
     background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
     padding: 30px;
@@ -23,6 +31,15 @@ body {
     margin-bottom: 30px;
     box-shadow: 0 10px 30px rgba(255, 107, 0, 0.1);
     border: 1px solid #2d2d2d;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.header-content {
+    flex: 1;
 }
 
 .dashboard-header h1 {
@@ -36,6 +53,58 @@ body {
     color: #999;
     font-size: 14px;
 }
+
+.header-actions {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.btn-create-admin, .btn-logout {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: 2px solid;
+}
+
+.btn-create-admin {
+    background: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+    border-color: rgba(40, 167, 69, 0.3);
+}
+
+.btn-create-admin:hover {
+    background: #28a745;
+    color: #fff;
+    border-color: #28a745;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+}
+
+.btn-logout {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+    border-color: rgba(220, 53, 69, 0.3);
+}
+
+.btn-logout:hover {
+    background: #dc3545;
+    color: #fff;
+    border-color: #dc3545;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+}
+
+/* ========================================
+   STATISTICS GRID
+   ======================================== */
 
 .stats-grid {
     display: grid;
@@ -171,6 +240,115 @@ body {
     border: 1px solid rgba(255, 69, 0, 0.3);
 }
 
+/* ========================================
+   PLATFORM OVERVIEW
+   ======================================== */
+
+.platform-overview {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    border: 1px solid #333;
+    margin-bottom: 30px;
+}
+
+.platform-overview h2 {
+    color: #ff6b00;
+    font-size: 20px;
+    margin-bottom: 25px;
+    text-shadow: 0 0 10px rgba(255, 107, 0, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.overview-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+.overview-card {
+    background: rgba(255, 107, 0, 0.05);
+    border: 1px solid rgba(255, 107, 0, 0.2);
+    border-radius: 12px;
+    padding: 25px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: all 0.3s ease;
+}
+
+.overview-card:hover {
+    background: rgba(255, 107, 0, 0.08);
+    border-color: rgba(255, 107, 0, 0.3);
+}
+
+.overview-card.earnings {
+    border-left: 4px solid #17a2b8;
+}
+
+.overview-card.users {
+    border-left: 4px solid #6f42c1;
+}
+
+.overview-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    background: rgba(255, 107, 0, 0.1);
+    border: 2px solid rgba(255, 107, 0, 0.3);
+    flex-shrink: 0;
+}
+
+.overview-card.earnings .overview-icon {
+    color: #17a2b8;
+    border-color: rgba(23, 162, 184, 0.3);
+    background: rgba(23, 162, 184, 0.1);
+}
+
+.overview-card.users .overview-icon {
+    color: #6f42c1;
+    border-color: rgba(111, 66, 193, 0.3);
+    background: rgba(111, 66, 193, 0.1);
+}
+
+.overview-content {
+    flex: 1;
+}
+
+.overview-label {
+    color: #999;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.overview-value {
+    color: #fff;
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 5px;
+    text-shadow: 0 0 10px rgba(255, 107, 0, 0.2);
+}
+
+.overview-note {
+    color: #666;
+    font-size: 12px;
+    font-style: italic;
+}
+
+/* ========================================
+   CHART SECTION
+   ======================================== */
+
 .chart-section {
     background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
     padding: 30px;
@@ -188,7 +366,7 @@ body {
 
 .quick-stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 15px;
     margin-top: 20px;
 }
@@ -228,16 +406,126 @@ body {
     color: #fff;
 }
 
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
 @media (max-width: 768px) {
     .stats-grid {
         grid-template-columns: 1fr;
+    }
+
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 25px;
     }
 
     .dashboard-header h1 {
         font-size: 24px;
     }
 
+    .header-actions {
+        width: 100%;
+        justify-content: center;
+        margin-top: 15px;
+    }
+
+    .btn-create-admin, .btn-logout {
+        flex: 1;
+        justify-content: center;
+        min-width: 140px;
+    }
+
     .stat-number {
         font-size: 28px;
     }
+
+    .quick-stats {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 10px;
+    }
+
+    .quick-stat-item {
+        padding: 12px;
+    }
+
+    .quick-stat-item i {
+        font-size: 20px;
+    }
+
+    .quick-stat-info h4 {
+        font-size: 11px;
+    }
+
+    .quick-stat-info p {
+        font-size: 16px;
+    }
+
+    .platform-overview {
+        padding: 20px;
+    }
+
+    .platform-overview h2 {
+        font-size: 18px;
+    }
+
+    .overview-cards {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .overview-card {
+        padding: 20px;
+        gap: 15px;
+    }
+
+    .overview-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+    }
+
+    .overview-value {
+        font-size: 24px;
+    }
+
+    .overview-label {
+        font-size: 12px;
+    }
+
+    .overview-note {
+        font-size: 11px;
+    }
+}
+
+/* ========================================
+   LINK STYLING
+   ======================================== */
+
+.stats-grid a {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+
+.stats-grid a:hover,
+.stats-grid a:visited,
+.stats-grid a:focus,
+.stats-grid a:active {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Ensure stat card text colors are preserved */
+.stats-grid a .stat-content h3 {
+    color: #999;
+}
+
+.stats-grid a .stat-number {
+    color: #fff;
+}
+
+.stats-grid a .stat-icon i {
+    color: var(--card-color);
 }

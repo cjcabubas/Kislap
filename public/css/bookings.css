@@ -330,6 +330,12 @@
     border: 2px solid rgba(239, 83, 80, 0.4);
 }
 
+.status-negotiating {
+    background: linear-gradient(135deg, rgba(156, 39, 176, 0.2), rgba(156, 39, 176, 0.1));
+    color: #9c27b0;
+    border: 2px solid rgba(156, 39, 176, 0.4);
+}
+
 /* Booking Details Grid */
 .booking-details {
     display: grid;
@@ -978,5 +984,320 @@
 
     .btn-action {
         width: 100%;
+    }
+}/*
+ Booking Details Modal */
+.booking-details-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+.booking-details-modal .modal-content {
+    background: linear-gradient(135deg, rgba(20, 20, 20, 0.95) 0%, rgba(30, 30, 30, 0.95) 100%);
+    border: 2px solid rgba(255, 107, 0, 0.3);
+    border-radius: 20px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.booking-details-modal .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px;
+    border-bottom: 1px solid rgba(255, 107, 0, 0.2);
+}
+
+.booking-details-modal .modal-header h3 {
+    color: #fff;
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.booking-details-modal .close-btn {
+    background: none;
+    border: none;
+    color: #ff6b00;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.booking-details-modal .close-btn:hover {
+    background: rgba(255, 107, 0, 0.1);
+    transform: scale(1.1);
+}
+
+.booking-details-modal .modal-body {
+    padding: 24px;
+}
+
+.booking-details-modal .detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.booking-details-modal .detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.booking-details-modal .detail-item.full-width {
+    grid-column: 1 / -1;
+}
+
+.booking-details-modal .detail-item strong {
+    color: #ff6b00;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.booking-details-modal .detail-item span {
+    color: #fff;
+    font-size: 16px;
+}
+
+.booking-details-modal .modal-footer {
+    padding: 24px;
+    border-top: 1px solid rgba(255, 107, 0, 0.2);
+    display: flex;
+    justify-content: center;
+}
+
+/* Enhanced Action Buttons */
+.btn-action {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 4px;
+}
+
+.btn-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.btn-action.btn-accept {
+    background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+    color: white;
+}
+
+.btn-action.btn-reject {
+    background: linear-gradient(135deg, #f44336 0%, #ef5350 100%);
+    color: white;
+}
+
+.btn-action.btn-edit {
+    background: linear-gradient(135deg, #2196f3 0%, #42a5f5 100%);
+    color: white;
+}
+
+.btn-action.btn-cancel {
+    background: linear-gradient(135deg, #ff9800 0%, #ffb74d 100%);
+    color: white;
+}
+
+.btn-action.btn-message {
+    background: linear-gradient(135deg, #9c27b0 0%, #ba68c8 100%);
+    color: white;
+}
+
+.btn-action.btn-details {
+    background: linear-gradient(135deg, #607d8b 0%, #90a4ae 100%);
+    color: white;
+}
+
+.btn-action.btn-rebook {
+    background: linear-gradient(135deg, #ff6b00 0%, #ff8533 100%);
+    color: white;
+}
+
+/* Notification System */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, rgba(20, 20, 20, 0.95) 0%, rgba(30, 30, 30, 0.95) 100%);
+    border: 2px solid rgba(255, 107, 0, 0.3);
+    border-radius: 12px;
+    padding: 16px 20px;
+    color: white;
+    z-index: 1001;
+    transform: translateX(400px);
+    opacity: 0;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.notification.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.notification.notification-success {
+    border-color: rgba(76, 175, 80, 0.5);
+}
+
+.notification.notification-error {
+    border-color: rgba(244, 67, 54, 0.5);
+}
+
+.notification-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.notification-content i {
+    font-size: 18px;
+}
+
+.notification-success .notification-content i {
+    color: #4caf50;
+}
+
+.notification-error .notification-content i {
+    color: #f44336;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .booking-details-modal .detail-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .booking-actions {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .btn-action {
+        flex: 1;
+        min-width: 120px;
+        justify-content: center;
+    }
+    
+    .notification {
+        right: 10px;
+        left: 10px;
+        transform: translateY(-100px);
+    }
+    
+    .notification.show {
+        transform: translateY(0);
+    }
+}/
+* Proposal Section */
+.proposal-section {
+    background: linear-gradient(135deg, rgba(156, 39, 176, 0.1) 0%, rgba(156, 39, 176, 0.05) 100%);
+    border: 2px solid rgba(156, 39, 176, 0.3);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 16px 0;
+}
+
+.proposal-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    color: #9c27b0;
+}
+
+.proposal-header i {
+    font-size: 18px;
+}
+
+.proposal-header h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.proposal-content {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.proposal-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.proposal-item.full-width {
+    grid-column: 1 / -1;
+}
+
+.proposal-label {
+    font-size: 12px;
+    color: #9c27b0;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.proposal-value {
+    font-size: 14px;
+    color: #fff;
+    font-weight: 500;
+}
+
+.proposal-value.price {
+    font-size: 18px;
+    font-weight: 700;
+    color: #9c27b0;
+}
+
+/* Enhanced booking actions for proposals */
+.booking-actions .btn-accept {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+    }
+}
+
+/* Responsive proposal section */
+@media (max-width: 768px) {
+    .proposal-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .proposal-section {
+        padding: 16px;
     }
 }

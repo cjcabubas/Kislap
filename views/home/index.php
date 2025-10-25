@@ -22,7 +22,7 @@
             <p class="hero-description">
                 Round off your photography journey with opportunities that matter. Whether you're behind the lens or in front of it, our platform helps you connect, collaborate, and create lasting stories.
             </p>
-            <a href="booking" class="hero-cta">
+            <a href="/Kislap/index.php?controller=Browse&action=browse" class="hero-cta">
                 <span>Book Now</span>
                 <i class="fas fa-arrow-right"></i>
             </a>
@@ -234,7 +234,7 @@
 
             <!-- Center Button -->
             <div class="freelancer-center">
-                <a href="apply-freelancer" class="apply-btn">
+                <a href="/Kislap/index.php?controller=Application&action=registration" class="apply-btn">
                     <span>Apply Now</span>
                     <i class="fas fa-camera"></i>
                 </a>

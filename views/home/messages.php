@@ -1,27 +1,33 @@
 <?php
-// start session
+// ========================================
+// SESSION MANAGEMENT
+// ========================================
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// get logged in user
 $user = $_SESSION['user'] ?? null;
 $worker = $_SESSION['worker'] ?? null;
 
-// redirect if not logged in
 if (!$user && !$worker) {
     header("Location: /Kislap/index.php?controller=Auth&action=login");
     exit;
 }
 
-// check user type
-$userType = $user ? 'user' : 'worker';
-$senderType = $userType; // Save this before navbar overwrites it
+// ========================================
+// USER TYPE DETECTION
+// ========================================
 
-// DEBUG
+$userType = $user ? 'user' : 'worker';
+$senderType = $userType;
+
 error_log("DEBUG messages.php: user=" . ($user ? 'SET' : 'NULL') . ", worker=" . ($worker ? 'SET' : 'NULL') . ", userType=$userType, senderType=$senderType");
 
-// initialize data from controller
+// ========================================
+// DATA INITIALIZATION
+// ========================================
+
 $conversations = $conversations ?? [];
 $activeConversation = $activeConversation ?? null;
 $messages = $messages ?? [];
@@ -44,8 +50,15 @@ $tempBooking = $tempBooking ?? null;
 
 <?php require __DIR__ . '/../shared/navbar.php'; ?>
 
+<!-- ========================================
+     MESSAGES CONTAINER
+     ======================================== -->
+
 <div class="messages-container">
     <div class="messages-wrapper">
+        <!-- ========================================
+             CONVERSATIONS SIDEBAR
+             ======================================== -->
         <div class="conversations-sidebar">
             <div class="sidebar-header">
                 <h2><i class="fas fa-comments"></i> Messages</h2>
@@ -107,7 +120,7 @@ $tempBooking = $tempBooking ?? null;
                             $recipientName = $recipientInfo['name'] ?? 'User';
                             $recipientPicture = $recipientInfo['profile_picture'] ?? null;
                             if ($recipientPicture && file_exists($_SERVER['DOCUMENT_ROOT'] . $recipientPicture)):
-                            ?>
+                                ?>
                                 <img src="<?php echo htmlspecialchars($recipientPicture); ?>" alt="Profile">
                             <?php else: ?>
                                 <?php echo strtoupper(substr($recipientName, 0, 2)); ?>
@@ -146,16 +159,35 @@ $tempBooking = $tempBooking ?? null;
                     <div class="chat-actions">
                         <?php if (isset($recipientInfo['conversation_type']) && $recipientInfo['conversation_type'] === 'ai'): ?>
                             <button class="chat-action-btn" title="Talk to Human" onclick="requestHumanAgent()">
-                                <i class="fas fa-user"></i>
+                                <i class="fas fa-headset"></i>
                             </button>
                         <?php endif; ?>
-                        <button class="chat-action-btn" title="More Options"><i class="fas fa-ellipsis-v"></i></button>
+                        <?php if ($user): ?>
+                            <!-- Customer/User buttons -->
+                            <button class="chat-action-btn" title="Book Again" onclick="bookAgain(<?php echo $recipientInfo['worker_id'] ?? 0; ?>)">
+                                <i class="fas fa-calendar-plus"></i>
+                            </button>
+                            <button class="chat-action-btn" title="View Profile" onclick="viewProfile(<?php echo $recipientInfo['worker_id'] ?? 0; ?>)">
+                                <i class="fas fa-user"></i>
+                            </button>
+                            <button class="chat-action-btn" title="My Bookings" onclick="goToBookings('user')">
+                                <i class="fas fa-calendar-check"></i>
+                            </button>
+                        <?php elseif ($worker): ?>
+                            <!-- Worker buttons -->
+                            <button class="chat-action-btn" title="View Customer Profile" onclick="viewCustomerProfile(<?php echo $recipientInfo['user_id'] ?? 0; ?>)">
+                                <i class="fas fa-user"></i>
+                            </button>
+                            <button class="chat-action-btn" title="My Bookings" onclick="goToBookings('worker')">
+                                <i class="fas fa-calendar-check"></i>
+                            </button>
+                        <?php endif; ?>
                     </div>
                 </div>
 
 
                 <div class="messages-area" id="messagesArea">
-                    
+
                     <?php if (!empty($messages)): ?>
                         <?php foreach ($messages as $msg): ?>
                             <?php
@@ -164,12 +196,12 @@ $tempBooking = $tempBooking ?? null;
                             $messageText = $msg['message_text'] ?? '';
                             $attachmentPath = $msg['attachment_path'] ?? '';
                             $sentAt = $msg['sent_at'] ?? '';
-                            
+
                             // Determine if this message was sent by the current user
                             $currentUserId = $user['user_id'] ?? ($worker['worker_id'] ?? 0);
                             $currentUserType = $user ? 'user' : 'worker';
                             $isSent = ($senderId == $currentUserId && $senderType == $currentUserType);
-                            
+
                             // Determine sender name and type label
                             // AI messages have sender_id = 0 or sender_type = 'bot'/'ai'
                             if ($senderId == 0 || $senderType === 'bot' || $senderType === 'ai') {
@@ -184,25 +216,25 @@ $tempBooking = $tempBooking ?? null;
                             }
                             ?>
                             <div class="message-group <?php echo $messageClass; ?>"><?php if ($senderId == 0 || $senderType === 'bot' || $senderType === 'ai'): ?>
-                                <div class="bot-badge"><i class="fas fa-robot"></i> AI</div>
-                            <?php endif; ?>
-                                <div class="message-avatar">
-                                <?php
-                                // get sender profile pic
-                                $senderPicture = null;
-                                if ($isSent) {
-                                    $senderPicture = $user['profilePhotoUrl'] ?? $worker['profile_photo'] ?? null;
-                                } else {
-                                    $senderPicture = $recipientInfo['profile_picture'] ?? null;
-                                }
-                                
-                                if ($senderPicture && file_exists($_SERVER['DOCUMENT_ROOT'] . $senderPicture)):
-                                ?>
-                                    <img src="<?php echo htmlspecialchars($senderPicture); ?>" alt="Avatar">
-                                <?php else: ?>
-                                    <?php echo strtoupper(substr($senderName, 0, 2)); ?>
+                                    <div class="bot-badge"><i class="fas fa-robot"></i> AI</div>
                                 <?php endif; ?>
-                            </div>
+                                <div class="message-avatar">
+                                    <?php
+                                    // get sender profile pic
+                                    $senderPicture = null;
+                                    if ($isSent) {
+                                        $senderPicture = $user['profilePhotoUrl'] ?? $worker['profile_photo'] ?? null;
+                                    } else {
+                                        $senderPicture = $recipientInfo['profile_picture'] ?? null;
+                                    }
+
+                                    if ($senderPicture && file_exists($_SERVER['DOCUMENT_ROOT'] . $senderPicture)):
+                                        ?>
+                                        <img src="<?php echo htmlspecialchars($senderPicture); ?>" alt="Avatar">
+                                    <?php else: ?>
+                                        <?php echo strtoupper(substr($senderName, 0, 2)); ?>
+                                    <?php endif; ?>
+                                </div>
                                 <div class="message-content">
                                     <div class="message-bubble">
                                         <?php echo nl2br(htmlspecialchars($messageText)); ?>
@@ -220,15 +252,15 @@ $tempBooking = $tempBooking ?? null;
                             </div>
                         <?php endforeach; ?>
                     <?php endif; ?>
-                    
+
                     <?php
                     // Show negotiation proposal banner AFTER messages (only for clients, not workers)
-                    if ($user && 
-                        isset($activeConversation['booking_status']) && 
-                        $activeConversation['booking_status'] === 'negotiating' &&
-                        isset($tempBooking) && is_array($tempBooking) &&
-                        (!empty($tempBooking['worker_proposed_price']) || !empty($tempBooking['worker_proposed_date']))): 
-                    ?>
+                    if ($user &&
+                            isset($activeConversation['booking_status']) &&
+                            $activeConversation['booking_status'] === 'negotiating' &&
+                            isset($tempBooking) && is_array($tempBooking) &&
+                            (!empty($tempBooking['worker_proposed_price']) || !empty($tempBooking['worker_proposed_date']))):
+                        ?>
                         <div class="negotiation-banner">
                             <div class="banner-icon">
                                 <i class="fas fa-handshake"></i>
@@ -236,20 +268,24 @@ $tempBooking = $tempBooking ?? null;
                             <div class="banner-content">
                                 <h4>Photographer's Proposal</h4>
                                 <?php if (!empty($tempBooking['worker_proposed_price'])): ?>
-                                    <p><strong>Proposed Price:</strong> ₱<?php echo number_format($tempBooking['worker_proposed_price'], 2); ?></p>
+                                    <p><strong>Proposed Price:</strong>
+                                        ₱<?php echo number_format($tempBooking['worker_proposed_price'], 2); ?></p>
                                 <?php endif; ?>
                                 <?php if (!empty($tempBooking['worker_proposed_date'])): ?>
-                                    <p><strong>Proposed Date:</strong> <?php echo date('F d, Y', strtotime($tempBooking['worker_proposed_date'])); ?>
-                                    <?php if (!empty($tempBooking['worker_proposed_time'])): ?>
-                                        at <?php echo date('h:i A', strtotime($tempBooking['worker_proposed_time'])); ?>
-                                    <?php endif; ?>
+                                    <p><strong>Proposed
+                                            Date:</strong> <?php echo date('F d, Y', strtotime($tempBooking['worker_proposed_date'])); ?>
+                                        <?php if (!empty($tempBooking['worker_proposed_time'])): ?>
+                                            at <?php echo date('h:i A', strtotime($tempBooking['worker_proposed_time'])); ?>
+                                        <?php endif; ?>
                                     </p>
                                 <?php endif; ?>
                                 <?php if (!empty($tempBooking['worker_notes'])): ?>
-                                    <p class="proposal-notes"><em><?php echo htmlspecialchars($tempBooking['worker_notes']); ?></em></p>
+                                    <p class="proposal-notes">
+                                        <em><?php echo htmlspecialchars($tempBooking['worker_notes']); ?></em></p>
                                 <?php endif; ?>
                                 <div class="banner-actions">
-                                    <button class="btn-accept-proposal" onclick="acceptProposal(<?php echo $activeConversation['conversation_id']; ?>)">
+                                    <button class="btn-accept-proposal"
+                                            onclick="acceptProposal(<?php echo $activeConversation['conversation_id']; ?>)">
                                         <i class="fas fa-check"></i> Accept Proposal
                                     </button>
                                     <button class="btn-reject-proposal" onclick="showRejectProposalModal()">
@@ -260,6 +296,143 @@ $tempBooking = $tempBooking ?? null;
                         </div>
                     <?php endif; ?>
                 </div>
+
+                <?php
+// Check if rating repository exists and get rating status
+                $alreadyRated = false;
+                if (isset($activeConversation['conversation_id']) && file_exists(__DIR__ . '/../../model/repositories/RatingRepository.php')) {
+                    require_once __DIR__ . '/../../model/repositories/RatingRepository.php';
+                    $ratingRepo = new RatingRepository();
+                    $alreadyRated = $ratingRepo->checkIfRated($activeConversation['conversation_id']);
+                }
+                ?>
+
+                <?php
+// Check if rating repository exists and get rating status
+                $alreadyRated = false;
+                if (isset($activeConversation['conversation_id']) && file_exists(__DIR__ . '/../../model/repositories/RatingRepository.php')) {
+                    require_once __DIR__ . '/../../model/repositories/RatingRepository.php';
+                    $ratingRepo = new RatingRepository();
+                    $alreadyRated = $ratingRepo->checkIfRated($activeConversation['conversation_id']);
+                }
+                ?>
+
+                <!-- Replace the payment bubble section in messages.php with this: -->
+
+                <?php
+// 1. Show deposit payment bubble for CONFIRMED bookings (only for clients)
+                if ($user &&
+                        isset($activeConversation['booking_status']) &&
+                        $activeConversation['booking_status'] === 'confirmed' &&
+                        isset($tempBooking) && is_array($tempBooking)):
+
+                    $finalPrice = $tempBooking['final_price'] ?? $tempBooking['budget'] ?? 0;
+                    $depositAmount = $finalPrice * 0.5;
+                    $depositPaid = !empty($tempBooking['deposit_paid_at']);
+                    ?>
+                    <div class="payment-bubble-wrapper">
+                        <div class="payment-bubble <?php echo $depositPaid ? 'paid' : 'pending'; ?>"
+                             data-tooltip="<?php echo $depositPaid ? '                          Deposit Paid - Click for details' : 'Click to Pay Deposit'; ?>"
+                             onclick="<?php echo $depositPaid ? 'togglePaymentDetails(this)' : 'payDeposit(' . $activeConversation['conversation_id'] . ')'; ?>">
+                            <div class="bubble-icon">
+                                <i class="fas fa-<?php echo $depositPaid ? 'check-circle' : 'credit-card'; ?>"></i>
+                            </div>
+                        </div>
+
+                        <?php if ($depositPaid): ?>
+                            <div class="payment-details">
+                                <div class="payment-breakdown">
+                                    <div class="breakdown-row">
+                                        <span>Total Price:</span>
+                                        <strong>₱<?php echo number_format($finalPrice, 2); ?></strong>
+                                    </div>
+                                    <div class="breakdown-row success">
+                                        <span><i class="fas fa-check-circle"></i> Down Payment:</span>
+                                        <strong>₱<?php echo number_format($depositAmount, 2); ?></strong>
+                                    </div>
+                                    <div class="breakdown-row">
+                                        <span>Remaining Balance:</span>
+                                        <strong>₱<?php echo number_format($depositAmount, 2); ?></strong>
+                                    </div>
+                                    <p class="payment-info">
+                                        <i class="fas fa-info-circle"></i>
+                                        Paid
+                                        on <?php echo date('M d, Y', strtotime($tempBooking['deposit_paid_at'])); ?>
+                                        <br>Balance due after service
+                                        on <?php echo date('M d, Y', strtotime($tempBooking['event_date'])); ?>
+                                    </p>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
+
+                <?php
+// 2. Show completion payment bubble (after event date, when deposit is paid)
+                if ($user &&
+                        isset($activeConversation['booking_status']) &&
+                        $activeConversation['booking_status'] === 'confirmed' &&
+                        isset($tempBooking) &&
+                        !empty($tempBooking['deposit_paid_at']) &&
+                        !empty($tempBooking['event_date']) &&
+                        strtotime($tempBooking['event_date']) < time() &&
+                        empty($tempBooking['completed_at'])):
+
+                    $finalPrice = $tempBooking['final_price'] ?? $tempBooking['budget'] ?? 0;
+                    $remainingBalance = $finalPrice * 0.5;
+                    ?>
+                    <div class="payment-bubble-wrapper">
+                        <div class="payment-bubble pending-completion"
+                             data-tooltip="Complete Service & Pay Balance"
+                             onclick="payFullAmount(<?php echo $activeConversation['conversation_id']; ?>)">
+                            <div class="bubble-icon">
+                                <i class="fas fa-camera"></i>
+                            </div>
+                        </div>
+                        <div class="bubble-info">
+                            <span class="bubble-label">Service Complete?</span>
+                            <span class="bubble-amount">Pay ₱<?php echo number_format($remainingBalance, 2); ?></span>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
+                <?php
+// 3. Show rating bubble (when service is completed)
+                if ($user &&
+                        isset($activeConversation['booking_status']) &&
+                        $activeConversation['booking_status'] === 'completed' &&
+                        isset($tempBooking) &&
+                        !empty($tempBooking['completed_at'])):
+                    ?>
+                    <div class="payment-bubble-wrapper">
+                        <div class="payment-bubble completed <?php echo $alreadyRated ? 'rated' : ''; ?>"
+                             data-tooltip="<?php echo $alreadyRated ? 'Service Rated' : 'Click to Rate Service'; ?>"
+                             onclick="<?php echo $alreadyRated ? 'togglePaymentDetails(this)' : 'showRatingModal(' . $activeConversation['conversation_id'] . ')'; ?>">
+                            <div class="bubble-icon">
+                                <i class="fas fa-<?php echo $alreadyRated ? 'heart' : 'star'; ?>"></i>
+                            </div>
+                        </div>
+
+                        <?php if (!$alreadyRated): ?>
+                            <div class="bubble-info">
+                                <span class="bubble-label">Rate Service</span>
+                            </div>
+                        <?php else: ?>
+                            <div class="payment-details">
+                                <div class="payment-breakdown">
+                                    <p class="completion-message success">
+                                        <i class="fas fa-check-circle"></i>
+                                        Booking completed
+                                        on <?php echo date('M d, Y', strtotime($tempBooking['completed_at'])); ?>!
+                                    </p>
+                                    <p class="rating-thankyou">
+                                        <i class="fas fa-heart"></i> Thank you for your review!
+                                    </p>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
 
                 <div class="message-input-area">
                     <form id="messageForm">
@@ -294,20 +467,10 @@ $tempBooking = $tempBooking ?? null;
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // ===================================
-        //  Element References & Initial State
-        // ===================================
-        const messageForm = document.getElementById('messageForm');
-        const messageText = document.getElementById('messageText');
-        const messagesArea = document.getElementById('messagesArea');
-        const sendBtn = document.getElementById('sendBtn');
-        const fileInput = document.getElementById('fileInput');
-        const searchInput = document.getElementById('searchConversations');
-
-        // --- Get essential data from PHP ---
+        // Get essential data from PHP
         const activeConversationId = <?php echo $activeConversation['conversation_id'] ?? 'null'; ?>;
         const currentUserId = <?php echo($user['user_id'] ?? $worker['worker_id'] ?? 'null'); ?>;
-        const currentUserType = <?php echo $user ? "'user'" : "'worker'"; ?>; // Simple: if user exists, type is 'user', else 'worker'
+        const currentUserType = <?php echo $user ? "'user'" : "'worker'"; ?>;
         const recipientName = '<?php echo addslashes($recipientInfo['name'] ?? 'Recipient'); ?>';
 
         console.log('Chat initialized:', {
@@ -315,10 +478,18 @@ $tempBooking = $tempBooking ?? null;
             userId: currentUserId,
             userType: currentUserType
         });
+        const messageText = document.getElementById('messageText');
+        const messagesArea = document.getElementById('messagesArea');
+        const sendBtn = document.getElementById('sendBtn');
+        const fileInput = document.getElementById('fileInput');
+        const searchInput = document.getElementById('searchConversations');
 
-        // --- Initial UI setup ---
+        const displayedMessageIds = new Set();
+        let isSubmitting = false;
+        let lastMessageId = <?php echo !empty($messages) ? end($messages)['message_id'] : 0; ?>;
+
+        // Scroll to bottom on page load
         if (messagesArea) {
-            // Use setTimeout to ensure DOM is fully rendered before scrolling
             setTimeout(() => {
                 messagesArea.scrollTop = messagesArea.scrollHeight;
             }, 100);
@@ -331,29 +502,23 @@ $tempBooking = $tempBooking ?? null;
                 this.style.height = `${Math.min(this.scrollHeight, 120)}px`;
             });
 
-            // Enter key to send
+            // Enter key to send (Shift+Enter for new line)
             messageText.addEventListener('keydown', function (e) {
                 if (e.key === 'Enter' && !e.shiftKey) {
-                    console.log('Enter key pressed at:', new Date().toISOString());
                     e.preventDefault();
                     window.sendMessage();
                 }
             });
         }
 
-        // ===================================
-        //  Send Message Function
-        // ===================================
-        let isSubmitting = false;
-        const displayedMessageIds = new Set();
-        
-        window.sendMessage = async function() {
-            console.log('sendMessage called at:', new Date().toISOString());
-            console.log('Call stack:', new Error().stack);
-            
+        // ========================================
+        // SEND MESSAGE
+        // ========================================
+
+        window.sendMessage = async function () {
             // Prevent double submissions
             if (isSubmitting) {
-                console.log('Already submitting, ignoring duplicate submission');
+                console.log('Already submitting, ignoring');
                 return;
             }
 
@@ -361,7 +526,6 @@ $tempBooking = $tempBooking ?? null;
             const file = fileInput.files[0];
 
             if (!message && !file) {
-                console.log('Empty message, not sending');
                 return;
             }
 
@@ -371,11 +535,9 @@ $tempBooking = $tempBooking ?? null;
             }
 
             isSubmitting = true;
-            console.log('Sending message:', message);
             sendBtn.disabled = true;
             sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
-            // Use FormData to handle files and text
             const formData = new FormData();
             formData.append('conversation_id', activeConversationId);
             formData.append('message', message);
@@ -384,42 +546,30 @@ $tempBooking = $tempBooking ?? null;
             }
 
             try {
-                // Make sure URL is correct
-                const url = '?controller=Chat&action=sendMessage';
-                console.log('Posting to:', url);
-
-                const response = await fetch(url, {
+                const response = await fetch('?controller=Chat&action=sendMessage', {
                     method: 'POST',
                     body: formData,
-                    credentials: 'same-origin' // Include session cookies
+                    credentials: 'same-origin'
                 });
 
-                console.log('Response status:', response.status);
-
                 if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error('Server error:', errorText);
-                    throw new Error(`Server responded with ${response.status}: ${errorText}`);
+                    throw new Error(`Server error: ${response.status}`);
                 }
 
                 const result = await response.json();
-                console.log('Server response:', result);
 
                 if (result.success) {
                     // Display user's message
                     if (result.message) {
-                        console.log('Attempting to display user message:', result.message);
                         displayMessage(result.message);
-                    } else {
-                        console.log('No message in response!');
                     }
 
-                    // Display bot's responses (if any)
+                    // Display bot responses (if any)
                     if (result.botMessages && result.botMessages.length > 0) {
                         result.botMessages.forEach((botMsg, index) => {
                             setTimeout(() => {
                                 displayMessage(botMsg);
-                            }, index * 500); // Stagger bot responses
+                            }, index * 500);
                         });
                     }
 
@@ -435,13 +585,12 @@ $tempBooking = $tempBooking ?? null;
                     fileInput.value = '';
                     messageText.style.height = 'auto';
                 } else {
-                    console.error('Failed to send message:', result.error);
                     alert('Error: ' + (result.error || 'Could not send message'));
                 }
 
             } catch (error) {
                 console.error('Network error:', error);
-                alert('A network error occurred. Please check the console and try again.\n\nError: ' + error.message);
+                alert('Network error. Please try again.');
             } finally {
                 isSubmitting = false;
                 sendBtn.disabled = false;
@@ -449,58 +598,24 @@ $tempBooking = $tempBooking ?? null;
             }
         };
 
-        // Form submission handler - DISABLED to prevent double submission
-        // The form submit event was causing double calls even with preventDefault
-        // Now we only use direct function calls from button and Enter key
-        /*
-        if (messageForm) {
-            messageForm.addEventListener('submit', function(event) {
-                console.log('Form submit event triggered at:', new Date().toISOString());
-                event.preventDefault();
-                window.sendMessage();
-            });
-        }
-        */
+        // ========================================
+        // DISPLAY MESSAGE
+        // ========================================
 
-        // ===================================
-        //  Conversation Search
-        // ===================================
-        if (searchInput) {
-            searchInput.addEventListener('input', function () {
-                const searchTerm = this.value.toLowerCase();
-                const conversations = document.querySelectorAll('.conversation-item');
-
-                conversations.forEach(conv => {
-                    const name = conv.querySelector('.conversation-name')?.textContent.toLowerCase() || '';
-                    conv.style.display = name.includes(searchTerm) ? '' : 'none';
-                });
-            });
-        }
-
-        // ===================================
-        //  Display Message Function
-        // ===================================
         function displayMessage(msg) {
             if (!messagesArea) return;
 
-            // Prevent duplicate display of the same message
+            // Prevent duplicate display
             if (msg.message_id && displayedMessageIds.has(msg.message_id)) {
-                console.log('Message already displayed, skipping:', msg.message_id);
                 return;
             }
 
-            // Check if bot FIRST (sender_id = 0 means AI)
+            // Determine message type
             const isBot = msg.sender_id == 0 || msg.sender_type === 'ai' || msg.sender_type === 'bot';
-            
-            console.log('CHECK: currentUserId =', currentUserId, ', currentUserType =', currentUserType);
-            console.log('CHECK: msg.sender_id =', msg.sender_id, ', msg.sender_type =', msg.sender_type);
-            console.log('CHECK: IDs match?', msg.sender_id == currentUserId, ', Types match?', msg.sender_type === currentUserType);
-            
-            // Then check if sent by current user (MUST match BOTH sender_id AND sender_type)
             const isSent = !isBot && (msg.sender_id == currentUserId && msg.sender_type === currentUserType);
 
-            let senderName;
-            let messageClass;
+            let senderName, messageClass;
+
             if (isBot) {
                 senderName = 'AI Assistant';
                 messageClass = 'bot-message';
@@ -511,18 +626,14 @@ $tempBooking = $tempBooking ?? null;
                 senderName = recipientName;
                 messageClass = 'received';
             }
-            
-            console.log('Final class:', messageClass, 'for message from sender_id:', msg.sender_id, 'sender_type:', msg.sender_type);
+
+            // Format message text
+            let formattedText = msg.message_text
+                .replace(/\n/g, '<br>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
             const messageGroup = document.createElement('div');
             messageGroup.className = `message-group ${messageClass}`;
-
-            // Format message text (preserve line breaks, make bold text work)
-            let formattedText = msg.message_text
-                .replace(/\n/g, '<br>')
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
-                .replace(/\*(.*?)\*/g, '<em>$1</em>'); // Italic
-
             messageGroup.innerHTML = `
             ${isBot ? '<div class="bot-badge"><i class="fas fa-robot"></i> AI</div>' : ''}
             <div class="message-avatar">
@@ -542,13 +653,11 @@ $tempBooking = $tempBooking ?? null;
         `;
 
             messagesArea.appendChild(messageGroup);
-            
-            // Track this message as displayed
+
             if (msg.message_id) {
                 displayedMessageIds.add(msg.message_id);
             }
-            
-            // Use setTimeout to ensure smooth scrolling after DOM update
+
             setTimeout(() => {
                 messagesArea.scrollTop = messagesArea.scrollHeight;
             }, 50);
@@ -560,58 +669,71 @@ $tempBooking = $tempBooking ?? null;
             return date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
         }
 
-        // ===================================
-        //  Display Package Cards
-        // ===================================
+        // ========================================
+        // DISPLAY PACKAGE CARDS
+        // ========================================
+
         function displayPackageCards(packages) {
             const packageContainer = document.createElement('div');
             packageContainer.className = 'package-cards-container';
-            
+
             packages.forEach((pkg, index) => {
                 const packageCard = document.createElement('div');
                 packageCard.className = 'package-card';
-                packageCard.setAttribute('data-package-id', pkg.package_id);
-                
+
                 packageCard.innerHTML = `
-                    <div class="package-header">
-                        <span class="package-number">${index + 1}</span>
-                        <h4>${pkg.name}</h4>
-                    </div>
-                    <p class="package-description">${pkg.description || 'No description available'}</p>
-                    <div class="package-price">₱${parseFloat(pkg.price).toLocaleString('en-PH', {minimumFractionDigits: 2})}</div>
-                    <div class="package-details">
-                        ${pkg.duration_hours ? `<div class="detail"><i class="fas fa-clock"></i> ${pkg.duration_hours} hours</div>` : ''}
-                        ${pkg.photo_count ? `<div class="detail"><i class="fas fa-camera"></i> ${pkg.photo_count} photos</div>` : ''}
-                        ${pkg.delivery_days ? `<div class="detail"><i class="fas fa-calendar"></i> ${pkg.delivery_days} days delivery</div>` : ''}
-                    </div>
-                    <button class="btn-select-package" onclick="selectPackage(${index + 1}, '${pkg.name}')">
-                        <i class="fas fa-check-circle"></i> Select Package ${index + 1}
-                    </button>
-                `;
-                
+                <div class="package-header">
+                    <span class="package-number">${index + 1}</span>
+                    <h4>${pkg.name}</h4>
+                </div>
+                <p class="package-description">${pkg.description || 'No description available'}</p>
+                <div class="package-price">₱${parseFloat(pkg.price).toLocaleString('en-PH', {minimumFractionDigits: 2})}</div>
+                <div class="package-details">
+                    ${pkg.duration_hours ? `<div class="detail"><i class="fas fa-clock"></i> ${pkg.duration_hours} hours</div>` : ''}
+                    ${pkg.photo_count ? `<div class="detail"><i class="fas fa-camera"></i> ${pkg.photo_count} photos</div>` : ''}
+                    ${pkg.delivery_days ? `<div class="detail"><i class="fas fa-calendar"></i> ${pkg.delivery_days} days delivery</div>` : ''}
+                </div>
+                <button class="btn-select-package" onclick="selectPackage(${index + 1}, '${pkg.name}')">
+                    <i class="fas fa-check-circle"></i> Select Package ${index + 1}
+                </button>
+            `;
+
                 packageContainer.appendChild(packageCard);
             });
-            
+
             messagesArea.appendChild(packageContainer);
             setTimeout(() => {
                 messagesArea.scrollTop = messagesArea.scrollHeight;
             }, 100);
         }
 
-        // ===================================
-        //  Select Package Function
-        // ===================================
-        window.selectPackage = function(packageNumber, packageName) {
-            // Send the package selection as a message
+        window.selectPackage = function (packageNumber, packageName) {
             messageText.value = packageNumber.toString();
             sendMessage();
         };
 
-        // ===================================
-        //  Load Conversation Function
-        // ===================================
+        // ========================================
+        // CONVERSATION SEARCH
+        // ========================================
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function () {
+                const searchTerm = this.value.toLowerCase();
+                const conversations = document.querySelectorAll('.conversation-item');
+
+                conversations.forEach(conv => {
+                    const name = conv.querySelector('.conversation-name')?.textContent.toLowerCase() || '';
+                    conv.style.display = name.includes(searchTerm) ? '' : 'none';
+                });
+            });
+        }
+
+        // ========================================
+        // NAVIGATION
+        // ========================================
+
         window.loadConversation = function (conversationId) {
-            // On mobile, show the chat area and hide sidebar
+            // On mobile, show chat area
             if (window.innerWidth <= 768) {
                 const sidebar = document.querySelector('.conversations-sidebar');
                 const chatArea = document.querySelector('.chat-area');
@@ -623,10 +745,7 @@ $tempBooking = $tempBooking ?? null;
             window.location.href = `?controller=Chat&action=view&conversation_id=${conversationId}`;
         };
 
-        // ===================================
-        //  Mobile Sidebar Toggle
-        // ===================================
-        window.showMobileSidebar = function() {
+        window.showMobileSidebar = function () {
             const sidebar = document.querySelector('.conversations-sidebar');
             const chatArea = document.querySelector('.chat-area');
             if (sidebar && chatArea) {
@@ -635,7 +754,7 @@ $tempBooking = $tempBooking ?? null;
             }
         };
 
-        // On page load, if on mobile and there's an active conversation, show chat
+        // Mobile setup
         if (window.innerWidth <= 768 && activeConversationId) {
             const sidebar = document.querySelector('.conversations-sidebar');
             const chatArea = document.querySelector('.chat-area');
@@ -643,20 +762,22 @@ $tempBooking = $tempBooking ?? null;
                 sidebar.classList.add('mobile-hidden');
                 chatArea.classList.add('mobile-active');
             }
-        };
+        }
 
-        // ===================================
-        //  File Handling
-        // ===================================
+        // ========================================
+        // FILE HANDLING
+        // ========================================
+
         window.handleFileSelect = function () {
             if (fileInput) {
                 fileInput.click();
             }
         };
 
-        // ===================================
-        //  Request Human Agent
-        // ===================================
+        // ========================================
+        // REQUEST HUMAN AGENT
+        // ========================================
+
         window.requestHumanAgent = function () {
             if (confirm('Would you like to be connected to the photographer directly?')) {
                 messageText.value = 'I would like to talk to a human agent';
@@ -664,13 +785,12 @@ $tempBooking = $tempBooking ?? null;
             }
         };
 
-        // ===================================
-        //  Polling for New Messages
-        // ===================================
+        // ========================================
+        // POLLING FOR NEW MESSAGES
+        // ========================================
+
         function startPollingForMessages() {
             if (!activeConversationId) return;
-
-            let lastMessageId = <?php echo !empty($messages) ? end($messages)['message_id'] : 0; ?>;
 
             setInterval(async () => {
                 try {
@@ -692,28 +812,28 @@ $tempBooking = $tempBooking ?? null;
                 } catch (error) {
                     console.error("Error polling for messages:", error);
                 }
-            }, 5000); // Poll every 5 seconds
+            }, 5000);
         }
 
-        // Start polling
         startPollingForMessages();
     });
-    
-    // ===================================
-    //  Proposal Actions
-    // ===================================
+
+    // ========================================
+    // PROPOSAL ACTIONS
+    // ========================================
+
     async function acceptProposal(conversationId) {
         if (!confirm('Accept this proposal and confirm the booking?')) return;
-        
+
         try {
             const response = await fetch('?controller=Chat&action=acceptProposal', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
                 body: `conversation_id=${conversationId}`
             });
-            
+
             const result = await response.json();
-            
+
             if (result.success) {
                 alert(result.message);
                 location.reload();
@@ -725,26 +845,60 @@ $tempBooking = $tempBooking ?? null;
             console.error(error);
         }
     }
-    
+
     function showRejectProposalModal() {
-        const reason = prompt('Why are you declining this proposal? (optional)');
-        if (reason !== null) { // User didn't cancel
-            rejectProposal(reason);
+        // Create modal if it doesn't exist
+        let modal = document.getElementById('rejectProposalModal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'rejectProposalModal';
+            modal.className = 'reject-modal';
+            modal.innerHTML = `
+            <div class="reject-modal-content">
+                <span class="close" onclick="closeRejectProposalModal()">&times;</span>
+                <h3>Decline Proposal</h3>
+                <label>Why are you declining this proposal?</label>
+                <textarea id="rejectProposalReason" placeholder="Please provide a reason (optional but recommended)..." rows="4"></textarea>
+                <div class="reject-modal-actions">
+                    <button class="btn-confirm-reject" onclick="confirmRejectProposal()">
+                        <i class="fas fa-times"></i> Decline Proposal
+                    </button>
+                    <button class="btn-cancel-reject" onclick="closeRejectProposalModal()">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        `;
+            document.body.appendChild(modal);
+        }
+        modal.style.display = 'block';
+    }
+
+    function closeRejectProposalModal() {
+        const modal = document.getElementById('rejectProposalModal');
+        if (modal) {
+            modal.style.display = 'none';
         }
     }
-    
+
+    function confirmRejectProposal() {
+        const reason = document.getElementById('rejectProposalReason').value;
+        rejectProposal(reason);
+        closeRejectProposalModal();
+    }
+
     async function rejectProposal(reason) {
         const conversationId = <?php echo $activeConversation['conversation_id'] ?? 0; ?>;
-        
+
         try {
             const response = await fetch('?controller=Chat&action=rejectProposal', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
                 body: `conversation_id=${conversationId}&reason=${encodeURIComponent(reason || '')}`
             });
-            
+
             const result = await response.json();
-            
+
             if (result.success) {
                 alert(result.message);
                 location.reload();
@@ -756,149 +910,406 @@ $tempBooking = $tempBooking ?? null;
             console.error(error);
         }
     }
+
+    // ========================================
+    // PAYMENT FUNCTIONS
+    // ========================================
+
+
+    async function payDeposit(conversationId) {
+        const bubble = event.currentTarget;
+
+        // Visual feedback
+        bubble.style.pointerEvents = 'none';
+        bubble.style.opacity = '0.6';
+        const icon = bubble.querySelector('.bubble-icon i');
+        const originalIcon = icon.className;
+        icon.className = 'fas fa-spinner fa-spin';
+
+        try {
+            const response = await fetch('?controller=Payment&action=payDeposit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `conversation_id=${conversationId}`
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                // Show success message
+                showNotification('success', `✅ Down payment of ₱${result.amount.toLocaleString()} processed!`);
+
+                // Reload page to show updated status
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
+            } else {
+                throw new Error(result.error || 'Payment failed');
+            }
+        } catch (error) {
+            console.error('Payment error:', error);
+            showNotification('error', 'Payment failed. Please try again.');
+
+            // Restore button
+            bubble.style.pointerEvents = '';
+            bubble.style.opacity = '';
+            icon.className = originalIcon;
+        }
+    }
+
+    async function payFullAmount(conversationId) {
+        const bubble = event.currentTarget;
+
+        // Visual feedback
+        bubble.style.pointerEvents = 'none';
+        bubble.style.opacity = '0.6';
+        const icon = bubble.querySelector('.bubble-icon i');
+        const originalIcon = icon.className;
+        icon.className = 'fas fa-spinner fa-spin';
+
+        try {
+            const response = await fetch('?controller=Payment&action=payFull', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `conversation_id=${conversationId}`
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                showNotification('success', '🎉 Service completed! Thank you!');
+
+                // Reload to show rating option
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
+            } else {
+                throw new Error(result.error || 'Payment failed');
+            }
+        } catch (error) {
+            console.error('Payment error:', error);
+            showNotification('error', 'Payment failed. Please try again.');
+
+            // Restore button
+            bubble.style.pointerEvents = '';
+            bubble.style.opacity = '';
+            icon.className = originalIcon;
+        }
+    }
+
+    function togglePaymentDetails(bubbleElement) {
+        const wrapper = bubbleElement.closest('.payment-bubble-wrapper');
+        const detailsDiv = wrapper.querySelector('.payment-details');
+
+        if (detailsDiv) {
+            const isExpanded = bubbleElement.classList.contains('expanded');
+
+            // Close all other expanded bubbles
+            document.querySelectorAll('.payment-bubble.expanded').forEach(b => {
+                if (b !== bubbleElement) {
+                    b.classList.remove('expanded');
+                }
+            });
+
+            // Toggle current bubble
+            if (isExpanded) {
+                bubbleElement.classList.remove('expanded');
+            } else {
+                bubbleElement.classList.add('expanded');
+            }
+        }
+    }
+
+    // Close details when clicking outside
+    document.addEventListener('click', function(event) {
+        if (!event.target.closest('.payment-bubble-wrapper')) {
+            document.querySelectorAll('.payment-bubble.expanded').forEach(bubble => {
+                bubble.classList.remove('expanded');
+            });
+        }
+    });
+
+    // ========================================
+    // RATING FUNCTIONS
+    // ========================================
+
+    function showRatingModal(conversationId) {
+        // Remove existing modal if any
+        const existingModal = document.getElementById('ratingModal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+
+        const modal = document.createElement('div');
+        modal.id = 'ratingModal';
+        modal.className = 'rating-modal';
+        modal.innerHTML = `
+        <div class="rating-modal-content">
+            <span class="close" onclick="closeRatingModal()">&times;</span>
+            <h2>Rate Your Experience</h2>
+            <p class="rating-subtitle">How was your experience with this photographer?</p>
+
+            <div class="star-rating" id="starRating">
+                ${[5,4,3,2,1].map(star => `
+                    <input type="radio" id="star${star}" name="rating" value="${star}">
+                    <label for="star${star}" title="${star} stars">★</label>
+                `).join('')}
+            </div>
+
+            <div class="selected-rating-text" id="ratingText"></div>
+
+            <textarea id="reviewText" placeholder="Share your experience (optional)" rows="4"></textarea>
+
+            <button onclick="submitRating(${conversationId})" class="btn-submit-rating">
+                <i class="fas fa-paper-plane"></i> Submit Review
+            </button>
+        </div>
+    `;
+        document.body.appendChild(modal);
+
+        // Show modal with animation
+        setTimeout(() => {
+            modal.classList.add('show');
+        }, 10);
+
+        // Add star rating interaction
+        setupStarRating();
+    }
+
+    function closeRatingModal() {
+        const modal = document.getElementById('ratingModal');
+        if (modal) {
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.remove();
+            }, 300);
+        }
+    }
+
+    function setupStarRating() {
+        const ratingInputs = document.querySelectorAll('#starRating input[type="radio"]');
+        const ratingText = document.getElementById('ratingText');
+
+        const ratingLabels = {
+            5: 'Excellent! 🌟',
+            4: 'Very Good! 😊',
+            3: 'Good 👍',
+            2: 'Could be better 😐',
+            1: 'Poor 😞'
+        };
+
+        ratingInputs.forEach(input => {
+            input.addEventListener('change', function() {
+                const rating = this.value;
+                ratingText.textContent = ratingLabels[rating];
+                ratingText.style.display = 'block';
+            });
+        });
+    }
+
+    async function submitRating(conversationId) {
+        const rating = document.querySelector('input[name="rating"]:checked')?.value;
+        const review = document.getElementById('reviewText').value.trim();
+
+        if (!rating) {
+            showNotification('error', 'Please select a star rating');
+            return;
+        }
+
+        const submitBtn = document.querySelector('.btn-submit-rating');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+
+        try {
+            const response = await fetch('?controller=Rating&action=submitRating', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `conversation_id=${conversationId}&rating=${rating}&review=${encodeURIComponent(review)}`
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                showNotification('success', '⭐ Thank you for your review!');
+                closeRatingModal();
+
+                // Reload to show updated status
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
+            } else {
+                throw new Error(result.error || 'Failed to submit rating');
+            }
+        } catch (error) {
+            console.error('Rating error:', error);
+            showNotification('error', error.message || 'Failed to submit rating. Please try again.');
+
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Review';
+        }
+    }
+
+    // ========================================
+    // CHAT ACTION FUNCTIONS
+    // ========================================
+
+    function bookAgain(workerId) {
+        if (!workerId) {
+            showNotification('error', 'Invalid photographer ID');
+            return;
+        }
+        
+        // Redirect to start new booking conversation
+        window.location.href = `?controller=Chat&action=startBooking&worker_id=${workerId}`;
+    }
+
+    function viewProfile(workerId) {
+        if (!workerId) {
+            showNotification('error', 'Invalid photographer ID');
+            return;
+        }
+        
+        // Open profile in new tab
+        window.open(`?controller=Home&action=profile&worker_id=${workerId}`, '_blank');
+    }
+
+    function viewCustomerProfile(userId) {
+        if (!userId) {
+            showNotification('error', 'Invalid customer ID');
+            return;
+        }
+        
+        // Open customer profile in new tab
+        window.open(`?controller=User&action=profile&user_id=${userId}`, '_blank');
+    }
+
+    function goToBookings(userType) {
+        if (userType === 'worker') {
+            // Redirect to worker bookings page
+            window.location.href = '?controller=Worker&action=bookings';
+        } else {
+            // Redirect to user/customer bookings page
+            window.location.href = '?controller=Home&action=bookings';
+        }
+    }
+
+    // ========================================
+    // NOTIFICATION SYSTEM
+    // ========================================
+
+    function showNotification(type, message) {
+        // Remove existing notification if any
+        const existing = document.querySelector('.custom-notification');
+        if (existing) {
+            existing.remove();
+        }
+
+        const notification = document.createElement('div');
+        notification.className = `custom-notification ${type}`;
+        notification.innerHTML = `
+        <div class="notification-content">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+            <span>${message}</span>
+        </div>
+    `;
+
+        document.body.appendChild(notification);
+
+        // Show with animation
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 10);
+
+        // Auto-hide after 4 seconds
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                notification.remove();
+            }, 300);
+        }, 4000);
+    }
+
+    // Close modal when clicking outside
+    window.addEventListener('click', function(event) {
+        const modal = document.getElementById('ratingModal');
+        if (event.target === modal) {
+            closeRatingModal();
+        }
+    });
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeRatingModal();
+        }
+    });
+
+    async function payFullAmount(conversationId) {
+        // Removed confirm dialog - just process automatically
+        try {
+            const response = await fetch('?controller=Payment&action=payFull', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: `conversation_id=${conversationId}`
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert(result.message);
+                location.reload();
+            } else {
+                alert('Error: ' + result.error);
+            }
+        } catch (error) {
+            alert('Payment failed. Please try again.');
+            console.error(error);
+        }
+    }
+
+    async function payFullAmount(conversationId) {
+        if (!confirm('Confirm that service is complete and pay the remaining balance?')) return;
+
+        try {
+            const response = await fetch('?controller=Payment&action=payFull', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: `conversation_id=${conversationId}`
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert(result.message);
+                location.reload();
+            } else {
+                alert('Error: ' + result.error);
+            }
+        } catch (error) {
+            alert('Payment failed. Please try again.');
+            console.error(error);
+        }
+    }
+
+    // Add this function with the other payment functions
+    function togglePaymentDetails(bubbleElement) {
+        const detailsDiv = bubbleElement.nextElementSibling;
+        const arrow = bubbleElement.querySelector('.bubble-arrow');
+
+        if (detailsDiv && detailsDiv.classList.contains('payment-details')) {
+            if (detailsDiv.style.display === 'none' || !detailsDiv.style.display) {
+                detailsDiv.style.display = 'block';
+                bubbleElement.classList.add('expanded');
+                if (arrow) arrow.style.transform = 'rotate(180deg)';
+            } else {
+                detailsDiv.style.display = 'none';
+                bubbleElement.classList.remove('expanded');
+                if (arrow) arrow.style.transform = 'rotate(0deg)';
+            }
+        }
+    }
+
+
 </script>
-
-<style>
-.negotiation-banner {
-    background: linear-gradient(135deg, rgba(255, 107, 0, 0.1) 0%, rgba(255, 133, 51, 0.1) 100%);
-    border: 2px solid rgba(255, 107, 0, 0.3);
-    border-radius: 12px;
-    padding: 20px;
-    margin: 15px;
-    display: flex;
-    gap: 15px;
-    animation: slideDown 0.3s ease-out;
-}
-
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.banner-icon {
-    font-size: 40px;
-    color: #ff6b00;
-    display: flex;
-    align-items: center;
-}
-
-.banner-content {
-    flex: 1;
-}
-
-.banner-content h4 {
-    color: #ff6b00;
-    margin: 0 0 10px 0;
-    font-size: 18px;
-}
-
-.banner-content p {
-    margin: 8px 0;
-    color: #e0e0e0;
-}
-
-.banner-content strong {
-    color: #ff6b00;
-}
-
-.proposal-notes {
-    background: rgba(255, 107, 0, 0.05);
-    padding: 10px;
-    border-left: 3px solid #ff6b00;
-    border-radius: 4px;
-    margin: 10px 0;
-}
-
-.banner-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 15px;
-}
-
-.btn-accept-proposal {
-    background: #28a745;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.3s;
-}
-
-.btn-accept-proposal:hover {
-    background: #218838;
-    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
-    transform: translateY(-2px);
-}
-
-.btn-reject-proposal {
-    background: rgba(220, 53, 69, 0.1);
-    color: #dc3545;
-    border: 1px solid rgba(220, 53, 69, 0.3);
-    padding: 10px 20px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.3s;
-}
-
-.btn-reject-proposal:hover {
-    background: rgba(220, 53, 69, 0.2);
-    border-color: #dc3545;
-}
-
-/* Bot/AI Message Styling - Override default message colors */
-.message-group.bot-message {
-    justify-content: center !important;
-    margin: 20px 0;
-}
-
-.message-group.bot-message .message-bubble {
-    background: linear-gradient(135deg, rgba(138, 43, 226, 0.2) 0%, rgba(147, 51, 234, 0.2) 100%) !important;
-    border: 1px solid rgba(138, 43, 226, 0.5) !important;
-    border-color: rgba(138, 43, 226, 0.5) !important;
-    color: #e0e0e0 !important;
-    max-width: 80%;
-    box-shadow: 0 2px 8px rgba(138, 43, 226, 0.3) !important;
-}
-
-.message-group.bot-message .message-avatar {
-    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%) !important;
-}
-
-.bot-badge {
-    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-    color: white;
-    padding: 4px 12px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 600;
-    display: inline-block;
-    margin-bottom: 8px;
-    text-transform: uppercase;
-    box-shadow: 0 2px 6px rgba(139, 92, 246, 0.3);
-}
-
-.bot-badge i {
-    margin-right: 4px;
-}
-
-/* Make sure worker messages appear on left for users */
-.message-group.received {
-    justify-content: flex-start;
-}
-
-.message-group.sent {
-    justify-content: flex-end;
-}
-</style>
-
 </body>
 </html>

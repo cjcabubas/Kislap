@@ -91,7 +91,7 @@ if (session_status() === PHP_SESSION_NONE) {
         </a>
     </div>
 </div>
-<script src="limit-files.js" defer></script>
+<script src="public/js/limit-files.js" defer></script>
 </body>
 
 </html>

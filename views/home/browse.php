@@ -57,7 +57,7 @@ $sortBy = $_GET['sort'] ?? 'featured';
 
     <!-- Search & Filter Bar -->
     <div class="search-filter-bar">
-        <form action="" method="GET" class="search-form" id="filterForm">
+        <form action="?controller=Browse&action=browse" method="GET" class="search-form" id="filterForm">
             <!-- Preserve controller and action -->
             <input type="hidden" name="controller" value="Browse">
             <input type="hidden" name="action" value="browse">
@@ -138,7 +138,7 @@ $sortBy = $_GET['sort'] ?? 'featured';
                 $yearsExperience = $photographer['experience_years'] ?? 0;
 
                 // Ratings
-                $rating = floatval($photographer['rating_average'] ?? 0);
+                $rating = floatval($photographer['average_rating'] ?? 0);
                 $reviewsCount = intval($photographer['total_ratings'] ?? 0);
                 $totalBookings = intval($photographer['total_bookings'] ?? 0);
 
@@ -149,16 +149,29 @@ $sortBy = $_GET['sort'] ?? 'featured';
                 // Featured status (based on bookings and ratings)
                 $isFeatured = ($totalBookings >= 10 && $rating >= 4.5);
 
-                // Price range (using total_earnings as indicator)
-                $totalEarnings = floatval($photographer['total_earnings'] ?? 0);
-                if ($totalEarnings > 100000) {
-                    $priceRange = '₱₱₱₱';
-                } elseif ($totalEarnings > 50000) {
-                    $priceRange = '₱₱₱';
-                } elseif ($totalEarnings > 10000) {
-                    $priceRange = '₱₱';
+                // Price range based on packages or earnings
+                $priceRange = 'Contact for pricing';
+                
+                if ($photographer['has_packages'] && $photographer['min_package_price']) {
+                    $minPrice = floatval($photographer['min_package_price']);
+                    $maxPrice = floatval($photographer['max_package_price']);
+                    
+                    if ($minPrice == $maxPrice) {
+                        $priceRange = '₱' . number_format($minPrice, 0);
+                    } else {
+                        $priceRange = '₱' . number_format($minPrice, 0) . ' - ₱' . number_format($maxPrice, 0);
+                    }
                 } else {
-                    $priceRange = 'Contact for pricing';
+                    // Fallback to earnings-based estimation
+                    $totalEarnings = floatval($photographer['total_earnings'] ?? 0);
+                    $totalBookings = intval($photographer['total_bookings'] ?? 0);
+                    
+                    if ($totalEarnings > 0 && $totalBookings > 0) {
+                        $avgPrice = $totalEarnings / $totalBookings;
+                        $minEstimate = $avgPrice * 0.8;
+                        $maxEstimate = $avgPrice * 1.2;
+                        $priceRange = '₱' . number_format($minEstimate, 0) . ' - ₱' . number_format($maxEstimate, 0);
+                    }
                 }
 
                 // Portfolio images (array of image paths)
@@ -282,9 +295,37 @@ $sortBy = $_GET['sort'] ?? 'featured';
                                class="btn-secondary">
                                 <i class="fas fa-eye"></i> View Profile
                             </a>
-                            <button class="btn-primary" onclick="bookPhotographer(<?php echo $photogId; ?>)">
-                                <i class="fas fa-calendar-check"></i> Book Now
-                            </button>
+
+                            <?php if (isset($_SESSION['user'])): ?>
+                                <?php if (!empty($photographer['has_incomplete_booking'])): ?>
+                                    <!-- Continue Existing Booking -->
+                                    <a href="index.php?controller=Chat&action=view&conversation_id=<?php echo $photographer['incomplete_conversation_id']; ?>"
+                                       class="btn-primary">
+                                        <i class="fas fa-comments"></i> Continue Booking
+                                    </a>
+                                <?php else: ?>
+                                    <!-- Start New Booking -->
+                                    <a href="index.php?controller=Chat&action=newBooking&worker_id=<?php echo $photogId; ?>"
+                                       class="btn-primary">
+                                        <i class="fas fa-calendar-check"></i> Book Now
+                                    </a>
+                                <?php endif; ?>
+
+                                <?php if (!empty($photographer['has_completed_booking'])): ?>
+                                    <!-- Book Again Option (for completed bookings) -->
+                                    <a href="index.php?controller=Chat&action=newBooking&worker_id=<?php echo $photogId; ?>"
+                                       class="btn-secondary btn-sm"
+                                       style="margin-top: 8px;">
+                                        <i class="fas fa-redo"></i> Book Again
+                                    </a>
+                                <?php endif; ?>
+                            <?php else: ?>
+                                <!-- Not logged in - show login prompt -->
+                                <a href="?controller=Auth&action=login&redirect=<?php echo urlencode('?controller=Chat&action=newBooking&worker_id=' . $photogId); ?>"
+                                   class="btn-primary">
+                                    <i class="fas fa-calendar-check"></i> Book Now
+                                </a>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>

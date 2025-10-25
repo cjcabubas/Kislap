@@ -4,32 +4,39 @@ class BrowseRepository
 {
     private PDO $conn;
 
+    // ========================================
+    // CONSTRUCTOR
+    // ========================================
+    
     public function __construct()
     {
-        // CONSIDER SECURITY: Replace this with safer configuration loading (e.g., .env)
         $this->conn = new PDO("mysql:host=localhost;dbname=kislap", "root", "");
         $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
 
+    // ========================================
+    // HELPER METHODS
+    // ========================================
+    
     private function getSortSql(string $sort): string
     {
         return match ($sort) {
-            'rating' => " ORDER BY w.rating_average DESC",
+            'rating' => " ORDER BY w.average_rating DESC",
             'reviews' => " ORDER BY w.total_ratings DESC",
             'price_low' => " ORDER BY w.total_earnings ASC",
             'price_high' => " ORDER BY w.total_earnings DESC",
             'newest' => " ORDER BY w.created_at DESC",
-            'featured' => " ORDER BY w.total_bookings DESC, w.rating_average DESC", // Featured: most bookings + high rating
-            default => " ORDER BY w.total_bookings DESC, w.rating_average DESC",
+            'featured' => " ORDER BY w.total_bookings DESC, w.average_rating DESC", // Featured: most bookings + high rating
+            default => " ORDER BY w.total_bookings DESC, w.average_rating DESC",
         };
     }
 
-    /**
-     * Fetch workers with their portfolio images grouped together
-     */
+    // ========================================
+    // WORKER BROWSING
+    // ========================================
+    
     public function getWorkersWithPortfolio(int $limit, int $offset, string $search = '', string $category = 'all', string $sort = 'featured'): array
     {
-        // First, get the worker IDs that match our criteria with pagination
         $sql = "
             SELECT DISTINCT w.worker_id
             FROM workers w
@@ -39,13 +46,11 @@ class BrowseRepository
         $params = [];
         $conditions = [];
 
-        // Add Category Filter
         if ($category !== 'all' && !empty($category)) {
             $conditions[] = "w.specialty = :category";
             $params[':category'] = $category;
         }
 
-        // Add Search Filter
         if (!empty($search)) {
             $search_term = "%$search%";
             $conditions[] = "
@@ -59,15 +64,11 @@ class BrowseRepository
             $params[':search_term'] = $search_term;
         }
 
-        // Add conditions if any
         if (!empty($conditions)) {
             $sql .= " AND " . implode(" AND ", $conditions);
         }
 
-        // Apply Sorting
         $sql .= $this->getSortSql($sort);
-
-        // Apply Pagination
         $sql .= " LIMIT :limit OFFSET :offset";
         $params[':limit'] = $limit;
         $params[':offset'] = $offset;
@@ -111,30 +112,25 @@ class BrowseRepository
         $stmt->execute($workerIds);
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Group results to aggregate portfolio images per worker
         $workers = [];
         foreach ($results as $row) {
             $id = $row['worker_id'];
 
             if (!isset($workers[$id])) {
-                // Initialize worker data
                 $workers[$id] = $row;
                 $workers[$id]['portfolio_images'] = [];
 
-                // Create display name
                 $workers[$id]['display_name'] = trim(
                     ($row['firstName'] ?? '') . ' ' .
                     ($row['middleName'] ?? '') . ' ' .
                     ($row['lastName'] ?? '')
                 );
 
-                // Remove portfolio-specific fields from main array
                 unset($workers[$id]['work_id']);
                 unset($workers[$id]['image_path']);
                 unset($workers[$id]['work_uploaded_at']);
             }
 
-            // Add portfolio image if exists
             if (!empty($row['image_path'])) {
                 $workers[$id]['portfolio_images'][] = [
                     'work_id' => $row['work_id'],
@@ -144,7 +140,26 @@ class BrowseRepository
             }
         }
 
-        // Maintain the order from the first query
+        foreach ($workers as $workerId => &$worker) {
+            $packageStmt = $this->conn->prepare("
+                SELECT MIN(price) as min_price, MAX(price) as max_price, COUNT(*) as package_count
+                FROM packages 
+                WHERE worker_id = ? AND status = 'active'
+            ");
+            $packageStmt->execute([$workerId]);
+            $packageData = $packageStmt->fetch(PDO::FETCH_ASSOC);
+            
+            if ($packageData && $packageData['package_count'] > 0) {
+                $worker['min_package_price'] = $packageData['min_price'];
+                $worker['max_package_price'] = $packageData['max_price'];
+                $worker['has_packages'] = true;
+            } else {
+                $worker['min_package_price'] = null;
+                $worker['max_package_price'] = null;
+                $worker['has_packages'] = false;
+            }
+        }
+
         $orderedWorkers = [];
         foreach ($workerIds as $id) {
             if (isset($workers[$id])) {
@@ -155,9 +170,6 @@ class BrowseRepository
         return $orderedWorkers;
     }
 
-    /**
-     * Get total count of workers matching criteria
-     */
     public function getWorkerCount(string $search = '', string $category = 'all'): int
     {
         $sql = "SELECT COUNT(DISTINCT w.worker_id) FROM workers w WHERE w.status = 'active'";
@@ -244,13 +256,115 @@ class BrowseRepository
         }
     }
 
-    /**
-     * Get all unique specialties from workers table
-     */
+    // ========================================
+    // WORKER DETAILS AND METADATA
+    // ========================================
+    
     public function getAllSpecialties(): array
     {
         $sql = "SELECT DISTINCT specialty FROM workers WHERE status = 'active' AND specialty IS NOT NULL ORDER BY specialty";
         $stmt = $this->conn->query($sql);
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+
+    public function getWorkerPackages(int $workerId): array
+    {
+        try {
+            $stmt = $this->conn->prepare("
+                SELECT package_id, name, description, price, duration_hours as duration, photo_count, delivery_days, status
+                FROM packages 
+                WHERE worker_id = ? AND status = 'active' 
+                ORDER BY price ASC
+            ");
+            $stmt->execute([$workerId]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            error_log("Error fetching packages: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    public function getWorkerRecentWork(int $workerId): array
+    {
+        try {
+            $stmt = $this->conn->prepare("
+                SELECT work_id, title, description, image_path, uploaded_at 
+                FROM worker_works 
+                WHERE worker_id = ? 
+                ORDER BY uploaded_at DESC 
+                LIMIT 12
+            ");
+            $stmt->execute([$workerId]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            error_log("Error fetching recent work: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    public function getWorkerStatistics(int $workerId): array
+    {
+        try {
+            $stmt = $this->conn->prepare("
+                SELECT 
+                    w.total_bookings,
+                    w.total_earnings,
+                    w.average_rating,
+                    w.total_ratings,
+                    w.created_at,
+                    COUNT(DISTINCT c.conversation_id) as active_conversations,
+                    COUNT(DISTINCT CASE WHEN c.booking_status = 'completed' THEN c.conversation_id END) as completed_bookings,
+                    COUNT(DISTINCT CASE WHEN c.booking_status IN ('confirmed', 'negotiating') THEN c.conversation_id END) as pending_bookings
+                FROM workers w
+                LEFT JOIN conversations c ON w.worker_id = c.worker_id
+                WHERE w.worker_id = ?
+                GROUP BY w.worker_id
+            ");
+            $stmt->execute([$workerId]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$result) {
+                return [
+                    'total_bookings' => 0,
+                    'total_earnings' => 0,
+                    'average_rating' => 0,
+                    'total_ratings' => 0,
+                    'active_conversations' => 0,
+                    'completed_bookings' => 0,
+                    'pending_bookings' => 0,
+                    'created_at' => date('Y-m-d H:i:s')
+                ];
+            }
+            
+            return $result;
+        } catch (Exception $e) {
+            error_log("Error fetching worker statistics: " . $e->getMessage());
+            return [
+                'total_bookings' => 0,
+                'total_earnings' => 0,
+                'average_rating' => 0,
+                'total_ratings' => 0,
+                'active_conversations' => 0,
+                'completed_bookings' => 0,
+                'pending_bookings' => 0,
+                'created_at' => date('Y-m-d H:i:s')
+            ];
+        }
+    }
+
+    public function getSpecialtyCategories(): array
+    {
+        return [
+            'event' => 'Event Photography',
+            'portrait' => 'Portrait Photography', 
+            'product' => 'Product Photography',
+            'lifestyle' => 'Lifestyle Photography',
+            'photobooth' => 'Photobooth Services',
+            'creative' => 'Creative/Conceptual',
+            'wedding' => 'Wedding Photography',
+            'corporate' => 'Corporate Photography',
+            'fashion' => 'Fashion Photography',
+            'nature' => 'Nature Photography'
+        ];
     }
 }

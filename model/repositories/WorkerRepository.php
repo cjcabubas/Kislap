@@ -233,4 +233,36 @@ class WorkerRepository
             throw $e; // Re-throw the exception to be caught by the controller
         }
     }
+
+    public function getWorkerEarnings(int $workerId): array
+    {
+        try {
+            $stmt = $this->conn->prepare("
+                SELECT 
+                    total_earnings,
+                    total_bookings,
+                    rating_average,
+                    total_ratings
+                FROM workers 
+                WHERE worker_id = ?
+            ");
+            $stmt->execute([$workerId]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            return $result ?: [
+                'total_earnings' => 0,
+                'total_bookings' => 0,
+                'rating_average' => 0,
+                'total_ratings' => 0
+            ];
+        } catch (Exception $e) {
+            error_log("Error fetching worker earnings: " . $e->getMessage());
+            return [
+                'total_earnings' => 0,
+                'total_bookings' => 0,
+                'rating_average' => 0,
+                'total_ratings' => 0
+            ];
+        }
+    }
 }

@@ -1,4 +1,3 @@
-
 * {
     margin: 0;
     padding: 0;
@@ -18,6 +17,7 @@ body {
     margin: 0 auto;
 }
 
+/* Header Section */
 .page-header-wrapper {
     display: flex;
     align-items: flex-start;
@@ -26,20 +26,19 @@ body {
 }
 
 .btn-back {
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-    padding: 30px 18px !important;
-    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%) !important;
-    color: #ff6b00 !important;
-    font-size: 14px !important;
-    font-weight: 500 !important;
-    text-decoration: none !important;
-    transition: all 0.3s ease !important;
-    border-radius: 15px !important;
-    border: 1px solid #2d2d2d !important;
-    box-shadow: 0 10px 30px rgba(255, 107, 0, 0.1) !important;
-    height: fit-content !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 30px 18px;
+    background: #1a1a1a;
+    color: #ff6b00;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-radius: 15px;
+    border: 1px solid #2d2d2d;
+    height: fit-content;
 }
 
 .btn-back i {
@@ -49,8 +48,8 @@ body {
 
 .btn-back:hover {
     border-color: #ff6b00;
-    box-shadow: 0 10px 30px rgba(255, 107, 0, 0.2);
     color: #ff8533;
+    transform: translateY(-2px);
 }
 
 .btn-back:hover i {
@@ -58,10 +57,9 @@ body {
 }
 
 .page-header {
-    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    background: #1a1a1a;
     padding: 30px;
     border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(255, 107, 0, 0.1);
     border: 1px solid #2d2d2d;
     display: flex;
     justify-content: space-between;
@@ -69,13 +67,27 @@ body {
     flex-wrap: wrap;
     gap: 20px;
     flex: 1;
+    border-left: 5px solid #dc3545;
 }
 
 .page-header h1 {
-    color: #ff6b00;
+    color: #dc3545;
     font-size: 28px;
-    text-shadow: 0 0 20px rgba(255, 107, 0, 0.3);
     margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.page-header h1 i {
+    font-size: 24px;
+    color: #ff4757;
+}
+
+.header-content p {
+    color: #999;
+    font-size: 14px;
+    margin-top: 5px;
 }
 
 .filter-section {
@@ -85,33 +97,35 @@ body {
     flex-wrap: wrap;
 }
 
-.search-box {
-    position: relative;
-}
-
-.search-box input {
-    padding: 12px 40px 12px 15px;
+/* Search Input */
+#searchInput {
+    padding: 12px 15px;
     border-radius: 8px;
-    border: 1px solid rgba(255, 107, 0, 0.3);
-    background: rgba(255, 107, 0, 0.05);
+    border: 1px solid #dc3545;
+    background: #2d2d2d;
     color: #fff;
     font-size: 14px;
     min-width: 250px;
     transition: all 0.3s ease;
 }
 
-.search-box input:focus {
+#searchInput:focus {
     outline: none;
-    border-color: #ff6b00;
-    box-shadow: 0 0 15px rgba(255, 107, 0, 0.2);
+    border-color: #ff4757;
+    background: #333;
 }
 
-.search-box i {
-    position: absolute;
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #ff6b00;
+#searchInput::placeholder {
+    color: #999;
+}
+
+/* Applications Container */
+.applications-container {
+    background: #1a1a1a;
+    border-radius: 15px;
+    padding: 30px;
+    border: 1px solid #333;
+    border-top: 4px solid #dc3545;
 }
 
 .applications-grid {
@@ -120,31 +134,22 @@ body {
 }
 
 .application-card {
-    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    background: #1a1a1a;
     border-radius: 15px;
     padding: 25px;
     border: 1px solid #333;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
 }
 
-.application-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 5px;
-    height: 100%;
-    background: #ff6b00;
-    box-shadow: 0 0 15px #ff6b00;
+.application-card.rejected {
+    border-left: 5px solid #dc3545;
 }
 
 .application-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 15px 40px rgba(255, 107, 0, 0.2);
-    border-color: #ff6b00;
+    border-color: #dc3545;
 }
 
 .card-header {
@@ -164,22 +169,37 @@ body {
 .applicant-info .meta {
     color: #999;
     font-size: 13px;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.applicant-info .meta span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
 .status-badge {
-    padding: 6px 12px;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
     text-transform: uppercase;
-    background: rgba(255, 107, 0, 0.2);
-    color: #ff8533;
-    border: 1px solid rgba(255, 107, 0, 0.3);
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.status-badge.rejected {
+    background: #dc3545;
+    color: #fff;
 }
 
 .card-body {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 15px;
     margin-bottom: 20px;
 }
@@ -191,7 +211,7 @@ body {
 }
 
 .info-item i {
-    color: #ff6b00;
+    color: #dc3545;
     margin-top: 3px;
     min-width: 16px;
 }
@@ -212,11 +232,14 @@ body {
 }
 
 .images-section h4 {
-    color: #ff6b00;
+    color: #dc3545;
     font-size: 14px;
     margin-bottom: 15px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .images-grid {
@@ -230,14 +253,13 @@ body {
     border-radius: 8px;
     overflow: hidden;
     aspect-ratio: 1;
-    border: 2px solid rgba(255, 107, 0, 0.3);
+    border: 2px solid #dc3545;
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
 .image-item:hover {
-    border-color: #ff6b00;
-    box-shadow: 0 0 20px rgba(255, 107, 0, 0.3);
+    border-color: #ff4757;
     transform: scale(1.05);
 }
 
@@ -252,22 +274,22 @@ body {
     align-items: center;
     gap: 10px;
     padding: 15px;
-    background: rgba(255, 107, 0, 0.05);
+    background: #2d2d2d;
     border-radius: 8px;
-    border: 1px solid rgba(255, 107, 0, 0.2);
+    border: 1px solid #dc3545;
     margin: 20px 0;
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
 .resume-section:hover {
-    background: rgba(255, 107, 0, 0.1);
-    border-color: #ff6b00;
+    background: #333;
+    border-color: #ff4757;
 }
 
 .resume-section i {
     font-size: 24px;
-    color: #ff6b00;
+    color: #dc3545;
 }
 
 .resume-section .resume-info h5 {
@@ -301,69 +323,87 @@ body {
     gap: 8px;
 }
 
-.btn-approve {
-    background: rgba(173, 255, 51, 0.2);
-    color: #d3ff33;
-    border: 1px solid rgba(102, 255, 51, 0.3);
+.btn-reconsider {
+    background: #28a745;
+    color: white;
 }
 
-.btn-approve:hover {
-    background: #33ff44;
-    color: #000;
-    box-shadow: 0 0 20px rgba(173, 255, 51, 0.5);
+.btn-reconsider:hover {
+    background: #218838;
+    transform: translateY(-2px);
 }
 
-.btn-reject {
-    background: rgba(255, 69, 0, 0.2);
-    color: #ff4500;
-    border: 1px solid rgba(255, 69, 0, 0.3);
+.btn-delete {
+    background: #dc3545;
+    color: white;
 }
 
-.btn-reject:hover {
-    background: #ff4500;
-    color: #fff;
-    box-shadow: 0 0 20px rgba(255, 69, 0, 0.5);
+.btn-delete:hover {
+    background: #c82333;
+    transform: translateY(-2px);
 }
 
-.load-more {
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 35px;
+    flex-wrap: wrap;
+}
+
+.page-link {
+    padding: 12px 18px;
+    background: #2d2d2d;
+    color: #dc3545;
+    text-decoration: none;
+    border-radius: 10px;
+    border: 1px solid #dc3545;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    min-width: 45px;
     text-align: center;
-    margin-top: 30px;
 }
 
-.btn-load-more {
-    background: rgba(255, 107, 0, 0.1);
-    color: #ff6b00;
-    border: 2px solid rgba(255, 107, 0, 0.3);
-    padding: 15px 40px;
-    font-size: 16px;
+.page-link:hover {
+    background: #dc3545;
+    color: #fff;
+    transform: translateY(-2px);
 }
 
-.btn-load-more:hover {
-    background: rgba(255, 107, 0, 0.2);
-    border-color: #ff6b00;
-    box-shadow: 0 0 20px rgba(255, 107, 0, 0.3);
+.page-link.active {
+    background: #dc3545;
+    color: #fff;
 }
 
+/* Empty State */
 .empty-state {
     text-align: center;
-    padding: 60px 20px;
-    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    padding: 60px 40px;
+    background: #2d2d2d;
     border-radius: 15px;
-    border: 1px solid #333;
+    border: 2px dashed #dc3545;
 }
 
 .empty-state i {
     font-size: 64px;
-    color: #ff6b00;
+    color: #dc3545;
     margin-bottom: 20px;
     opacity: 0.5;
 }
 
 .empty-state h3 {
-    color: #999;
+    color: #fff;
     font-size: 18px;
+    margin-bottom: 10px;
 }
 
+.empty-state p {
+    color: #999;
+    font-size: 14px;
+}
+
+/* Modal */
 .modal {
     display: none;
     position: fixed;
@@ -385,7 +425,6 @@ body {
     max-width: 90%;
     max-height: 90%;
     border-radius: 10px;
-    box-shadow: 0 0 50px rgba(255, 107, 0, 0.5);
 }
 
 .modal-close {
@@ -393,11 +432,16 @@ body {
     top: 20px;
     right: 30px;
     font-size: 40px;
-    color: #ff6b00;
+    color: #dc3545;
     cursor: pointer;
 }
 
+/* Mobile Responsiveness */
 @media (max-width: 768px) {
+    body {
+        padding: 15px;
+    }
+    
     .page-header-wrapper {
         flex-direction: column;
         gap: 15px;
@@ -406,15 +450,35 @@ body {
     .btn-back {
         width: 100%;
         justify-content: center;
-    }
-
-    .card-body {
-        grid-template-columns: 1fr;
+        padding: 20px 18px;
     }
 
     .page-header {
         flex-direction: column;
         align-items: flex-start;
+        padding: 25px;
+    }
+
+    .page-header h1 {
+        font-size: 24px;
+    }
+
+    .filter-section {
+        width: 100%;
+        justify-content: center;
+    }
+
+    #searchInput {
+        min-width: 100%;
+        max-width: 100%;
+    }
+
+    .applications-container {
+        padding: 20px;
+    }
+
+    .card-body {
+        grid-template-columns: 1fr;
     }
 
     .actions {
@@ -424,5 +488,35 @@ body {
     .btn {
         width: 100%;
         justify-content: center;
+    }
+
+    .pagination {
+        gap: 8px;
+        margin-top: 25px;
+    }
+    
+    .page-link {
+        padding: 10px 14px;
+        font-size: 12px;
+        min-width: 40px;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-header h1 {
+        font-size: 20px;
+    }
+    
+    .applications-container {
+        padding: 15px;
+    }
+    
+    .empty-state {
+        padding: 40px 20px;
+        font-size: 16px;
+    }
+
+    .empty-state i {
+        font-size: 48px;
     }
 }

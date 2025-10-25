@@ -1,67 +1,65 @@
 <?php
 
-// Includes all repositories the controller needs
 require_once __DIR__ . '/../model/repositories/PaymentRepository.php';
 require_once __DIR__ . '/../model/repositories/ChatRepository.php';
 
 class PaymentController
 {
-    private $paymentRepo;
-    private $chatRepo;
+    private PaymentRepository $paymentRepo;
+    private ChatRepository $chatRepo;
 
-    /**
-     * Constructor to instantiate repositories, just like in AuthController
-     */
     public function __construct()
     {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
         $this->paymentRepo = new PaymentRepository();
-        $this->chatRepo = new ChatRepository(); // Needed to get booking details
+        $this->chatRepo = new ChatRepository();
     }
 
     public function payDeposit()
     {
         header('Content-Type: application/json');
 
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
-        // 1. Handle session and authentication
         $user = $_SESSION['user'] ?? null;
         if (!$user) {
             echo json_encode(['success' => false, 'error' => 'Not authenticated']);
             exit;
         }
 
-        // 2. Get POST data
         $conversationId = $_POST['conversation_id'] ?? null;
+
         if (!$conversationId) {
             echo json_encode(['success' => false, 'error' => 'Missing conversation ID']);
             exit;
         }
 
-        try {
-            // 3. Business Logic (get price, calculate deposit)
-            $tempBooking = $this->chatRepo->getTempBooking($conversationId);
-            $finalPrice = $tempBooking['final_price'] ?? $tempBooking['budget'] ?? 0;
-            $depositAmount = $finalPrice * 0.5; // 50% down payment
+        // Get booking amount
+        $totalAmount = $this->paymentRepo->getBookingAmount($conversationId);
+        if (!$totalAmount) {
+            echo json_encode(['success' => false, 'error' => 'Booking not found']);
+            exit;
+        }
 
-            // 4. Call Repository to save data
-            $success = $this->paymentRepo->markDepositAsPaid($conversationId, $depositAmount);
+        $depositAmount = $totalAmount * 0.5;
 
-            // 5. Send response
-            if ($success) {
-                echo json_encode([
-                    'success' => true,
-                    'message' => 'Deposit paid successfully!',
-                    'amount' => $depositAmount
-                ]);
-            } else {
-                echo json_encode(['success' => false, 'error' => 'Payment failed']);
-            }
+        // Process payment (simulation)
+        if ($this->paymentRepo->processDepositPayment($conversationId)) {
+            // Send confirmation message
+            $this->chatRepo->saveMessage(
+                $conversationId,
+                $user['user_id'],
+                'user',
+                "✅ Down payment of ₱" . number_format($depositAmount, 2) . " has been processed successfully! The photographer has been notified."
+            );
 
-        } catch (Exception $e) {
-            echo json_encode(['success' => false, 'error' => 'An error occurred: ' . $e->getMessage()]);
+            echo json_encode([
+                'success' => true,
+                'amount' => $depositAmount,
+                'message' => 'Down payment processed successfully!'
+            ]);
+        } else {
+            echo json_encode(['success' => false, 'error' => 'Failed to process payment']);
         }
         exit;
     }
@@ -70,38 +68,47 @@ class PaymentController
     {
         header('Content-Type: application/json');
 
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
-        // 1. Handle session and authentication
         $user = $_SESSION['user'] ?? null;
         if (!$user) {
             echo json_encode(['success' => false, 'error' => 'Not authenticated']);
             exit;
         }
 
-        // 2. Get POST data
         $conversationId = $_POST['conversation_id'] ?? null;
+
         if (!$conversationId) {
             echo json_encode(['success' => false, 'error' => 'Missing conversation ID']);
             exit;
         }
 
-        try {
-            // 3. Call Repository to save data
-            $success = $this->paymentRepo->markBookingAsCompleted($conversationId);
+        // Get booking amount
+        $totalAmount = $this->paymentRepo->getBookingAmount($conversationId);
+        if (!$totalAmount) {
+            echo json_encode(['success' => false, 'error' => 'Booking not found']);
+            exit;
+        }
 
-            // 4. Send response
-            if ($success) {
-                echo json_encode(['success' => true, 'message' => 'Full payment received! Booking completed.']);
-            } else {
-                echo json_encode(['success' => false, 'error' => 'Payment failed']);
-            }
+        $remainingBalance = $totalAmount * 0.5;
 
-        } catch (Exception $e) {
-            echo json_encode(['success' => false, 'error' => 'An error occurred: ' . $e->getMessage()]);
+        // Process payment (simulation)
+        if ($this->paymentRepo->processFullPayment($conversationId)) {
+            // Send completion message
+            $this->chatRepo->saveMessage(
+                $conversationId,
+                $user['user_id'],
+                'user',
+                "🎉 Final payment of ₱" . number_format($remainingBalance, 2) . " has been processed. Thank you for using our service! Please rate your experience."
+            );
+
+            echo json_encode([
+                'success' => true,
+                'amount' => $remainingBalance,
+                'message' => 'Booking completed successfully! Please rate your experience.'
+            ]);
+        } else {
+            echo json_encode(['success' => false, 'error' => 'Failed to complete booking']);
         }
         exit;
     }
+
 }

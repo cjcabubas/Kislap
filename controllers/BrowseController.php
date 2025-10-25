@@ -16,6 +16,14 @@ class BrowseController
      */
     public function browse(): void
     {
+        // Start session to get user info
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        // Get current user ID if logged in
+        $userId = $_SESSION['user']['user_id'] ?? null;
+
         // Pagination setup
         $limit = 9; // number of workers per page
         $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
@@ -34,6 +42,23 @@ class BrowseController
 
         // Fetch data
         $workers = $this->repo->getWorkersWithPortfolio($limit, $offset, $search, $category, $sort);
+
+        // Add booking status for each worker if user is logged in
+        if ($userId) {
+            require_once __DIR__ . '/../model/repositories/ChatRepository.php';
+            $chatRepo = new ChatRepository();
+
+            foreach ($workers as &$worker) {
+                $incompleteBooking = $chatRepo->findIncompleteBooking($userId, $worker['worker_id']);
+                $hasCompleted = $chatRepo->hasCompletedBooking($userId, $worker['worker_id']);
+
+                $worker['has_incomplete_booking'] = !empty($incompleteBooking);
+                $worker['has_completed_booking'] = $hasCompleted;
+                $worker['incomplete_conversation_id'] = $incompleteBooking['conversation_id'] ?? null;
+            }
+            unset($worker); // Break reference
+        }
+
         $totalWorkers = $this->repo->getWorkerCount($search, $category);
         $totalPages = max(1, ceil($totalWorkers / $limit));
 
@@ -48,6 +73,11 @@ class BrowseController
      */
     public function viewProfile(): void
     {
+        // Start session to get user info
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
         $workerId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
         if ($workerId <= 0) {
@@ -66,7 +96,67 @@ class BrowseController
             exit;
         }
 
+        // Check if current user has booked this photographer before
+        $hasBookedBefore = false;
+        $currentUser = $_SESSION['user'] ?? null;
+        
+        if ($currentUser) {
+            require_once __DIR__ . '/../model/repositories/ChatRepository.php';
+            $chatRepo = new ChatRepository();
+            $hasBookedBefore = $chatRepo->hasUserBookedWorker($currentUser['user_id'], $workerId);
+        }
+
+        // Fetch additional profile data
+        require_once __DIR__ . '/../model/repositories/RatingRepository.php';
+        $ratingRepo = new RatingRepository();
+        
+        // Get reviews and ratings
+        $reviews = $ratingRepo->getWorkerRatings($workerId, 10);
+        $ratingStats = $ratingRepo->getWorkerRatingStats($workerId);
+        
+        // Ensure worker has the most up-to-date rating data
+        if (!empty($ratingStats) && $ratingStats['total_ratings'] > 0) {
+            $worker['average_rating'] = floatval($ratingStats['average_rating']);
+            $worker['total_ratings'] = intval($ratingStats['total_ratings']);
+        }
+        
+        // Get packages if they exist
+        $packages = $this->repo->getWorkerPackages($workerId);
+        
+        // Get recent work/portfolio
+        $recentWork = $this->repo->getWorkerRecentWork($workerId);
+        
+        // Get worker statistics from database
+        $workerStats = $this->repo->getWorkerStatistics($workerId);
+        
+        // Get specialty categories from database
+        $allSpecialties = $this->repo->getSpecialtyCategories();
+
         // Load profile view
         require 'views/home/profile.php';
+    }
+
+
+
+    public function getWorkerWithBookingStatus(int $workerId, int $userId): array
+    {
+        // Get worker info from repository
+        $worker = $this->repo->getWorkerByIdWithPortfolio($workerId);
+
+        if (!$worker) {
+            return [];
+        }
+
+        // Check booking status
+        require_once __DIR__ . '/../model/repositories/ChatRepository.php';
+        $chatRepo = new ChatRepository();
+        $incompleteBooking = $chatRepo->findIncompleteBooking($userId, $workerId);
+        $hasCompleted = $chatRepo->hasCompletedBooking($userId, $workerId);
+
+        $worker['has_incomplete_booking'] = !empty($incompleteBooking);
+        $worker['has_completed_booking'] = $hasCompleted;
+        $worker['incomplete_conversation_id'] = $incompleteBooking['conversation_id'] ?? null;
+
+        return $worker;
     }
 }

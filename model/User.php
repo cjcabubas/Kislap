@@ -1,6 +1,10 @@
 <?php
 class User
 {
+    // ========================================
+    // PROPERTIES
+    // ========================================
+    
     private ?int $user_id = null;
     private string $lastName;
     private string $firstName;
@@ -12,7 +16,10 @@ class User
     private ?string $profilePhotoUrl = null;
     private string $createdAt;
 
-
+    // ========================================
+    // CONSTRUCTOR
+    // ========================================
+    
     public function __construct(
         string $lastName,
         string $firstName,
@@ -32,7 +39,10 @@ class User
         $this->createdAt = date('Y-m-d H:i:s');
     }
 
-    // Getters
+    // ========================================
+    // GETTERS
+    // ========================================
+    
     public function getId(): ?int { return $this->user_id; }
     public function getLastName(): string { return $this->lastName; }
     public function getFirstName(): string { return $this->firstName; }
@@ -45,11 +55,17 @@ class User
     public function getCreatedAt(): string { return $this->createdAt; }
     public function getStatus(): string { return $this->status; }
 
-    // Setters
+    // ========================================
+    // SETTERS
+    // ========================================
+    
     public function setId(int $id): void { $this->user_id = $id; }
     public function setProfilePhotoUrl(?string $url): void { $this->profilePhotoUrl = $url; }
 
-    // Convert only fields that come from registration form
+    // ========================================
+    // UTILITY METHODS
+    // ========================================
+    
     public function toArray(): array
     {
         return [

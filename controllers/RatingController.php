@@ -1,27 +1,25 @@
 <?php
 
-// Include all necessary repositories
-require_once __DIR__ . '/../model/repositories/ChatRepository.php';
 require_once __DIR__ . '/../model/repositories/RatingRepository.php';
+require_once __DIR__ . '/../model/repositories/ChatRepository.php';
 
 class RatingController
 {
-    private $chatRepo;
-    private $ratingRepo;
+    private RatingRepository $ratingRepo;
+    private ChatRepository $chatRepo;
 
     public function __construct()
     {
-        $this->chatRepo = new ChatRepository();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
         $this->ratingRepo = new RatingRepository();
+        $this->chatRepo = new ChatRepository();
     }
 
     public function submitRating()
     {
         header('Content-Type: application/json');
-
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
 
         $user = $_SESSION['user'] ?? null;
         if (!$user) {
@@ -38,38 +36,65 @@ class RatingController
             exit;
         }
 
-        try {
-            // 1. Get required data from a repository (ChatRepository)
-            $conversation = $this->chatRepo->getConversationById($conversationId);
+        // Validate rating is between 1-5
+        if ($rating < 1 || $rating > 5) {
+            echo json_encode(['success' => false, 'error' => 'Invalid rating value']);
+            exit;
+        }
 
-            if (!$conversation || !isset($conversation['worker_id'])) {
-                echo json_encode(['success' => false, 'error' => 'Conversation or worker not found.']);
-                exit;
-            }
+        // Check if already rated
+        if ($this->ratingRepo->hasUserRated($conversationId, $user['user_id'])) {
+            echo json_encode(['success' => false, 'error' => 'You have already rated this service']);
+            exit;
+        }
 
-            $workerId = $conversation['worker_id'];
-            $userId = $user['user_id'];
+        // Get worker_id from conversation
+        $conversation = $this->chatRepo->getConversationById($conversationId);
+        if (!$conversation) {
+            echo json_encode(['success' => false, 'error' => 'Conversation not found']);
+            exit;
+        }
 
-            // 2. Delegate the main database action to the new repository (RatingRepository)
-            $success = $this->ratingRepo->submitRating(
+        $workerId = $conversation['worker_id'];
+
+        // Save rating
+        if ($this->ratingRepo->saveRating($conversationId, $user['user_id'], $workerId, $rating, $review)) {
+            // Send thank you message
+            $this->chatRepo->saveMessage(
                 $conversationId,
-                $userId,
-                $workerId,
-                (int)$rating, // Ensure rating is an integer
-                $review
+                $user['user_id'],
+                'user',
+                "⭐ I've rated this service {$rating}/5 stars. " .
+                ($review ? "Review: {$review}" : "Thank you for the excellent service!")
             );
 
-            // 3. Send response
-            if ($success) {
-                echo json_encode(['success' => true, 'message' => 'Rating submitted successfully!']);
-            } else {
-                echo json_encode(['success' => false, 'error' => 'Failed to submit rating']);
-            }
-
-        } catch (Exception $e) {
-            // Log the exception
-            echo json_encode(['success' => false, 'error' => 'An unexpected error occurred.']);
+            echo json_encode([
+                'success' => true,
+                'message' => 'Thank you for your feedback!'
+            ]);
+        } else {
+            echo json_encode(['success' => false, 'error' => 'Failed to save rating']);
         }
+        exit;
+    }
+
+    public function getWorkerRatings()
+    {
+        $workerId = $_GET['worker_id'] ?? null;
+
+        if (!$workerId) {
+            echo json_encode(['success' => false, 'error' => 'Worker ID required']);
+            exit;
+        }
+
+        $ratings = $this->ratingRepo->getWorkerRatings($workerId);
+        $stats = $this->ratingRepo->getWorkerRatingStats($workerId);
+
+        echo json_encode([
+            'success' => true,
+            'ratings' => $ratings,
+            'stats' => $stats
+        ]);
         exit;
     }
 }

@@ -6,32 +6,50 @@ class AdminController
 {
     private AdminRepository $repo;
 
+    // ========================================
+    // CONSTRUCTOR
+    // ========================================
+    
     public function __construct()
     {
         $this->repo = new AdminRepository();
     }
 
-    // Show login form
+    // ========================================
+    // AUTHENTICATION
+    // ========================================
+    
     public function login(): void
     {
         require __DIR__ . '/../views/admin/login.php';
     }
 
-    // Handle login
     public function handleLogin(): void
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            require_once __DIR__ . '/../model/Validator.php';
+            
             $username = trim($_POST['username'] ?? '');
-            $password = trim($_POST['password'] ?? '');
+            $password = $_POST['password'] ?? '';
 
             if (session_status() === PHP_SESSION_NONE) {
                 session_start();
             }
 
-            if ($username === '' || $password === '') {
+            if (empty($username) || empty($password)) {
                 $_SESSION['notification'] = [
                     'type' => 'error',
                     'message' => 'Username and password are required.'
+                ];
+                header("Location: index.php?controller=Admin&action=login");
+                exit;
+            }
+
+            $usernameValidation = Validator::validateUsername($username);
+            if (!$usernameValidation['valid']) {
+                $_SESSION['notification'] = [
+                    'type' => 'error',
+                    'message' => 'Invalid username format.'
                 ];
                 header("Location: index.php?controller=Admin&action=login");
                 exit;
@@ -43,7 +61,7 @@ class AdminController
                 if (!$admin) {
                     $_SESSION['notification'] = [
                         'type' => 'error',
-                        'message' => 'No admin account found.'
+                        'message' => 'Invalid username or password.'
                     ];
                     header("Location: index.php?controller=Admin&action=login");
                     exit;
@@ -52,13 +70,13 @@ class AdminController
                 if (!password_verify($password, $admin['password'])) {
                     $_SESSION['notification'] = [
                         'type' => 'error',
-                        'message' => 'Incorrect password.'
+                        'message' => 'Invalid username or password.'
                     ];
                     header("Location: index.php?controller=Admin&action=login");
                     exit;
                 }
 
-                unset($admin['password']); // never store plain password
+                unset($admin['password']);
 
                 $_SESSION['admin'] = [
                     'admin_id'   => $admin['admin_id'],
@@ -71,10 +89,12 @@ class AdminController
 
                 header("Location: index.php?controller=Admin&action=showDashboard");
                 exit;
+                
             } catch (Exception $e) {
+                error_log("Admin login error: " . $e->getMessage());
                 $_SESSION['notification'] = [
                     'type' => 'error',
-                    'message' => 'Error: ' . $e->getMessage()
+                    'message' => 'Login failed. Please try again.'
                 ];
                 header("Location: index.php?controller=Admin&action=login");
                 exit;
@@ -84,7 +104,6 @@ class AdminController
         }
     }
 
-    // Logout
     public function logout(): void
     {
         if (session_status() === PHP_SESSION_NONE) {
@@ -96,16 +115,114 @@ class AdminController
         exit;
     }
 
+    // ========================================
+    // DASHBOARD
+    // ========================================
+
     public function showDashboard()
     {
-        $pending = $this->repo->getPendingApplicationsCount('pending');
-        $accepted = $this->repo->getAcceptedApplicationsCount('accepted');
-        $rejected = $this->repo->getRejectedApplicationsCount('rejected');
+        $pending = $this->repo->getPendingApplicationsCount();
+        $approved = $this->repo->getApprovedWorkersCount();
+        $rejected = $this->repo->getRejectedApplicationsCount();
+        
         $userCount = $this->repo->getUserCount();
+        $totalUsers = $this->repo->getTotalUsers();
+        $totalWorkers = $this->repo->getTotalWorkers();
+
+        $activeBookings = $this->repo->getActiveBookingsCount();
+        $completedToday = $this->repo->getCompletedBookingsTodayCount();
+        $avgRating = $this->repo->getAverageRating();
+        $growthRate = $this->repo->getBookingGrowthRate();
+        
+        $totalEarnings = $this->repo->getTotalEarnings();
 
         require 'views/admin/dashboard.php';
     }
 
+    // ========================================
+    // WORKER MANAGEMENT
+    // ========================================
+    
+    public function viewApprovedWorkers()
+    {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        if (!isset($_SESSION['admin'])) {
+            header("Location: /Kislap/views/admin/login.php");
+            exit;
+        }
+
+        $limit = 15;
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        $offset = ($page - 1) * $limit;
+        $search = $_GET['search'] ?? '';
+        $statusFilter = $_GET['status'] ?? 'all';
+
+        $workers = $this->repo->getApprovedWorkers($limit, $offset, $search, $statusFilter);
+        $totalWorkers = $this->repo->getApprovedWorkersCount($search, $statusFilter);
+        $totalPages = ceil($totalWorkers / $limit);
+
+        $statusCounts = [
+            'all' => $this->repo->getApprovedWorkersCount('', 'all'),
+            'active' => $this->repo->getApprovedWorkersCount('', 'active'),
+            'suspended' => $this->repo->getApprovedWorkersCount('', 'suspended'),
+            'banned' => $this->repo->getApprovedWorkersCount('', 'banned')
+        ];
+
+        require 'views/admin/approved_workers.php';
+    }
+
+    public function handleWorkerAction()
+    {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        if (!isset($_SESSION['admin'])) {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['success' => false, 'message' => 'Method not allowed']);
+            exit;
+        }
+
+        $data = json_decode(file_get_contents('php://input'), true);
+        $workerId = $data['worker_id'] ?? null;
+        $action = $data['action'] ?? null;
+
+        if (!$workerId || !in_array($action, ['suspend', 'ban', 'activate'])) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Invalid worker_id or action']);
+            exit;
+        }
+
+        $statusMap = [
+            'suspend' => 'suspended',
+            'ban' => 'banned',
+            'activate' => 'active'
+        ];
+        $newStatus = $statusMap[$action];
+        $actionTitle = ucfirst($action);
+
+        try {
+            $success = $this->repo->updateWorkerStatus($workerId, $newStatus);
+
+            if ($success) {
+                echo json_encode(['success' => true, 'message' => "Worker ID #{$workerId} has been successfully {$actionTitle}d."]);
+            } else {
+                http_response_code(500);
+                echo json_encode(['success' => false, 'message' => 'Failed to update worker status in database.']);
+            }
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
+        }
+    }
+
+    // ========================================
+    // APPLICATION MANAGEMENT
+    // ========================================
+    
     public function viewPendingApplications() {
         if (session_status() === PHP_SESSION_NONE) session_start();
         if (!isset($_SESSION['admin'])) {
@@ -156,7 +273,12 @@ class AdminController
                 exit;
             }
 
-            $status = $action === 'approve' ? 'ACCEPTED' : 'REJECTED';
+            // Handle different status updates
+            if ($action === 'pending') {
+                $status = 'pending';
+            } else {
+                $status = $action === 'approve' ? 'ACCEPTED' : 'REJECTED';
+            }
 
             try {
                 $this->repo->updateApplicationStatus($id, $status);
@@ -203,6 +325,162 @@ class AdminController
         echo json_encode(['success' => false, 'message' => 'Invalid request']);
     }
 
+    public function deleteApplication() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $data = json_decode(file_get_contents('php://input'), true);
+            $id = $data['application_id'] ?? null;
+
+            if (!$id) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'message' => 'Missing application_id']);
+                exit;
+            }
+
+            try {
+                $success = $this->repo->deleteApplication($id);
+                
+                if ($success) {
+                    echo json_encode(['success' => true, 'message' => 'Application deleted permanently']);
+                } else {
+                    echo json_encode(['success' => false, 'message' => 'Failed to delete application']);
+                }
+            } catch (Exception $e) {
+                http_response_code(500);
+                error_log($e->getMessage());
+                echo json_encode(['success' => false, 'message' => 'Server error']);
+            }
+
+            exit;
+        }
+
+        http_response_code(405);
+        echo json_encode(['success' => false, 'message' => 'Invalid request']);
+    }
+
+    // ========================================
+    // ADMIN MANAGEMENT
+    // ========================================
+    
+    public function createAdmin() {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        if (!isset($_SESSION['admin'])) {
+            header("Location: /Kislap/views/admin/login.php");
+            exit;
+        }
+
+        require 'views/admin/create_admin.php';
+    }
+
+    public function handleCreateAdmin() {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        if (!isset($_SESSION['admin'])) {
+            header("Location: /Kislap/views/admin/login.php");
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            require_once __DIR__ . '/../model/Validator.php';
+            
+            $username = trim($_POST['username'] ?? '');
+            $firstName = trim($_POST['firstName'] ?? '');
+            $middleName = trim($_POST['middleName'] ?? '');
+            $lastName = trim($_POST['lastName'] ?? '');
+            $password = $_POST['password'] ?? '';
+            $confirmPassword = $_POST['confirmPassword'] ?? '';
+
+            $errors = [];
+
+            $usernameValidation = Validator::validateUsername($username);
+            if (!$usernameValidation['valid']) {
+                $errors[] = $usernameValidation['message'];
+            }
+
+            $firstNameValidation = Validator::validateName($firstName, 'first name');
+            if (!$firstNameValidation['valid']) {
+                $errors[] = $firstNameValidation['message'];
+            }
+
+            $lastNameValidation = Validator::validateName($lastName, 'last name');
+            if (!$lastNameValidation['valid']) {
+                $errors[] = $lastNameValidation['message'];
+            }
+
+            if (!empty($middleName)) {
+                $middleNameValidation = Validator::validateName($middleName, 'middle name');
+                if (!$middleNameValidation['valid']) {
+                    $errors[] = $middleNameValidation['message'];
+                }
+            }
+
+            $passwordValidation = Validator::validatePassword($password);
+            if (!$passwordValidation['valid']) {
+                $errors[] = $passwordValidation['message'];
+            }
+
+            if ($password !== $confirmPassword) {
+                $errors[] = 'Passwords do not match';
+            }
+
+            if (!empty($errors)) {
+                $_SESSION['notification'] = [
+                    'type' => 'error',
+                    'message' => 'Please fix the following errors: ' . implode(', ', $errors)
+                ];
+                $_SESSION['form_data'] = $_POST;
+                header("Location: index.php?controller=Admin&action=createAdmin");
+                exit;
+            }
+
+            $existingAdmin = $this->repo->findByUsername($username);
+            if ($existingAdmin) {
+                $_SESSION['notification'] = [
+                    'type' => 'error',
+                    'message' => 'Username already exists. Please choose a different username.'
+                ];
+                $_SESSION['form_data'] = $_POST;
+                header("Location: index.php?controller=Admin&action=createAdmin");
+                exit;
+            }
+
+            try {
+                $adminData = [
+                    'username' => Validator::sanitizeInput($username),
+                    'firstName' => Validator::sanitizeInput($firstName),
+                    'middleName' => Validator::sanitizeInput($middleName),
+                    'lastName' => Validator::sanitizeInput($lastName),
+                    'password' => $password
+                ];
+
+                $this->repo->signUp($adminData);
+
+                unset($_SESSION['form_data']);
+
+                $_SESSION['notification'] = [
+                    'type' => 'success',
+                    'message' => 'Admin account created successfully!'
+                ];
+                header("Location: index.php?controller=Admin&action=showDashboard");
+                exit;
+
+            } catch (Exception $e) {
+                error_log("Admin creation error: " . $e->getMessage());
+                $_SESSION['notification'] = [
+                    'type' => 'error',
+                    'message' => 'Error creating admin account. Please try again.'
+                ];
+                $_SESSION['form_data'] = $_POST;
+                header("Location: index.php?controller=Admin&action=createAdmin");
+                exit;
+            }
+        } else {
+            $this->createAdmin();
+        }
+    }
+
+    // ========================================
+    // HELPER METHODS
+    // ========================================
+    
     private function insertWorkerWorks(string $applicationId, int $workerId)
     {
         $works = $this->repo->getApplicationWorks($applicationId);
@@ -218,13 +496,11 @@ class AdminController
         }
 
         foreach ($works as $index => $work) {
-            // Check if worksFilePath exists
             if (empty($work['worksFilePath'])) {
                 error_log("Empty worksFilePath for work_id: " . ($work['work_id'] ?? 'unknown'));
                 continue;
             }
 
-            // Build source path - adjust this based on your actual file structure
             $source = __DIR__ . "/../" . $work['worksFilePath'];
 
             if (!file_exists($source)) {
@@ -232,25 +508,22 @@ class AdminController
                 continue;
             }
 
-            // Get extension from worksFilePath, not image_path
             $ext = pathinfo($work['worksFilePath'], PATHINFO_EXTENSION);
             $newFileName = $this->generateWorkerWorkFileName($workerId, $index + 1, $ext);
             $newPath = $targetDir . $newFileName;
 
-            // Copy the file
             if (!copy($source, $newPath)) {
                 error_log("Failed to copy $source to $newPath");
                 continue;
             }
 
-            // Insert into DB using relative path
             $dbPath = "uploads/workers/{$workerId}/{$newFileName}";
             $result = $this->repo->insertWorkerWork($workerId, $dbPath);
 
             if (!$result) {
                 error_log("Failed to insert worker work into DB: worker_id=$workerId, path=$dbPath");
             } else {
-                error_log("Successfully inserted work: $dbPath"); // Success log for debugging
+                error_log("Successfully inserted work: $dbPath");
             }
         }
     }
@@ -273,6 +546,30 @@ class AdminController
         require 'views/admin/application.php';
     }
 
+    public function viewRejectedApplications()
+    {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        if (!isset($_SESSION['admin'])) {
+            header("Location: /Kislap/views/admin/login.php");
+            exit;
+        }
+
+        $limit = 10;
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        $offset = ($page - 1) * $limit;
+        $search = $_GET['search'] ?? '';
+
+        $applications = $this->repo->getRejectedApplications($limit, $offset, $search);
+        $totalApplications = $this->repo->getRejectedApplicationsCount($search);
+        $totalPages = ceil($totalApplications / $limit);
+
+        require 'views/admin/rejected_applications.php';
+    }
+
+    // ========================================
+    // BOOKING MANAGEMENT
+    // ========================================
+    
     public function bookings()
     {
         require_once __DIR__ . '/../model/repositories/ChatRepository.php';
@@ -280,7 +577,6 @@ class AdminController
         
         $status = $_GET['status'] ?? 'all';
         
-        // Get all bookings
         $stmt = $chatRepo->conn->prepare(
             "SELECT c.conversation_id, c.booking_status, c.created_at,
                     u.firstName as user_first, u.lastName as user_last,
