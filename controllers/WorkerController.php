@@ -5,19 +5,13 @@ require_once __DIR__ . "/../model/repositories/WorkerRepository.php";
 
 class WorkerController
 {
-    // ========================================
-    // CONSTRUCTOR
-    // ========================================
+    private $repo;
 
     public function __construct()
     {
         $this->repo = new WorkerRepository();
     }
 
-    // ========================================
-    // AUTHENTICATION
-    // ========================================
-    
     public function login(): void
     {
         require "views/worker/login.php";
@@ -53,7 +47,6 @@ class WorkerController
                     exit;
                 }
 
-
                 if (!password_verify($password, $worker['password'])) {
                     $_SESSION['notification'] = [
                         'type' => 'error',
@@ -85,7 +78,6 @@ class WorkerController
                     'status' => $worker['status'],
                     'created_at' => $worker['created_at'],
                     'role' => 'worker'
-
                 ];
                 header("Location: index.php?controller=Worker&action=dashboard");
                 exit;
@@ -111,10 +103,6 @@ class WorkerController
         exit;
     }
 
-    // ========================================
-    // DASHBOARD
-    // ========================================
-    
     public function dashboard(): void
     {
         if (session_status() === PHP_SESSION_NONE) {
@@ -132,17 +120,25 @@ class WorkerController
         
         $workerId = $worker['worker_id'];
         
-        $stats = $chatRepo->getWorkerBookingStats($workerId);
+        $workerStats = $this->getWorkerStatistics($workerId);
+        $detailedStats = $chatRepo->getWorkerBookingStats($workerId);
         $recentBookings = $chatRepo->getWorkerBookings($workerId, null, 5);
-        $earningsData = $this->repo->getWorkerEarnings($workerId);
+        
+        $stats = array_merge($detailedStats, [
+            'total_bookings' => $workerStats['total_bookings'],
+            'avg_booking_value' => $workerStats['total_bookings'] > 0 ? 
+                ($workerStats['total_earnings'] / $workerStats['total_bookings']) : 0
+        ]);
+        
+        $earningsData = [
+            'total_earnings' => $workerStats['total_earnings'],
+            'rating_average' => $workerStats['rating_average'],
+            'total_ratings' => $workerStats['total_ratings']
+        ];
         
         require __DIR__ . '/../views/worker/dashboard.php';
     }
 
-    // ========================================
-    // PROFILE MANAGEMENT
-    // ========================================
-    
     public function profile(): void
     {
         if (session_status() === PHP_SESSION_NONE) {
@@ -163,7 +159,10 @@ class WorkerController
             exit;
         }
 
-        $worker = array_merge($worker, $workerData);
+        $workerStats = $this->getWorkerStatistics($workerId);
+        $worker = array_merge($worker, $workerData, $workerStats);
+        $_SESSION['worker'] = array_merge($_SESSION['worker'], $workerStats);
+        
         $existingPortfolio = $this->repo->getWorkerPortfolio($workerId);
         $existingPackages = $this->repo->getWorkerPackages($workerId);
         $isEditMode = isset($_GET['edit']) && $_GET['edit'] === 'true';
@@ -179,6 +178,7 @@ class WorkerController
 
         $worker = $_SESSION['worker'] ?? null;
         if (!$worker) {
+            $_SESSION['error'] = 'Session expired. Please log in again.';
             header("Location: index.php?controller=Worker&action=login");
             exit;
         }
@@ -189,8 +189,10 @@ class WorkerController
         }
 
         $workerId = $worker['worker_id'];
+        $messages = [];
 
         try {
+            // 1. UPDATE BASIC PROFILE DATA
             $profileData = [
                 'firstName' => trim($_POST['firstName'] ?? ''),
                 'middleName' => trim($_POST['middleName'] ?? ''),
@@ -202,169 +204,140 @@ class WorkerController
                 'bio' => trim($_POST['bio'] ?? '')
             ];
 
-            if (empty($profileData['firstName']) || empty($profileData['lastName']) ||
-                empty($profileData['phoneNumber']) || empty($profileData['address']) ||
-                empty($profileData['specialty']) || empty($profileData['bio'])) {
-                $_SESSION['error'] = 'Please fill in all required fields.';
-                header("Location: index.php?controller=Worker&action=profile&edit=true");
-                exit;
-            }
-
-            if (isset($_FILES['profile_photo']) && $_FILES['profile_photo']['error'] !== UPLOAD_ERR_NO_FILE) {
-                require_once __DIR__ . '/../model/Validator.php';
+            // 2. HANDLE PROFILE PHOTO UPLOAD
+            if (isset($_FILES['profile_photo']) && $_FILES['profile_photo']['error'] === UPLOAD_ERR_OK) {
+                $uploadDir = "uploads/workers/{$workerId}/";
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0755, true);
+                }
                 
-                $photoValidation = Validator::validateFile($_FILES['profile_photo'], 'profile_photo');
-                if (!$photoValidation['valid']) {
-                    $_SESSION['error'] = 'Profile photo error: ' . $photoValidation['message'];
-                    header("Location: index.php?controller=Worker&action=profile&edit=true");
-                    exit;
-                }
-
-                $targetDir = "uploads/workers/{$workerId}/";
-                if (!is_dir($targetDir)) {
-                    mkdir($targetDir, 0755, true);
-                }
-
-                $secureFilename = Validator::generateSecureFilename($_FILES['profile_photo']['name'], "worker{$workerId}_profile_");
-                $targetFile = $targetDir . $secureFilename;
-
-                if (move_uploaded_file($_FILES['profile_photo']['tmp_name'], $targetFile)) {
-                    chmod($targetFile, 0644);
-                    $profileData['profile_photo'] = $targetFile;
-                } else {
-                    $_SESSION['warning'] = 'Failed to upload profile photo.';
+                $fileName = $_FILES['profile_photo']['name'];
+                $tmpName = $_FILES['profile_photo']['tmp_name'];
+                $fileSize = $_FILES['profile_photo']['size'];
+                $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+                $fileType = mime_content_type($tmpName);
+                
+                if (in_array($fileType, $allowedTypes) && $fileSize <= 5 * 1024 * 1024) {
+                    $extension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+                    $secureFilename = "worker{$workerId}_profile_" . time() . "." . $extension;
+                    $targetPath = $uploadDir . $secureFilename;
+                    
+                    if (move_uploaded_file($tmpName, $targetPath)) {
+                        chmod($targetPath, 0644);
+                        $profileData['profile_photo'] = $targetPath;
+                        $messages[] = "Profile photo updated";
+                    }
                 }
             }
 
+            // 3. UPDATE DATABASE
             $this->repo->updateWorkerProfile($workerId, $profileData);
 
-            $currentPassword = trim($_POST['current_password'] ?? '');
-            $newPassword = trim($_POST['new_password'] ?? '');
-            $confirmPassword = trim($_POST['confirm_password'] ?? '');
-
-            if (!empty($currentPassword) && !empty($newPassword)) {
-                if ($newPassword !== $confirmPassword) {
-                    $_SESSION['error'] = 'New passwords do not match.';
-                    header("Location: index.php?controller=Worker&action=profile&edit=true");
-                    exit;
-                }
-
-                if (strlen($newPassword) < 6) {
-                    $_SESSION['error'] = 'Password must be at least 6 characters long.';
-                    header("Location: index.php?controller=Worker&action=profile&edit=true");
-                    exit;
-                }
-
-                $workerData = $this->repo->getWorkerById($workerId);
-                if (!password_verify($currentPassword, $workerData['password'])) {
-                    $_SESSION['error'] = 'Current password is incorrect.';
-                    header("Location: index.php?controller=Worker&action=profile&edit=true");
-                    exit;
-                }
-
-                $this->repo->updateWorkerPassword($workerId, $newPassword);
+            // 4. UPDATE SESSION
+            foreach ($profileData as $key => $value) {
+                $_SESSION['worker'][$key] = $value;
             }
 
-            $packagesData = $_POST['packages'] ?? [];
-            if (!empty($packagesData)) {
-                $this->repo->syncWorkerPackages($workerId, $packagesData);
-            }
-
+            // 5. HANDLE PORTFOLIO IMAGES
             if (isset($_FILES['portfolio_images']) && !empty($_FILES['portfolio_images']['tmp_name'][0])) {
                 $portfolioResult = $this->handlePortfolioUpload($_FILES['portfolio_images'], $workerId);
-                if (!$portfolioResult['success']) {
-                    $_SESSION['error'] = $portfolioResult['message'];
-                    header("Location: index.php?controller=Worker&action=profile&edit=true");
-                    exit;
+                if ($portfolioResult['success']) {
+                    $messages[] = $portfolioResult['message'];
+                } else {
+                    $messages[] = "Portfolio error: " . $portfolioResult['message'];
                 }
             }
 
-            $_SESSION['worker']['firstName'] = $profileData['firstName'];
-            $_SESSION['worker']['middleName'] = $profileData['middleName'];
-            $_SESSION['worker']['lastName'] = $profileData['lastName'];
-            $_SESSION['worker']['phoneNumber'] = $profileData['phoneNumber'];
-            $_SESSION['worker']['address'] = $profileData['address'];
-            $_SESSION['worker']['specialty'] = $profileData['specialty'];
-            $_SESSION['worker']['experience_years'] = $profileData['experience_years'];
-            $_SESSION['worker']['bio'] = $profileData['bio'];
-
-            if (isset($profileData['profile_photo'])) {
-                $_SESSION['worker']['profile_photo'] = $profileData['profile_photo'];
+            // 6. SET SUCCESS MESSAGE
+            if (empty($messages)) {
+                $_SESSION['success'] = 'Profile updated successfully!';
+            } else {
+                $_SESSION['success'] = 'Profile updated! ' . implode(' | ', $messages);
             }
 
-            $_SESSION['success'] = 'Profile updated successfully!';
             header("Location: index.php?controller=Worker&action=profile");
             exit;
 
         } catch (Exception $e) {
             error_log("Profile update error: " . $e->getMessage());
-            $_SESSION['error'] = 'Failed to update profile. Please try again.';
+            $_SESSION['error'] = 'Failed to update profile: ' . $e->getMessage();
             header("Location: index.php?controller=Worker&action=profile&edit=true");
             exit;
         }
     }
 
-
-    // ========================================
-    // PORTFOLIO MANAGEMENT
-    // ========================================
-    
     private function handlePortfolioUpload(array $files, int $workerId): array
     {
-        require_once __DIR__ . '/../model/Validator.php';
+        $uploadedCount = 0;
+        $errors = [];
         
-        $maxImages = 8;
-        $currentCount = $this->repo->getWorkerPortfolioCount($workerId);
-        $validation = Validator::validateMultipleFiles($files, 'portfolio', $maxImages);
-        
-        if (!$validation['valid']) {
-            return ['success' => false, 'message' => implode(', ', $validation['errors'])];
-        }
-
-        $availableSlots = $maxImages - $currentCount;
-        if (count($validation['files']) > $availableSlots) {
-            return ['success' => false, 'message' => "You can only upload {$availableSlots} more images (maximum {$maxImages} total)"];
-        }
-
+        // Create upload directory
         $uploadDir = "uploads/workers/{$workerId}/";
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }
-
-        $uploadedCount = 0;
-        $errors = [];
-
-        foreach ($validation['files'] as $file) {
-            try {
-                $secureFilename = Validator::generateSecureFilename($file['name'], "worker{$workerId}_work_");
-                $targetPath = $uploadDir . $secureFilename;
-
-                if (move_uploaded_file($file['tmp_name'], $targetPath)) {
-                    chmod($targetPath, 0644);
-                    $this->repo->insertWorkerWork($workerId, $targetPath);
-                    $uploadedCount++;
-                } else {
-                    $errors[] = "Failed to upload: " . $file['name'];
+        
+        // Handle multiple files
+        if (is_array($files['name'])) {
+            $fileCount = count($files['name']);
+            
+            for ($i = 0; $i < $fileCount; $i++) {
+                // Skip if no file or error
+                if ($files['error'][$i] !== UPLOAD_ERR_OK || empty($files['tmp_name'][$i])) {
+                    continue;
                 }
-            } catch (Exception $e) {
-                $errors[] = "Error uploading " . $file['name'] . ": " . $e->getMessage();
+                
+                // Basic validation
+                $fileName = $files['name'][$i];
+                $tmpName = $files['tmp_name'][$i];
+                $fileSize = $files['size'][$i];
+                
+                // Check file type
+                $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+                $fileType = mime_content_type($tmpName);
+                
+                if (!in_array($fileType, $allowedTypes)) {
+                    $errors[] = "Invalid file type: {$fileName}";
+                    continue;
+                }
+                
+                // Check file size (10MB max)
+                if ($fileSize > 10 * 1024 * 1024) {
+                    $errors[] = "File too large: {$fileName}";
+                    continue;
+                }
+                
+                // Generate secure filename
+                $extension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+                $secureFilename = "worker{$workerId}_work_" . time() . "_" . $i . "." . $extension;
+                $targetPath = $uploadDir . $secureFilename;
+                
+                // Move file and save to database
+                if (move_uploaded_file($tmpName, $targetPath)) {
+                    chmod($targetPath, 0644);
+                    
+                    if ($this->repo->insertWorkerWork($workerId, $targetPath)) {
+                        $uploadedCount++;
+                    } else {
+                        $errors[] = "Database error: {$fileName}";
+                        unlink($targetPath);
+                    }
+                } else {
+                    $errors[] = "Upload failed: {$fileName}";
+                }
             }
         }
-
+        
+        // Return result
         if ($uploadedCount > 0) {
-            $message = "{$uploadedCount} portfolio image(s) uploaded successfully!";
+            $message = "{$uploadedCount} image(s) uploaded successfully!";
             if (!empty($errors)) {
-                $message .= " Some files failed: " . implode(', ', $errors);
+                $message .= " Errors: " . implode(', ', $errors);
             }
-            
-            if (!isset($_SESSION['success'])) {
-                $_SESSION['success'] = $message;
-            }
-            
             return ['success' => true, 'message' => $message];
         }
-
-        return ['success' => false, 'message' => 'No files were uploaded. ' . implode(', ', $errors)];
+        
+        return ['success' => false, 'message' => 'No files uploaded. ' . implode(', ', $errors)];
     }
 
     public function removePortfolioImage(): void
@@ -394,7 +367,6 @@ class WorkerController
         }
 
         try {
-            // Get image path before deleting
             $work = $this->repo->getWorkerWorkById($workId, $workerId);
 
             if (!$work) {
@@ -402,10 +374,8 @@ class WorkerController
                 exit;
             }
 
-            // Delete from database
             $this->repo->deleteWorkerWork($workId, $workerId);
 
-            // Delete physical file
             $filePath = $work['image_path'];
             if (file_exists($filePath)) {
                 unlink($filePath);
@@ -418,436 +388,42 @@ class WorkerController
         }
     }
 
-    // ========================================
-    // BOOKING MANAGEMENT
-    // ========================================
-    
-    public function bookings(): void
-    {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
-        $worker = $_SESSION['worker'] ?? null;
-        if (!$worker) {
-            header("Location: index.php?controller=Worker&action=login");
-            exit;
-        }
-
-        require_once __DIR__ . '/../model/repositories/ChatRepository.php';
-        $chatRepo = new ChatRepository();
-        
-        $workerId = $worker['worker_id'];
-        $status = $_GET['status'] ?? null;
-        
-        // Get bookings
-        $bookings = $chatRepo->getWorkerBookings($workerId, $status);
-        
-        require __DIR__ . '/../views/worker/bookings.php';
-    }
-
-    public function acceptBooking(): void
-    {
-        header('Content-Type: application/json');
-
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
-        $worker = $_SESSION['worker'] ?? null;
-        if (!$worker) {
-            echo json_encode(['success' => false, 'error' => 'Not authenticated']);
-            exit;
-        }
-
-        $conversationId = $_POST['conversation_id'] ?? null;
-
-        if (!$conversationId) {
-            echo json_encode(['success' => false, 'error' => 'Missing conversation ID']);
-            exit;
-        }
-
-        try {
-            require_once __DIR__ . '/../model/repositories/ChatRepository.php';
-            $chatRepo = new ChatRepository();
-
-            // Update conversation status to 'confirmed'
-            if ($chatRepo->updateConversationStatus($conversationId, 'confirmed')) {
-                // Send message to user
-                $chatRepo->saveMessage(
-                    $conversationId,
-                    $worker['worker_id'],
-                    'worker',
-                    "✅ I've accepted your booking! Please proceed with the 50% down payment to confirm."
-                );
-
-                echo json_encode(['success' => true, 'message' => 'Booking accepted!']);
-            } else {
-                echo json_encode(['success' => false, 'error' => 'Failed to accept booking']);
-            }
-        } catch (Exception $e) {
-            error_log("Accept booking error: " . $e->getMessage());
-            echo json_encode(['success' => false, 'error' => 'An error occurred: ' . $e->getMessage()]);
-        }
-        exit;
-    }
-
-    public function rejectBooking(int $conversationId, ?string $reason = null): bool
+    private function getWorkerStatistics(int $workerId): array
     {
         try {
-            $this->conn->beginTransaction();
-
-            // Reset proposed values and mark as cancelled
-            $stmt = $this->conn->prepare(
-                "UPDATE ai_temp_bookings 
-             SET cancellation_reason = ?, 
-                 cancelled_by = 'worker' 
-             WHERE conversation_id = ?"
-            );
-            $stmt->execute([$reason, $conversationId]);
-
-            // Set status to cancelled
-            $stmt = $this->conn->prepare(
-                "UPDATE conversations SET booking_status = 'cancelled' WHERE conversation_id = ?"
-            );
-            $stmt->execute([$conversationId]);
-
-            $this->conn->commit();
-            return true;
+            $conn = new PDO("mysql:host=localhost;dbname=kislap", "root", "");
+            $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            
+            $stmt = $conn->prepare("
+                SELECT 
+                    COALESCE(AVG(r.rating), 0) as rating_average,
+                    COALESCE(COUNT(DISTINCT r.rating_id), 0) as total_ratings,
+                    COALESCE(COUNT(DISTINCT c.conversation_id), 0) as total_bookings,
+                    COALESCE(SUM(CASE WHEN atb.final_price > 0 THEN atb.final_price ELSE atb.budget END), 0) as total_earnings
+                FROM workers w
+                LEFT JOIN conversations c ON w.worker_id = c.worker_id
+                LEFT JOIN ratings r ON c.conversation_id = r.conversation_id AND r.worker_id = w.worker_id
+                LEFT JOIN ai_temp_bookings atb ON c.conversation_id = atb.conversation_id
+                WHERE w.worker_id = ?
+            ");
+            
+            $stmt->execute([$workerId]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            return $result ?: [
+                'rating_average' => 0,
+                'total_ratings' => 0,
+                'total_bookings' => 0,
+                'total_earnings' => 0
+            ];
         } catch (Exception $e) {
-            $this->conn->rollBack();
-            error_log("Error rejecting booking: " . $e->getMessage());
-            return false;
+            error_log("Error fetching worker statistics: " . $e->getMessage());
+            return [
+                'rating_average' => 0,
+                'total_ratings' => 0,
+                'total_bookings' => 0,
+                'total_earnings' => 0
+            ];
         }
-    }
-    
-    // ========================================
-    // BOOKING CONTROLS
-    // ========================================
-    
-    public function proposePrice(): void
-    {
-        header('Content-Type: application/json');
-        
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
-        $worker = $_SESSION['worker'] ?? null;
-        if (!$worker) {
-            echo json_encode(['success' => false, 'error' => 'Not authenticated']);
-            exit;
-        }
-
-        $conversationId = $_POST['conversation_id'] ?? null;
-        $proposedPrice = $_POST['proposed_price'] ?? null;
-        $notes = $_POST['notes'] ?? null;
-        
-        if (!$conversationId || !$proposedPrice) {
-            echo json_encode(['success' => false, 'error' => 'Missing required fields']);
-            exit;
-        }
-
-        require_once __DIR__ . '/../model/repositories/ChatRepository.php';
-        $chatRepo = new ChatRepository();
-        
-        if ($chatRepo->proposePrice($conversationId, (float)$proposedPrice, $notes)) {
-            // Send notification message to client
-            $message = "I've reviewed your booking request. I'd like to propose a price of ₱" . number_format($proposedPrice, 2);
-            if ($notes) {
-                $message .= "\n\nNote: " . $notes;
-            }
-            $chatRepo->saveMessage($conversationId, $worker['worker_id'], 'worker', $message);
-            
-            echo json_encode(['success' => true, 'message' => 'Price proposal sent']);
-        } else {
-            echo json_encode(['success' => false, 'error' => 'Failed to propose price']);
-        }
-        exit;
-    }
-    
-    public function proposeDateTime(): void
-    {
-        header('Content-Type: application/json');
-        
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
-        $worker = $_SESSION['worker'] ?? null;
-        if (!$worker) {
-            echo json_encode(['success' => false, 'error' => 'Not authenticated']);
-            exit;
-        }
-
-        $conversationId = $_POST['conversation_id'] ?? null;
-        $proposedDate = $_POST['proposed_date'] ?? null;
-        $proposedTime = $_POST['proposed_time'] ?? null;
-        $reason = $_POST['reason'] ?? null;
-        
-        if (!$conversationId || !$proposedDate) {
-            echo json_encode(['success' => false, 'error' => 'Missing required fields']);
-            exit;
-        }
-
-        require_once __DIR__ . '/../model/repositories/ChatRepository.php';
-        $chatRepo = new ChatRepository();
-        
-        if ($chatRepo->proposeDateTime($conversationId, $proposedDate, $proposedTime, $reason)) {
-            // Send notification message to client
-            $message = "I'd like to propose an alternative date: " . date('F d, Y', strtotime($proposedDate));
-            if ($proposedTime) {
-                $message .= " at " . date('h:i A', strtotime($proposedTime));
-            }
-            if ($reason) {
-                $message .= "\n\nReason: " . $reason;
-            }
-            $chatRepo->saveMessage($conversationId, $worker['worker_id'], 'worker', $message);
-            
-            echo json_encode(['success' => true, 'message' => 'Date/time proposal sent']);
-        } else {
-            echo json_encode(['success' => false, 'error' => 'Failed to propose date/time']);
-        }
-        exit;
-    }
-    
-    public function requestMoreInfo(): void
-    {
-        header('Content-Type: application/json');
-        
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
-        $worker = $_SESSION['worker'] ?? null;
-        if (!$worker) {
-            echo json_encode(['success' => false, 'error' => 'Not authenticated']);
-            exit;
-        }
-
-        $conversationId = $_POST['conversation_id'] ?? null;
-        $message = $_POST['message'] ?? null;
-        
-        if (!$conversationId || !$message) {
-            echo json_encode(['success' => false, 'error' => 'Missing required fields']);
-            exit;
-        }
-
-        require_once __DIR__ . '/../model/repositories/ChatRepository.php';
-        $chatRepo = new ChatRepository();
-        
-        if ($chatRepo->requestMoreInfo($conversationId, $message)) {
-            echo json_encode(['success' => true, 'message' => 'Information request sent']);
-        } else {
-            echo json_encode(['success' => false, 'error' => 'Failed to send request']);
-        }
-        exit;
-    }
-    
-    public function updateBookingDetails(): void
-    {
-        header('Content-Type: application/json');
-        
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
-        $worker = $_SESSION['worker'] ?? null;
-        if (!$worker) {
-            echo json_encode(['success' => false, 'error' => 'Not authenticated']);
-            exit;
-        }
-
-        $conversationId = $_POST['conversation_id'] ?? null;
-        
-        if (!$conversationId) {
-            echo json_encode(['success' => false, 'error' => 'Missing conversation ID']);
-            exit;
-        }
-        
-        // Collect updates
-        $updates = [];
-        $allowedFields = ['event_date', 'event_time', 'event_location', 'final_price', 'worker_notes', 'package_id'];
-        
-        foreach ($allowedFields as $field) {
-            if (isset($_POST[$field]) && $_POST[$field] !== '') {
-                $updates[$field] = $_POST[$field];
-            }
-        }
-        
-        if (empty($updates)) {
-            echo json_encode(['success' => false, 'error' => 'No updates provided']);
-            exit;
-        }
-
-        require_once __DIR__ . '/../model/repositories/ChatRepository.php';
-        $chatRepo = new ChatRepository();
-        
-        if ($chatRepo->updateBookingDetails($conversationId, $updates)) {
-            echo json_encode(['success' => true, 'message' => 'Booking updated successfully']);
-        } else {
-            echo json_encode(['success' => false, 'error' => 'Failed to update booking']);
-        }
-        exit;
-    }
-    
-    public function setDeposit(): void
-    {
-        header('Content-Type: application/json');
-        
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
-        $worker = $_SESSION['worker'] ?? null;
-        if (!$worker) {
-            echo json_encode(['success' => false, 'error' => 'Not authenticated']);
-            exit;
-        }
-
-        $conversationId = $_POST['conversation_id'] ?? null;
-        $depositAmount = $_POST['deposit_amount'] ?? null;
-        
-        if (!$conversationId || !$depositAmount) {
-            echo json_encode(['success' => false, 'error' => 'Missing required fields']);
-            exit;
-        }
-
-        require_once __DIR__ . '/../model/repositories/ChatRepository.php';
-        $chatRepo = new ChatRepository();
-        
-        if ($chatRepo->setDepositAmount($conversationId, (float)$depositAmount)) {
-            // Send notification message
-            $message = "A deposit of ₱" . number_format($depositAmount, 2) . " is required to confirm this booking.";
-            $chatRepo->saveMessage($conversationId, $worker['worker_id'], 'worker', $message);
-            
-            echo json_encode(['success' => true, 'message' => 'Deposit amount set']);
-        } else {
-            echo json_encode(['success' => false, 'error' => 'Failed to set deposit']);
-        }
-        exit;
-    }
-    
-    public function getBookingStats(): void
-    {
-        header('Content-Type: application/json');
-        
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
-        $worker = $_SESSION['worker'] ?? null;
-        if (!$worker) {
-            echo json_encode(['success' => false, 'error' => 'Not authenticated']);
-            exit;
-        }
-
-        $startDate = $_GET['start_date'] ?? null;
-        $endDate = $_GET['end_date'] ?? null;
-
-        require_once __DIR__ . '/../model/repositories/ChatRepository.php';
-        $chatRepo = new ChatRepository();
-        
-        $stats = $chatRepo->getWorkerBookingStats($worker['worker_id'], $startDate, $endDate);
-        echo json_encode(['success' => true, 'stats' => $stats]);
-        exit;
-    }
-    
-    // ========================================
-    // AVAILABILITY MANAGEMENT
-    // ========================================
-    
-    public function manageAvailability(): void
-    {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
-        $worker = $_SESSION['worker'] ?? null;
-        if (!$worker) {
-            header("Location: index.php?controller=Worker&action=login");
-            exit;
-        }
-
-        require_once __DIR__ . '/../model/repositories/ChatRepository.php';
-        $chatRepo = new ChatRepository();
-        
-        $workerId = $worker['worker_id'];
-        
-        // Get availability for next 90 days
-        $startDate = date('Y-m-d');
-        $endDate = date('Y-m-d', strtotime('+90 days'));
-        $availability = $chatRepo->getAvailabilityRange($workerId, $startDate, $endDate);
-        
-        require __DIR__ . '/../views/worker/availability.php';
-    }
-    
-    public function setAvailability(): void
-    {
-        header('Content-Type: application/json');
-        
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
-        $worker = $_SESSION['worker'] ?? null;
-        if (!$worker) {
-            echo json_encode(['success' => false, 'error' => 'Not authenticated']);
-            exit;
-        }
-
-        $date = $_POST['date'] ?? null;
-        $isAvailable = isset($_POST['is_available']) ? (bool)$_POST['is_available'] : true;
-        $startTime = $_POST['start_time'] ?? null;
-        $endTime = $_POST['end_time'] ?? null;
-        $maxBookings = $_POST['max_bookings'] ?? 1;
-        
-        if (!$date) {
-            echo json_encode(['success' => false, 'error' => 'Missing date']);
-            exit;
-        }
-
-        require_once __DIR__ . '/../model/repositories/ChatRepository.php';
-        $chatRepo = new ChatRepository();
-        
-        if ($chatRepo->setAvailability($worker['worker_id'], $date, $isAvailable, $startTime, $endTime, (int)$maxBookings)) {
-            echo json_encode(['success' => true, 'message' => 'Availability updated']);
-        } else {
-            echo json_encode(['success' => false, 'error' => 'Failed to update availability']);
-        }
-        exit;
-    }
-    
-    public function blockDates(): void
-    {
-        header('Content-Type: application/json');
-        
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
-        $worker = $_SESSION['worker'] ?? null;
-        if (!$worker) {
-            echo json_encode(['success' => false, 'error' => 'Not authenticated']);
-            exit;
-        }
-
-        $dates = $_POST['dates'] ?? [];
-        $reason = $_POST['reason'] ?? null;
-        
-        if (empty($dates)) {
-            echo json_encode(['success' => false, 'error' => 'No dates provided']);
-            exit;
-        }
-
-        require_once __DIR__ . '/../model/repositories/ChatRepository.php';
-        $chatRepo = new ChatRepository();
-        
-        if ($chatRepo->blockDates($worker['worker_id'], $dates, $reason)) {
-            echo json_encode(['success' => true, 'message' => count($dates) . ' date(s) blocked']);
-        } else {
-            echo json_encode(['success' => false, 'error' => 'Failed to block dates']);
-        }
-        exit;
     }
 }

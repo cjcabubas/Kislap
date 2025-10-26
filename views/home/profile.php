@@ -141,7 +141,13 @@ $joinedYear = $joinedDate ? date('Y', strtotime($joinedDate)) : date('Y');
             <div class="profile-main-info">
                 <div class="profile-avatar-large">
                     <?php if ($profilePicture): ?>
-                        <img src="<?php echo htmlspecialchars($profilePicture); ?>"
+                        <?php 
+                        $profileImagePath = $profilePicture;
+                        if (!str_starts_with($profileImagePath, '/Kislap/') && !str_starts_with($profileImagePath, 'http')) {
+                            $profileImagePath = '/Kislap/' . $profileImagePath;
+                        }
+                        ?>
+                        <img src="<?php echo htmlspecialchars($profileImagePath); ?>"
                              alt="<?php echo htmlspecialchars($businessName); ?>"
                              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                         <div class="avatar-placeholder" style="display:none;">
@@ -246,15 +252,18 @@ $joinedYear = $joinedDate ? date('Y', strtotime($joinedDate)) : date('Y');
                         <div class="portfolio-grid">
                             <?php foreach ($recentWork as $index => $work): ?>
                                 <div class="portfolio-item" onclick="openLightbox(<?php echo $index; ?>)">
-                                    <img src="<?php echo htmlspecialchars($work['image_path']); ?>"
-                                         alt="<?php echo htmlspecialchars($work['title'] ?? 'Portfolio image'); ?>"
+                                    <?php 
+                                    $imagePath = $work['image_path'];
+                                    if (!str_starts_with($imagePath, '/Kislap/') && !str_starts_with($imagePath, 'http')) {
+                                        $imagePath = '/Kislap/' . $imagePath;
+                                    }
+                                    ?>
+                                    <img src="<?php echo htmlspecialchars($imagePath); ?>"
+                                         alt=""
                                          loading="lazy"
                                          onerror="this.parentElement.style.display='none'">
                                     <div class="portfolio-overlay">
                                         <i class="fas fa-search-plus"></i>
-                                        <?php if ($work['title']): ?>
-                                            <span class="portfolio-title"><?php echo htmlspecialchars($work['title']); ?></span>
-                                        <?php endif; ?>
                                     </div>
                                 </div>
                             <?php endforeach; ?>
@@ -264,8 +273,14 @@ $joinedYear = $joinedDate ? date('Y', strtotime($joinedDate)) : date('Y');
                         <div class="portfolio-grid">
                             <?php foreach ($portfolioImages as $index => $image): ?>
                                 <div class="portfolio-item" onclick="openLightbox(<?php echo $index; ?>)">
-                                    <img src="<?php echo htmlspecialchars($image); ?>"
-                                         alt="Portfolio image <?php echo $index + 1; ?>"
+                                    <?php 
+                                    $imagePath = $image;
+                                    if (!str_starts_with($imagePath, '/Kislap/') && !str_starts_with($imagePath, 'http')) {
+                                        $imagePath = '/Kislap/' . $imagePath;
+                                    }
+                                    ?>
+                                    <img src="<?php echo htmlspecialchars($imagePath); ?>"
+                                         alt=""
                                          loading="lazy"
                                          onerror="this.parentElement.style.display='none'">
                                     <div class="portfolio-overlay">
@@ -332,7 +347,13 @@ $joinedYear = $joinedDate ? date('Y', strtotime($joinedDate)) : date('Y');
                                         <div class="reviewer-info">
                                             <div class="reviewer-avatar">
                                                 <?php if ($review['user_photo']): ?>
-                                                    <img src="<?php echo htmlspecialchars($review['user_photo']); ?>" alt="Reviewer">
+                                                    <?php 
+                                                    $reviewerImagePath = $review['user_photo'];
+                                                    if (!str_starts_with($reviewerImagePath, '/Kislap/') && !str_starts_with($reviewerImagePath, 'http')) {
+                                                        $reviewerImagePath = '/Kislap/' . $reviewerImagePath;
+                                                    }
+                                                    ?>
+                                                    <img src="<?php echo htmlspecialchars($reviewerImagePath); ?>" alt="Reviewer">
                                                 <?php else: ?>
                                                     <?php echo strtoupper(substr($review['user_name'], 0, 2)); ?>
                                                 <?php endif; ?>
@@ -567,8 +588,18 @@ $joinedYear = $joinedDate ? date('Y', strtotime($joinedDate)) : date('Y');
 
 <script>
     // Portfolio lightbox functionality
-    const portfolioImages = <?php echo json_encode(array_column($recentWork, 'image_path')); ?>;
-    const portfolioTitles = <?php echo json_encode(array_column($recentWork, 'title')); ?>;
+    const portfolioImages = <?php 
+        $correctedPaths = [];
+        foreach ($recentWork as $work) {
+            $imagePath = $work['image_path'];
+            if (!str_starts_with($imagePath, '/Kislap/') && !str_starts_with($imagePath, 'http')) {
+                $imagePath = '/Kislap/' . $imagePath;
+            }
+            $correctedPaths[] = $imagePath;
+        }
+        echo json_encode($correctedPaths); 
+    ?>;
+    const portfolioTitles = <?php echo json_encode(array_fill(0, count($recentWork), 'Portfolio Image')); ?>;
     let currentImageIndex = 0;
 
     function openLightbox(index) {

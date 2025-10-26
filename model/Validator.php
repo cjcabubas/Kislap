@@ -350,14 +350,8 @@ class Validator
             return $result;
         }
         
-        $imageInfo = getimagesize($file['tmp_name']);
-        $width = $imageInfo[0];
-        $height = $imageInfo[1];
-        
-        if ($width < 800 || $height < 600) {
-            return ['valid' => false, 'message' => 'Portfolio images should be at least 800x600 pixels for professional quality'];
-        }
-        
+        // No minimum size restriction for portfolio images
+        // Just validate that it's a proper image file
         return ['valid' => true, 'message' => 'Valid portfolio image'];
     }
     

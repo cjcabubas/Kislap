@@ -8,13 +8,14 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: #0a0a0a;
     min-height: 100vh;
-    padding: 20px;
     color: #fff;
 }
 
 .dashboard-container {
     max-width: 1400px;
     margin: 0 auto;
+    margin-top: 80px; /* Space for fixed navbar (navbar height) */
+    padding: 20px;
 }
 
 /* Header Section */

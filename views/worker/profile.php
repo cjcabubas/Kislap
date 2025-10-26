@@ -64,6 +64,8 @@ $existingPortfolio = $existingPortfolio ?? [];
         <?php endif; ?>
     </div>
 
+
+
     <?php if ($isEditMode): ?>
     <!-- EDIT MODE - Form -->
     <form method="POST" action="?controller=Worker&action=updateProfile" enctype="multipart/form-data"
@@ -558,7 +560,13 @@ $existingPortfolio = $existingPortfolio ?? [];
                         foreach ($existingPortfolio as $index => $portfolioItem): ?>
                             <div class="<?php echo $isEditMode ? 'portfolio-item' : 'portfolio-item-view'; ?>"
                                  data-work-id="<?php echo $portfolioItem['work_id']; ?>">
-                                <img src="<?php echo htmlspecialchars($portfolioItem['image_path']); ?>"
+                                <?php 
+                                $imagePath = $portfolioItem['image_path'];
+                                if (!str_starts_with($imagePath, '/Kislap/') && !str_starts_with($imagePath, 'http')) {
+                                    $imagePath = '/Kislap/' . $imagePath;
+                                }
+                                ?>
+                                <img src="<?php echo htmlspecialchars($imagePath); ?>"
                                      alt="Portfolio <?php echo $index + 1; ?>">
                                 <?php if ($isEditMode): ?>
                                     <button type="button" class="btn-remove"
@@ -676,27 +684,23 @@ $existingPortfolio = $existingPortfolio ?? [];
 
             if (files.length > availableSlots) {
                 alert(`You can only upload ${availableSlots} more image(s). Maximum is ${maxImages} images total.`);
+                return;
             }
 
-            // Preview each selected file
-            let successCount = 0;
-            Array.from(files).slice(0, availableSlots).forEach((file) => {
+            // Simple approach - just show preview without complex file management
+            Array.from(files).forEach((file, index) => {
                 // Validate file type
                 if (!file.type.startsWith('image/')) {
                     alert(`"${file.name}" is not a valid image file.`);
                     return;
                 }
 
-                // Validate file size (5MB)
-                const maxSize = 5 * 1024 * 1024;
+                // Validate file size (10MB to match server validation)
+                const maxSize = 10 * 1024 * 1024;
                 if (file.size > maxSize) {
-                    alert(`"${file.name}" is too large. Maximum size is 5MB.`);
+                    alert(`"${file.name}" is too large. Maximum size is 10MB.`);
                     return;
                 }
-
-                // Store the file
-                const fileIndex = selectedPortfolioFiles.length;
-                selectedPortfolioFiles.push(file);
 
                 // Create preview
                 const reader = new FileReader();
@@ -704,63 +708,25 @@ $existingPortfolio = $existingPortfolio ?? [];
                     const portfolioItem = document.createElement('div');
                     portfolioItem.className = 'portfolio-item';
                     portfolioItem.setAttribute('data-preview', 'true');
-                    portfolioItem.setAttribute('data-file-index', fileIndex);
                     portfolioItem.innerHTML = `
                         <img src="${e.target.result}" alt="Portfolio Preview">
                         <div class="preview-badge">
                             <i class="fas fa-clock"></i> New
                         </div>
-                        <button type="button" class="btn-remove btn-remove-preview">
-                            <i class="fas fa-times"></i>
-                        </button>
                     `;
 
-                    // Add click event to the remove button
-                    const removeBtn = portfolioItem.querySelector('.btn-remove-preview');
-                    removeBtn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        removePreviewImage(this);
-                    });
-
                     portfolioGrid.appendChild(portfolioItem);
-                    successCount++;
                     updatePortfolioCount();
                 };
                 reader.readAsDataURL(file);
             });
 
-            console.log(`Added ${successCount} previews`);
-
-            // Reset input
-            this.value = '';
+            // Don't reset the input - let the form handle the files naturally
+            console.log(`Files ready for upload: ${files.length}`);
         });
     }
 
-    // Remove preview image (before saving)
-    function removePreviewImage(button) {
-        const item = button.closest('.portfolio-item[data-preview]');
-        if (item) {
-            // Remove from selectedFiles array
-            const fileIndex = parseInt(item.getAttribute('data-file-index'));
-            selectedPortfolioFiles[fileIndex] = null; // Mark as removed
 
-            item.remove();
-            updatePortfolioCount();
-
-            // Show "no portfolio" message if all removed
-            const portfolioGrid = document.getElementById('portfolioGrid');
-            const remainingItems = portfolioGrid.querySelectorAll('.portfolio-item');
-            if (remainingItems.length === 0) {
-                portfolioGrid.innerHTML = `
-                    <div class="no-portfolio">
-                        <i class="fas fa-images"></i>
-                        <p>No portfolio images yet</p>
-                    </div>
-                `;
-            }
-        }
-    }
 
     // Update portfolio count
     function updatePortfolioCount() {
@@ -782,8 +748,17 @@ $existingPortfolio = $existingPortfolio ?? [];
         }
     }
 
-    // Reconstruct file input before form submission
+    // Simple form submission handler
     document.querySelector('.profile-form').addEventListener('submit', function (e) {
+        console.log('Form submission started');
+        
+        // Add a visual indicator that form is being processed
+        const submitBtn = document.querySelector('.btn-save');
+        if (submitBtn) {
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            submitBtn.disabled = true;
+        }
+        
         // Password validation
         const newPass = document.getElementById('newPassword').value;
         const confirmPass = document.getElementById('confirmPassword').value;
@@ -791,30 +766,31 @@ $existingPortfolio = $existingPortfolio ?? [];
         if (newPass && newPass !== confirmPass) {
             e.preventDefault();
             alert('New passwords do not match!');
+            if (submitBtn) {
+                submitBtn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+                submitBtn.disabled = false;
+            }
             return false;
         }
 
         if (newPass && newPass.length < 6) {
             e.preventDefault();
             alert('Password must be at least 6 characters long!');
+            if (submitBtn) {
+                submitBtn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+                submitBtn.disabled = false;
+            }
             return false;
         }
 
-        // Reconstruct portfolio images file input
+        // Check if portfolio files are selected
         const portfolioInput = document.getElementById('portfolioImages');
-        if (selectedPortfolioFiles.length > 0) {
-            const dataTransfer = new DataTransfer();
-
-            // Add only non-null files (not removed)
-            selectedPortfolioFiles.forEach(file => {
-                if (file !== null) {
-                    dataTransfer.items.add(file);
-                }
-            });
-
-            portfolioInput.files = dataTransfer.files;
-            console.log(`Submitting ${dataTransfer.files.length} portfolio images`);
+        if (portfolioInput && portfolioInput.files.length > 0) {
+            console.log(`Submitting ${portfolioInput.files.length} portfolio images`);
         }
+        
+        console.log('Form submission proceeding');
+        return true;
     });
 
     <?php endif; ?>

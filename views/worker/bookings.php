@@ -341,7 +341,7 @@ $bookings = $bookings ?? [];
                             <div>
                                 <h3><?php echo htmlspecialchars($booking['customer_name']); ?></h3>
                                 <p style="color: #666; font-size: 14px;">
-                                    <i class="fas fa-envelope"></i> <?php echo htmlspecialchars($booking['customer_email']); ?>
+                                    <i class="fas fa-envelope"></i> <?php echo htmlspecialchars($booking['user_email'] ?? $booking['customer_email'] ?? 'No email available'); ?>
                                 </p>
                             </div>
                         </div>

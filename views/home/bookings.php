@@ -351,13 +351,11 @@ foreach ($bookings as $booking) {
                                         <i class="fas fa-info-circle"></i> View Details
                                     </button>
                                 <?php endif; ?>
-                                    </button>
-                                <?php endif; ?>
                             </div>
                         </div>
 
                         <div class="booking-meta">
-                            <span class="booking-id">Booking #<?php echo str_pad($bookingId, 6, '0', STR_PAD_LEFT); ?></span>
+                            <span class="booking-id">Booking #<?php echo str_pad($conversationId, 6, '0', STR_PAD_LEFT); ?></span>
                             <span class="booking-created">Created: <?php echo $createdAt ? date('M d, Y', strtotime($createdAt)) : 'N/A'; ?></span>
                         </div>
                     </div>
@@ -381,9 +379,37 @@ foreach ($bookings as $booking) {
                         ];
 
                         foreach ($bookings as $booking) {
-                            $status = $booking['status'] ?? 'pending';
-                            if (isset($statusCounts[$status])) {
-                                $statusCounts[$status]++;
+                            $status = $booking['booking_status'] ?? 'pending';
+                            
+                            // Map database status to display status (same as main loop)
+                            $displayStatus = $status;
+                            switch($status) {
+                                case 'collecting_info':
+                                case 'pending_details':
+                                    $displayStatus = 'pending';
+                                    break;
+                                case 'pending_worker':
+                                case 'negotiating':
+                                    $displayStatus = 'pending';
+                                    break;
+                                case 'confirmed':
+                                case 'deposit_paid':
+                                    $displayStatus = 'confirmed';
+                                    break;
+                                case 'completed':
+                                case 'paid':
+                                    $displayStatus = 'completed';
+                                    break;
+                                case 'cancelled':
+                                case 'rejected':
+                                    $displayStatus = 'cancelled';
+                                    break;
+                                default:
+                                    $displayStatus = 'pending';
+                            }
+                            
+                            if (isset($statusCounts[$displayStatus])) {
+                                $statusCounts[$displayStatus]++;
                             }
                         }
                         ?>

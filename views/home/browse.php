@@ -203,16 +203,28 @@ $sortBy = $_GET['sort'] ?? 'featured';
                     <div class="portfolio-preview">
                         <?php if (!empty($portfolioImages)): ?>
                             <div class="portfolio-main">
-                                <img src="<?php echo htmlspecialchars($portfolioImages[0]); ?>"
-                                     alt="Portfolio of <?php echo htmlspecialchars($businessName); ?>"
+                                <?php 
+                                $mainImagePath = $portfolioImages[0];
+                                if (!str_starts_with($mainImagePath, '/Kislap/') && !str_starts_with($mainImagePath, 'http')) {
+                                    $mainImagePath = '/Kislap/' . $mainImagePath;
+                                }
+                                ?>
+                                <img src="<?php echo htmlspecialchars($mainImagePath); ?>"
+                                     alt=""
                                      onerror="this.parentElement.innerHTML='<div class=\'no-portfolio\'><i class=\'fas fa-camera\'></i><p>Image unavailable</p></div>'">
                             </div>
                             <?php if (count($portfolioImages) > 1): ?>
                                 <div class="portfolio-thumbnails">
                                     <?php for ($i = 1; $i <= min(3, count($portfolioImages) - 1); $i++): ?>
                                         <div class="thumbnail">
-                                            <img src="<?php echo htmlspecialchars($portfolioImages[$i]); ?>"
-                                                 alt="Portfolio thumbnail"
+                                            <?php 
+                                            $thumbImagePath = $portfolioImages[$i];
+                                            if (!str_starts_with($thumbImagePath, '/Kislap/') && !str_starts_with($thumbImagePath, 'http')) {
+                                                $thumbImagePath = '/Kislap/' . $thumbImagePath;
+                                            }
+                                            ?>
+                                            <img src="<?php echo htmlspecialchars($thumbImagePath); ?>"
+                                                 alt=""
                                                  onerror="this.style.display='none'">
                                         </div>
                                     <?php endfor; ?>
@@ -237,7 +249,13 @@ $sortBy = $_GET['sort'] ?? 'featured';
                             <div class="profile-section">
                                 <div class="profile-image">
                                     <?php if ($profilePicture): ?>
-                                        <img src="<?php echo htmlspecialchars($profilePicture); ?>"
+                                        <?php 
+                                        $profileImagePath = $profilePicture;
+                                        if (!str_starts_with($profileImagePath, '/Kislap/') && !str_starts_with($profileImagePath, 'http')) {
+                                            $profileImagePath = '/Kislap/' . $profileImagePath;
+                                        }
+                                        ?>
+                                        <img src="<?php echo htmlspecialchars($profileImagePath); ?>"
                                              alt="<?php echo htmlspecialchars($businessName); ?>"
                                              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                         <div class="profile-placeholder" style="display:none;">

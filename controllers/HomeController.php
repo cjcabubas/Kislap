@@ -29,7 +29,9 @@ class HomeController
 
     public function messages()
     {
-        require __DIR__ . '/../views/home/messages.php';
+        // Redirect to ChatController which has proper message handling
+        header('Location: index.php?controller=Chat&action=view');
+        exit;
     }
 
     public function bookings() {

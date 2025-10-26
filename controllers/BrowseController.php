@@ -126,6 +126,9 @@ class BrowseController
         // Get recent work/portfolio
         $recentWork = $this->repo->getWorkerRecentWork($workerId);
         
+        // Debug: Check what portfolio data we're getting
+        error_log("DEBUG BrowseController: recentWork for worker $workerId = " . print_r($recentWork, true));
+        
         // Get worker statistics from database
         $workerStats = $this->repo->getWorkerStatistics($workerId);
         

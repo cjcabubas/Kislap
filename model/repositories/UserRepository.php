@@ -70,4 +70,61 @@ class UserRepository
             return null;
         }
     }
+
+    public function updateUserPassword(int $userId, string $hashedPassword): bool
+    {
+        try {
+            $stmt = $this->conn->prepare("UPDATE user SET password = ? WHERE user_id = ?");
+            return $stmt->execute([$hashedPassword, $userId]);
+        } catch (Exception $e) {
+            error_log("Error updating user password: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function createSupportTicket(array $ticketData): bool
+    {
+        try {
+            // First, create the support_tickets table if it doesn't exist
+            $this->createSupportTicketsTable();
+            
+            $stmt = $this->conn->prepare("
+                INSERT INTO support_tickets (user_id, subject, message, priority, status, created_at) 
+                VALUES (?, ?, ?, ?, ?, ?)
+            ");
+            
+            return $stmt->execute([
+                $ticketData['user_id'],
+                $ticketData['subject'],
+                $ticketData['message'],
+                $ticketData['priority'],
+                $ticketData['status'],
+                $ticketData['created_at']
+            ]);
+        } catch (Exception $e) {
+            error_log("Error creating support ticket: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    private function createSupportTicketsTable(): void
+    {
+        try {
+            $sql = "CREATE TABLE IF NOT EXISTS support_tickets (
+                ticket_id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                subject VARCHAR(255) NOT NULL,
+                message TEXT NOT NULL,
+                priority ENUM('low', 'medium', 'high') DEFAULT 'medium',
+                status ENUM('open', 'in_progress', 'resolved', 'closed') DEFAULT 'open',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES user(user_id) ON DELETE CASCADE
+            )";
+            
+            $this->conn->exec($sql);
+        } catch (Exception $e) {
+            error_log("Error creating support_tickets table: " . $e->getMessage());
+        }
+    }
 }

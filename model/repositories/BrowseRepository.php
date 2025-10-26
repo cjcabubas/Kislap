@@ -288,7 +288,7 @@ class BrowseRepository
     {
         try {
             $stmt = $this->conn->prepare("
-                SELECT work_id, title, description, image_path, uploaded_at 
+                SELECT work_id, image_path, uploaded_at 
                 FROM worker_works 
                 WHERE worker_id = ? 
                 ORDER BY uploaded_at DESC 

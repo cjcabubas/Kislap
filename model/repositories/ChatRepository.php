@@ -590,4 +590,70 @@ class ChatRepository
             return [];
         }
     }
+
+    // ========================================
+    // AVAILABILITY MANAGEMENT
+    // ========================================
+
+    public function getAvailabilityRange(int $workerId, string $startDate, string $endDate): array
+    {
+        try {
+            $sql = "SELECT date, is_available, start_time, end_time, max_bookings, notes
+                    FROM worker_availability 
+                    WHERE worker_id = ? AND date BETWEEN ? AND ?
+                    ORDER BY date ASC";
+            
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute([$workerId, $startDate, $endDate]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            error_log("Error fetching availability range: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    public function setAvailability(int $workerId, string $date, bool $isAvailable, ?string $startTime = null, ?string $endTime = null, int $maxBookings = 1): bool
+    {
+        try {
+            $sql = "INSERT INTO worker_availability (worker_id, date, is_available, start_time, end_time, max_bookings) 
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    ON DUPLICATE KEY UPDATE 
+                    is_available = VALUES(is_available),
+                    start_time = VALUES(start_time),
+                    end_time = VALUES(end_time),
+                    max_bookings = VALUES(max_bookings)";
+            
+            $stmt = $this->conn->prepare($sql);
+            return $stmt->execute([$workerId, $date, $isAvailable ? 1 : 0, $startTime, $endTime, $maxBookings]);
+        } catch (Exception $e) {
+            error_log("Error setting availability: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function blockDates(int $workerId, array $dates, ?string $reason = null): bool
+    {
+        try {
+            $this->conn->beginTransaction();
+            
+            $sql = "INSERT INTO worker_availability (worker_id, date, is_available, notes) 
+                    VALUES (?, ?, 0, ?)
+                    ON DUPLICATE KEY UPDATE 
+                    is_available = 0,
+                    notes = VALUES(notes)";
+            
+            $stmt = $this->conn->prepare($sql);
+            
+            foreach ($dates as $date) {
+                $stmt->execute([$workerId, $date, $reason]);
+            }
+            
+            $this->conn->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->conn->rollBack();
+            error_log("Error blocking dates: " . $e->getMessage());
+            return false;
+        }
+    }
 }

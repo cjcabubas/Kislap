@@ -23,6 +23,8 @@ $earningsData = $earningsData ?? [];
 </head>
 <body>
 
+<?php require __DIR__ . '/../shared/navbar.php'; ?>
+
 <div class="dashboard-container">
     <div class="dashboard-header">
         <h1>Welcome back, <?= htmlspecialchars($worker['firstName']) ?>!</h1>
