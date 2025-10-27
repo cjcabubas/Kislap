@@ -214,6 +214,19 @@ class ChatController
             return ['botMessage' => $botMessage, 'packages' => []];
         }
 
+        // Check if user is responding to "no packages available" question
+        if ($this->allDetailsCollected($tempBooking) && $this->wantsPhotographerAfterNoPackages($userMessage)) {
+            $this->chatRepo->updateConversationType($conversationId, 'direct');
+            $this->chatRepo->updateConversationStatus($conversationId, 'pending_worker');
+
+            $botMessage = $this->chatRepo->saveMessage(
+                $conversationId, 0, 'bot',
+                "Perfect! I'm redirecting you to the photographer now. They'll be able to discuss custom options with you directly. 📸✨"
+            );
+
+            return ['botMessage' => $botMessage, 'packages' => []];
+        }
+
         $extracted = $this->extractBookingInfo($userMessage, $tempBooking);
 
         if (!empty($extracted)) {
@@ -405,6 +418,31 @@ class ChatController
             if (stripos($lowerMessage, $keyword) !== false) {
                 return true;
             }
+        }
+
+        return false;
+    }
+
+    private function wantsPhotographerAfterNoPackages(string $message): bool
+    {
+        $positiveKeywords = [
+            'yes', 'yeah', 'yep', 'sure', 'ok', 'okay', 'alright', 'fine',
+            'i would like', 'i want', 'please', 'connect me', 'talk to',
+            'speak with', 'contact', 'photographer', 'direct', 'human'
+        ];
+        
+        $lowerMessage = strtolower(trim($message));
+
+        // Check for positive responses
+        foreach ($positiveKeywords as $keyword) {
+            if (stripos($lowerMessage, $keyword) !== false) {
+                return true;
+            }
+        }
+
+        // Check for simple affirmative responses
+        if (in_array($lowerMessage, ['y', 'yes', 'yep', 'yeah', 'sure', 'ok', 'okay'])) {
+            return true;
         }
 
         return false;

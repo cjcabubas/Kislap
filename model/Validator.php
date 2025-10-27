@@ -338,9 +338,28 @@ class Validator
             return $result;
         }
         
+        // Check if it's an AVIF file
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mimeType = finfo_file($finfo, $file['tmp_name']);
+        finfo_close($finfo);
+        
+        if ($mimeType === 'image/avif' || stripos($file['name'], '.avif') !== false) {
+            // For AVIF files, we'll skip dimension validation since getimagesize() doesn't support it
+            // Just validate that it's a reasonable file size (which we already did in validateImageFile)
+            return ['valid' => true, 'message' => 'Valid AVIF profile photo'];
+        }
+        
         $imageInfo = getimagesize($file['tmp_name']);
+        if ($imageInfo === false) {
+            return ['valid' => false, 'message' => 'Unable to read image dimensions. Please upload a valid image file.'];
+        }
+        
         $width = $imageInfo[0];
         $height = $imageInfo[1];
+        
+        if ($height == 0) {
+            return ['valid' => false, 'message' => 'Invalid image dimensions detected.'];
+        }
         
         $aspectRatio = $width / $height;
         if ($aspectRatio < 0.5 || $aspectRatio > 2.0) {

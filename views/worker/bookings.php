@@ -20,276 +20,7 @@ $bookings = $bookings ?? [];
     <title>My Bookings - Kislap</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/Kislap/public/css/style.css">
-    <style>
-        body {
-            background-color: #0a0a0a;
-            color: #e0e0e0;
-        }
-        
-        .bookings-container {
-            max-width: 1200px;
-            margin: 100px auto 40px;
-            padding: 20px;
-        }
-        
-        .bookings-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-        
-        .bookings-header h1 {
-            color: #fff;
-            font-size: 32px;
-            font-weight: 700;
-        }
-        
-        .bookings-header h1 i {
-            color: #ff6b00;
-            margin-right: 10px;
-        }
-        
-        .filter-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
-        
-        .filter-tab {
-            padding: 12px 24px;
-            border: 1px solid rgba(255, 107, 0, 0.3);
-            background: rgba(255, 107, 0, 0.05);
-            color: #e0e0e0;
-            cursor: pointer;
-            border-radius: 8px;
-            transition: all 0.3s;
-            font-weight: 500;
-        }
-        
-        .filter-tab:hover {
-            background: rgba(255, 107, 0, 0.1);
-            border-color: rgba(255, 107, 0, 0.5);
-        }
-        
-        .filter-tab.active {
-            background: linear-gradient(135deg, #ff6b00 0%, #ff8533 100%);
-            color: #fff;
-            border-color: #ff6b00;
-            box-shadow: 0 4px 15px rgba(255, 107, 0, 0.3);
-        }
-        
-        .bookings-grid {
-            display: grid;
-            gap: 20px;
-        }
-        
-        .booking-card {
-            background: rgba(20, 20, 20, 0.8);
-            border: 1px solid rgba(255, 107, 0, 0.2);
-            border-radius: 12px;
-            padding: 24px;
-            transition: all 0.3s;
-        }
-        
-        .booking-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(255, 107, 0, 0.2);
-            border-color: rgba(255, 107, 0, 0.4);
-        }
-        
-        .booking-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            margin-bottom: 20px;
-        }
-        
-        .customer-info {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
-        
-        .customer-info h3 {
-            color: #fff;
-            margin-bottom: 5px;
-        }
-        
-        .customer-info p {
-            color: #999;
-            font-size: 14px;
-        }
-        
-        .customer-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #ff6b00 0%, #ff8533 100%);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 18px;
-        }
-        
-        .customer-avatar img {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-        
-        .status-badge {
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-        
-        .status-pending_worker { background: #ffc107; color: #000; }
-        .status-confirmed { background: #28a745; color: white; }
-        .status-cancelled { background: #dc3545; color: white; }
-        .status-pending_confirmation { background: #17a2b8; color: white; }
-        .status-negotiating { background: #ff9800; color: white; }
-        .status-requires_info { background: #9c27b0; color: white; }
-        
-        .booking-details {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin: 20px 0;
-            padding: 20px;
-            background: rgba(255, 107, 0, 0.05);
-            border: 1px solid rgba(255, 107, 0, 0.1);
-            border-radius: 8px;
-        }
-        
-        .detail-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .detail-item i {
-            color: #ff6b00;
-            width: 20px;
-        }
-        
-        .detail-item small {
-            color: #999;
-        }
-        
-        .detail-item strong {
-            color: #fff;
-        }
-        
-        .booking-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-        
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-            font-size: 14px;
-        }
-        
-        .btn i {
-            margin-right: 6px;
-        }
-        
-        .btn-accept {
-            background: #28a745;
-            color: white;
-        }
-        
-        .btn-accept:hover {
-            background: #218838;
-            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
-        }
-        
-        .btn-negotiate {
-            background: #ff9800;
-            color: white;
-        }
-        
-        .btn-negotiate:hover {
-            background: #e68900;
-            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
-        }
-        
-        .btn-reject {
-            background: #dc3545;
-            color: white;
-        }
-        
-        .btn-reject:hover {
-            background: #c82333;
-            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
-        }
-        
-        .btn-edit {
-            background: #17a2b8;
-            color: white;
-        }
-        
-        .btn-edit:hover {
-            background: #138496;
-            box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
-        }
-        
-        .btn-chat {
-            background: linear-gradient(135deg, #ff6b00 0%, #ff8533 100%);
-            color: white;
-        }
-        
-        .btn-chat:hover {
-            box-shadow: 0 4px 15px rgba(255, 107, 0, 0.4);
-            transform: translateY(-2px);
-        }
-        
-        .btn-info {
-            background: rgba(255, 107, 0, 0.1);
-            color: #ff6b00;
-            border: 1px solid rgba(255, 107, 0, 0.3);
-        }
-        
-        .btn-info:hover {
-            background: rgba(255, 107, 0, 0.2);
-            border-color: #ff6b00;
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: 80px 20px;
-            color: #666;
-        }
-        
-        .empty-state i {
-            font-size: 64px;
-            color: rgba(255, 107, 0, 0.3);
-            margin-bottom: 20px;
-        }
-        
-        .empty-state h3 {
-            color: #fff;
-            margin-bottom: 10px;
-        }
-        
-        .empty-state p {
-            color: #999;
-        }
-    </style>
+    <link rel="stylesheet" href="/Kislap/public/css/workerBookings.css">
 </head>
 <body>
 
@@ -301,19 +32,34 @@ $bookings = $bookings ?? [];
     </div>
     
     <div class="filter-tabs">
-        <button class="filter-tab <?php echo !isset($_GET['status']) ? 'active' : ''; ?>" 
+        <?php $currentStatus = $_GET['status'] ?? 'all'; ?>
+        
+        <button class="filter-tab <?php echo $currentStatus === 'all' || !isset($_GET['status']) ? 'active' : ''; ?>" 
                 onclick="filterBookings('')">
             All Bookings
         </button>
-        <button class="filter-tab <?php echo ($_GET['status'] ?? '') === 'pending_worker' ? 'active' : ''; ?>" 
-                onclick="filterBookings('pending_worker')">
+        
+        <button class="filter-tab <?php echo $currentStatus === 'pending' ? 'active' : ''; ?>" 
+                onclick="filterBookings('pending')">
             Pending
         </button>
-        <button class="filter-tab <?php echo ($_GET['status'] ?? '') === 'confirmed' ? 'active' : ''; ?>" 
+        
+        <button class="filter-tab <?php echo $currentStatus === 'negotiating' ? 'active' : ''; ?>" 
+                onclick="filterBookings('negotiating')">
+            Negotiating
+        </button>
+        
+        <button class="filter-tab <?php echo $currentStatus === 'confirmed' ? 'active' : ''; ?>" 
                 onclick="filterBookings('confirmed')">
             Confirmed
         </button>
-        <button class="filter-tab <?php echo ($_GET['status'] ?? '') === 'cancelled' ? 'active' : ''; ?>" 
+        
+        <button class="filter-tab <?php echo $currentStatus === 'completed' ? 'active' : ''; ?>" 
+                onclick="filterBookings('completed')">
+            Completed
+        </button>
+        
+        <button class="filter-tab <?php echo $currentStatus === 'cancelled' ? 'active' : ''; ?>" 
                 onclick="filterBookings('cancelled')">
             Cancelled
         </button>
@@ -340,20 +86,35 @@ $bookings = $bookings ?? [];
                             </div>
                             <div>
                                 <h3><?php echo htmlspecialchars($booking['customer_name']); ?></h3>
+                                <?php if (!empty($booking['customer_email'])): ?>
                                 <p style="color: #666; font-size: 14px;">
-                                    <i class="fas fa-envelope"></i> <?php echo htmlspecialchars($booking['user_email'] ?? $booking['customer_email'] ?? 'No email available'); ?>
+                                    <i class="fas fa-envelope"></i> <?php echo htmlspecialchars($booking['customer_email']); ?>
                                 </p>
+                                <?php endif; ?>
                             </div>
                         </div>
-                        <span class="status-badge status-<?php echo $booking['booking_status']; ?>">
+                        <?php 
+                        // Handle empty status for display
+                        $displayStatus = $booking['booking_status'] ?? '';
+                        if (empty($displayStatus) || $displayStatus === '' || $displayStatus === null) {
+                            $displayStatus = 'pending_worker';
+                        }
+                        ?>
+                        <span class="status-badge status-<?php echo $displayStatus; ?>">
                             <?php 
                             $statusLabels = [
                                 'pending_worker' => 'Pending',
+                                'pending_ai' => 'Pending',
                                 'confirmed' => 'Confirmed',
                                 'cancelled' => 'Cancelled',
-                                'pending_confirmation' => 'Awaiting Confirmation'
+                                'negotiating' => 'Negotiating',
+                                'pending_confirmation' => 'Awaiting Confirmation',
+                                'awaiting_deposit' => 'Awaiting Deposit',
+                                'deposit_paid' => 'Deposit Paid',
+                                'completed' => 'Completed',
+                                'requires_info' => 'Needs Info'
                             ];
-                            echo $statusLabels[$booking['booking_status']] ?? $booking['booking_status'];
+                            echo $statusLabels[$displayStatus] ?? ucfirst(str_replace('_', ' ', $displayStatus));
                             ?>
                         </span>
                     </div>
@@ -403,7 +164,14 @@ $bookings = $bookings ?? [];
                     </div>
                     
                     <div class="booking-actions">
-                        <?php if ($booking['booking_status'] === 'pending_worker' || $booking['booking_status'] === 'negotiating'): ?>
+                        <?php 
+                        // Handle empty/null status - treat as pending_worker for workers
+                        $status = $booking['booking_status'] ?? '';
+                        if (empty($status) || $status === '' || $status === null) {
+                            $status = 'pending_worker';
+                        }
+                        ?>
+                        <?php if ($status === 'pending_worker' || $status === 'negotiating' || $status === 'pending_ai' || $status === 'requires_info'): ?>
                             <button class="btn btn-accept" onclick="acceptBooking(<?php echo $booking['conversation_id']; ?>)">
                                 <i class="fas fa-check"></i> Accept
                             </button>
@@ -415,7 +183,7 @@ $bookings = $bookings ?? [];
                             </button>
                         <?php endif; ?>
                         
-                        <?php if ($booking['booking_status'] === 'confirmed'): ?>
+                        <?php if ($status === 'confirmed' || $status === 'awaiting_deposit' || $status === 'deposit_paid'): ?>
                             <button class="btn btn-edit" onclick="showEditModal(<?php echo $booking['conversation_id']; ?>, <?php echo htmlspecialchars(json_encode($booking)); ?>)">
                                 <i class="fas fa-edit"></i> Edit Details
                             </button>
@@ -552,6 +320,28 @@ function showBookingDetails(booking) {
 function closeModal(modalId) {
     document.getElementById(modalId).style.display = 'none';
 }
+
+// Close modal when clicking outside
+document.addEventListener('DOMContentLoaded', function() {
+    const modals = document.querySelectorAll('.modal');
+    modals.forEach(modal => {
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeModal(modal.id);
+            }
+        });
+    });
+    
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const openModal = document.querySelector('.modal[style*="block"]');
+            if (openModal) {
+                closeModal(openModal.id);
+            }
+        }
+    });
+});
 
 // Propose price
 async function proposePrice() {
@@ -753,131 +543,7 @@ async function updateBooking() {
     </div>
 </div>
 
-<style>
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 2000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(5px);
-}
 
-.modal-content {
-    background: rgba(20, 20, 20, 0.95);
-    border: 1px solid rgba(255, 107, 0, 0.3);
-    margin: 5% auto;
-    padding: 30px;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 600px;
-    max-height: 80vh;
-    overflow-y: auto;
-    box-shadow: 0 10px 40px rgba(255, 107, 0, 0.2);
-}
-
-.modal-content h2, .modal-content h3 {
-    color: #fff;
-    margin-bottom: 20px;
-}
-
-.modal-content h2 {
-    background: linear-gradient(135deg, #ff6b00 0%, #ff8533 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.modal-content p, .modal-content label {
-    color: #e0e0e0;
-    margin-bottom: 10px;
-}
-
-.modal-content input[type="number"],
-.modal-content input[type="date"],
-.modal-content input[type="time"],
-.modal-content input[type="text"],
-.modal-content textarea {
-    background: rgba(255, 107, 0, 0.05);
-    border: 1px solid rgba(255, 107, 0, 0.3);
-    color: #fff;
-    border-radius: 8px;
-    padding: 12px;
-    width: 100%;
-    margin: 10px 0;
-    font-family: 'Segoe UI', sans-serif;
-}
-
-.modal-content input:focus,
-.modal-content textarea:focus {
-    outline: none;
-    border-color: #ff6b00;
-    box-shadow: 0 0 10px rgba(255, 107, 0, 0.3);
-}
-
-.close {
-    color: #999;
-    float: right;
-    font-size: 32px;
-    font-weight: bold;
-    cursor: pointer;
-    line-height: 20px;
-    transition: all 0.3s;
-}
-
-.close:hover,
-.close:focus {
-    color: #ff6b00;
-    transform: rotate(90deg);
-}
-
-.modal-section {
-    margin: 25px 0;
-    padding: 20px;
-    background: rgba(255, 107, 0, 0.03);
-    border: 1px solid rgba(255, 107, 0, 0.1);
-    border-radius: 8px;
-}
-
-.modal-section h3 {
-    font-size: 18px;
-    margin-bottom: 15px;
-}
-
-.detail-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 12px;
-    margin-top: 15px;
-}
-
-.detail-grid > div {
-    padding: 12px;
-    background: rgba(255, 107, 0, 0.05);
-    border: 1px solid rgba(255, 107, 0, 0.1);
-    border-radius: 8px;
-    color: #e0e0e0;
-}
-
-.detail-grid strong {
-    color: #ff6b00;
-    margin-right: 8px;
-}
-
-.modal-content .btn {
-    margin-top: 10px;
-}
-
-.modal-content hr {
-    border: none;
-    border-top: 1px solid rgba(255, 107, 0, 0.2);
-    margin: 25px 0;
-}
-</style>
 
 </body>
 </html>

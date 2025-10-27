@@ -750,7 +750,16 @@ $existingPortfolio = $existingPortfolio ?? [];
 
     // Simple form submission handler
     document.querySelector('.profile-form').addEventListener('submit', function (e) {
-        console.log('Form submission started');
+        console.log('=== FORM SUBMISSION STARTED ===');
+        console.log('Form action:', this.action);
+        console.log('Form method:', this.method);
+        
+        // Log all form data
+        const formData = new FormData(this);
+        console.log('Form data:');
+        for (let [key, value] of formData.entries()) {
+            console.log(key + ':', value);
+        }
         
         // Add a visual indicator that form is being processed
         const submitBtn = document.querySelector('.btn-save');

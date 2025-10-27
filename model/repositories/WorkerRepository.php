@@ -66,7 +66,15 @@ class WorkerRepository
         $sql .= " WHERE worker_id = :worker_id";
 
         $stmt = $this->conn->prepare($sql);
-        return $stmt->execute($params);
+        $result = $stmt->execute($params);
+        
+        if (!$result) {
+            error_log("Database error in updateWorkerProfile: " . implode(", ", $stmt->errorInfo()));
+            error_log("SQL: " . $sql);
+            error_log("Params: " . print_r($params, true));
+        }
+        
+        return $result;
     }
 
     public function updateWorkerPassword(int $workerId, string $newPassword): bool
