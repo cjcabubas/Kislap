@@ -148,7 +148,6 @@
 }
 
 
-
 .tab-btn:hover {
     border-color: #ff6b00;
     color: #ff6b00;
@@ -263,7 +262,6 @@
     transform: scale(1.05) rotate(2deg);
     box-shadow: 0 12px 35px rgba(255, 107, 0, 0.5);
 }
-
 
 
 .photographer-avatar img {
@@ -486,7 +484,6 @@
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
-
 
 
 .btn-cancel {
@@ -780,7 +777,6 @@
     color: rgba(255, 107, 0, 0.3);
     filter: drop-shadow(0 4px 20px rgba(255, 107, 0, 0.2));
 }
-
 
 
 .empty-state h3 {
@@ -1084,7 +1080,6 @@
 }
 
 
-
 .btn-action.btn-accept {
     background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
     color: white;
@@ -1195,7 +1190,7 @@
     .notification.show {
         transform: translateY(0);
     }
-}
+
 
 / * Proposal Section */ .proposal-section {
     background: linear-gradient(135deg, rgba(156, 39, 176, 0.1) 0%, rgba(156, 39, 176, 0.05) 100%);
@@ -1205,69 +1200,68 @@
     margin: 16px 0;
 }
 
-.proposal-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 16px;
-    color: #9c27b0;
-}
-
-.proposal-header i {
-    font-size: 18px;
-}
-
-.proposal-header h4 {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 600;
-}
-
-.proposal-content {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-}
-
-.proposal-item {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.proposal-item.full-width {
-    grid-column: 1 / -1;
-}
-
-.proposal-label {
-    font-size: 12px;
-    color: #9c27b0;
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-.proposal-value {
-    font-size: 14px;
-    color: #fff;
-    font-weight: 500;
-}
-
-.proposal-value.price {
-    font-size: 18px;
-    font-weight: 700;
-    color: #9c27b0;
-}
-
-/* Enhanced booking actions for proposals */
-
-
-/* Responsive proposal section */
-@media (max-width: 768px) {
-    .proposal-content {
-        grid-template-columns: 1fr;
+    .proposal-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 16px;
+        color: #9c27b0;
     }
 
-    .proposal-section {
-        padding: 16px;
+    .proposal-header i {
+        font-size: 18px;
+    }
+
+    .proposal-header h4 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .proposal-content {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .proposal-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .proposal-item.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .proposal-label {
+        font-size: 12px;
+        color: #9c27b0;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .proposal-value {
+        font-size: 14px;
+        color: #fff;
+        font-weight: 500;
+    }
+
+    .proposal-value.price {
+        font-size: 18px;
+        font-weight: 700;
+        color: #9c27b0;
+    }
+
+    /* Enhanced booking actions for proposals */
+    /* Responsive proposal section */
+    @media (max-width: 768px) {
+        .proposal-content {
+            grid-template-columns: 1fr;
+        }
+
+        .proposal-section {
+            padding: 16px;
+        }
     }
 }

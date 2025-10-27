@@ -204,6 +204,16 @@ class AdminRepository
         $stmt->execute([':status' => $status, ':id' => $id]);
     }
 
+    public function updateApplicationStatusWithReason($id, $status, $rejectionReason)
+    {
+        $stmt = $this->conn->prepare("UPDATE application SET status = :status, rejection_reason = :rejection_reason WHERE application_id = :id");
+        $stmt->execute([
+            ':status' => $status, 
+            ':rejection_reason' => $rejectionReason,
+            ':id' => $id
+        ]);
+    }
+
     public function getApplications($search = '')
     {
         $query = "SELECT * FROM application";

@@ -111,7 +111,7 @@ if (!$admin) {
                         <?php endif; ?>
 
                         <div class="actions">
-                            <button class="btn btn-reject" onclick="handleAction(<?php echo $app['application_id']; ?>,'reject')">
+                            <button class="btn btn-reject" onclick="openRejectModal(<?php echo $app['application_id']; ?>)">
                                 <i class="fas fa-times"></i>
                                 Reject
                             </button>
@@ -146,7 +146,49 @@ if (!$admin) {
     <img id="modalImage" src="" alt="Portfolio work">
 </div>
 
+<!-- Rejection Modal -->
+<div class="modal" id="rejectModal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-times-circle"></i> Reject Application</h3>
+            <span class="modal-close" onclick="closeRejectModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <p>Please provide a reason for rejecting this application:</p>
+            <div class="form-group">
+                <label for="rejectionReason">Rejection Reason</label>
+                <select id="rejectionReason" onchange="toggleCustomReason()">
+                    <option value="">Select a reason...</option>
+                    <option value="Incomplete portfolio - needs more samples">Incomplete portfolio - needs more samples</option>
+                    <option value="Poor image quality - resolution too low">Poor image quality - resolution too low</option>
+                    <option value="Insufficient experience for platform standards">Insufficient experience for platform standards</option>
+                    <option value="Missing required documents">Missing required documents</option>
+                    <option value="Portfolio doesn't match claimed specialty">Portfolio doesn't match claimed specialty</option>
+                    <option value="Unprofessional presentation">Unprofessional presentation</option>
+                    <option value="custom">Other (specify below)</option>
+                </select>
+            </div>
+            <div class="form-group" id="customReasonGroup" style="display: none;">
+                <label for="customReason">Custom Reason</label>
+                <textarea id="customReason" rows="3" placeholder="Please specify the reason..."></textarea>
+            </div>
+            <div class="form-group">
+                <label for="additionalNotes">Additional Notes (Optional)</label>
+                <textarea id="additionalNotes" rows="3" placeholder="Any additional feedback or suggestions for improvement..."></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-cancel" onclick="closeRejectModal()">Cancel</button>
+            <button type="button" class="btn btn-reject" onclick="submitRejection()">
+                <i class="fas fa-times"></i> Reject Application
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
+    let currentApplicationId = null;
+
     function handleAction(id, action) {
         if (!confirm(`Are you sure you want to ${action} this application?`)) return;
 
@@ -154,6 +196,83 @@ if (!$admin) {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ application_id: id, status: action })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Request failed. Check console for details.');
+        });
+    }
+
+    function openRejectModal(applicationId) {
+        currentApplicationId = applicationId;
+        document.getElementById('rejectModal').style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeRejectModal() {
+        document.getElementById('rejectModal').style.display = 'none';
+        document.body.style.overflow = '';
+        // Reset form
+        document.getElementById('rejectionReason').value = '';
+        document.getElementById('customReason').value = '';
+        document.getElementById('additionalNotes').value = '';
+        document.getElementById('customReasonGroup').style.display = 'none';
+        currentApplicationId = null;
+    }
+
+    function toggleCustomReason() {
+        const select = document.getElementById('rejectionReason');
+        const customGroup = document.getElementById('customReasonGroup');
+        
+        if (select.value === 'custom') {
+            customGroup.style.display = 'block';
+        } else {
+            customGroup.style.display = 'none';
+        }
+    }
+
+    function submitRejection() {
+        const reasonSelect = document.getElementById('rejectionReason');
+        const customReason = document.getElementById('customReason');
+        const additionalNotes = document.getElementById('additionalNotes');
+        
+        let finalReason = '';
+        
+        if (reasonSelect.value === 'custom') {
+            if (!customReason.value.trim()) {
+                alert('Please specify a custom reason.');
+                return;
+            }
+            finalReason = customReason.value.trim();
+        } else if (reasonSelect.value) {
+            finalReason = reasonSelect.value;
+        } else {
+            alert('Please select a rejection reason.');
+            return;
+        }
+        
+        // Add additional notes if provided
+        if (additionalNotes.value.trim()) {
+            finalReason += '\n\nAdditional Notes: ' + additionalNotes.value.trim();
+        }
+
+        fetch(`/Kislap/index.php?controller=Admin&action=updateStatus`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ 
+                application_id: currentApplicationId, 
+                status: 'reject',
+                rejection_reason: finalReason
+            })
         })
         .then(response => response.json())
         .then(data => {

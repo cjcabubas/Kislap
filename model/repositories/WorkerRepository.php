@@ -265,4 +265,20 @@ class WorkerRepository
             ];
         }
     }
+
+    public function getWorkerAvailability(int $workerId): array
+    {
+        try {
+            $stmt = $this->conn->prepare("
+                SELECT * FROM worker_availability 
+                WHERE worker_id = ? 
+                ORDER BY date ASC
+            ");
+            $stmt->execute([$workerId]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            error_log("Error fetching worker availability: " . $e->getMessage());
+            return [];
+        }
+    }
 }

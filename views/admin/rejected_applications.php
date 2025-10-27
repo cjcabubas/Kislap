@@ -91,6 +91,16 @@ $search = $search ?? '';
                                     <div class="value"><?php echo htmlspecialchars($app['address']); ?></div>
                                 </div>
                             </div>
+
+                            <?php if (!empty($app['rejection_reason'])): ?>
+                            <div class="info-item rejection-reason">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <div>
+                                    <div class="label">Rejection Reason</div>
+                                    <div class="value rejection-text"><?php echo nl2br(htmlspecialchars($app['rejection_reason'])); ?></div>
+                                </div>
+                            </div>
+                            <?php endif; ?>
                         </div>
 
                         <?php if (!empty($app['resumeFilePath'])): ?>

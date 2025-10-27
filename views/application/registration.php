@@ -41,7 +41,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
         <div class="form-group">
             <label for="middleName">Middle Name</label>
-            <input id="middleName" name="middleName" type="text" required placeholder="Enter your Middle Name">
+            <input id="middleName" name="middleName" type="text" placeholder="Enter your Middle Name">
         </div>
     </div>
 
@@ -59,7 +59,7 @@ if (session_status() === PHP_SESSION_NONE) {
     <div class="form-group">
         <label for="address">Address</label>
         <input id="address" type="text" name="address" required
-               placeholder="123 Example District, Example City, Example, 1234">
+               placeholder="123 Example Street, Example City, Example Province">
     </div>
 
     <div class="form-group">
@@ -68,8 +68,8 @@ if (session_status() === PHP_SESSION_NONE) {
     </div>
 
     <div class="form-group">
-        <label for="images">Upload Work Samples (Up to 4)</label>
-        <input id="images" type="file" name="images[]" multiple>
+        <label for="images">Upload Work Samples (Up to 8)</label>
+        <input id="images" type="file" name="images[]" multiple accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,image/avif,.jpg,.jpeg,.png,.gif,.webp,.avif">
     </div>
 
     <div class="form-group">

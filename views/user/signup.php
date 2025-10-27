@@ -54,8 +54,7 @@ unset($_SESSION['form_data']);
             <label for="middleName">Middle Name</label>
             <input id="middleName" name="middleName" type="text" 
                    placeholder="Enter your Middle Name (Optional)"
-                   pattern="[a-zA-Z\s\-\'\.]{2,50}"
-                   title="Name must be 2-50 characters, letters only"
+                   title="Optional - leave blank if not applicable"
                    value="<?php echo htmlspecialchars($formData['middleName'] ?? ''); ?>">
         </div>
     </div>
@@ -89,11 +88,10 @@ unset($_SESSION['form_data']);
     <div class="form-group">
         <label for="password">Password <span class="required">*</span></label>
         <input id="password" type="password" name="password" required 
-               placeholder="Enter a strong password"
-               minlength="8" maxlength="128"
-               pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':&quot;\\|,.<>\/?]).{8,}$"
-               title="Password must be at least 8 characters with uppercase, lowercase, number, and special character">
-        <small class="form-help">Password must contain: uppercase, lowercase, number, and special character</small>
+               placeholder="Enter your password"
+               minlength="6" maxlength="128"
+               title="Password must be at least 6 characters">
+        <small class="form-help">Password must be at least 6 characters</small>
     </div>
 
     <button type="submit">Sign Up</button>

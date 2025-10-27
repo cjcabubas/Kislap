@@ -426,3 +426,34 @@ body {
         justify-content: center;
     }
 }
+/* ========================================
+   REJECTION REASON BOX
+   ======================================== */
+
+.rejection-reason-box {
+    background: rgba(255, 107, 107, 0.1);
+    border: 1px solid rgba(255, 107, 107, 0.3);
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.rejection-reason-box h3 {
+    color: #ff6b6b;
+    margin: 0 0 15px 0;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rejection-reason-box .rejection-text {
+    color: #ff9999;
+    line-height: 1.6;
+    margin: 0;
+    white-space: pre-line;
+    background: rgba(255, 107, 107, 0.05);
+    padding: 15px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 107, 107, 0.2);
+}

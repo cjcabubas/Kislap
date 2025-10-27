@@ -73,7 +73,7 @@ $user = $_SESSION['user'];
              PROFILE BODY
              ======================================== -->
         <div class="profile-body">
-            <!-- ========================================
+            <!--========================================
                  USER STATISTICS SECTION
                  ======================================== -->
             <div class="stats-section">
@@ -234,8 +234,6 @@ $user = $_SESSION['user'];
                                 <button type="button" class="btn-support" onclick="openPasswordModal()">
                                     <i class="fas fa-key"></i> Change Password
                                 </button>
-                                <!-- Debug: Direct test link -->
-                                <a href="?controller=User&action=changePassword" style="color: red; font-size: 12px; display: block; margin-top: 5px;">DEBUG: Test changePassword route</a>
                             </div>
                         </div>
                         <div class="support-option">
@@ -375,17 +373,13 @@ function openPasswordModal() {
     document.getElementById('passwordModal').style.display = 'block';
     document.body.style.overflow = 'hidden';
     
-    // Debug: Check if inputs are disabled
+    // Enable password inputs and focus
     setTimeout(() => {
         const currentPwd = document.getElementById('currentPassword');
         const newPwd = document.getElementById('newPassword');
         const confirmPwd = document.getElementById('confirmPassword');
         
-        console.log('Current password input disabled:', currentPwd.disabled);
-        console.log('New password input disabled:', newPwd.disabled);
-        console.log('Confirm password input disabled:', confirmPwd.disabled);
-        
-        // Force enable them and remove any disabled attributes
+        // Force enable them
         currentPwd.disabled = false;
         newPwd.disabled = false;
         confirmPwd.disabled = false;
@@ -394,15 +388,11 @@ function openPasswordModal() {
         newPwd.removeAttribute('disabled');
         confirmPwd.removeAttribute('disabled');
         
-        // Make sure they're editable
         currentPwd.readOnly = false;
         newPwd.readOnly = false;
         confirmPwd.readOnly = false;
         
-        // Focus on first input
         currentPwd.focus();
-        
-        console.log('Password inputs should now be editable');
     }, 100);
 }
 
@@ -426,13 +416,6 @@ window.onclick = function(event) {
 
 // Password form validation
 document.getElementById('passwordForm').addEventListener('submit', function(e) {
-    console.log('Password form submit event triggered'); // Debug log
-    
-    // Check if form exists
-    const form = document.getElementById('passwordForm');
-    console.log('Form element:', form);
-    console.log('Form action:', form.action);
-    console.log('Form method:', form.method);
     
     const currentPassword = document.getElementById('currentPassword').value;
     const newPassword = document.getElementById('newPassword').value;
@@ -466,7 +449,7 @@ document.getElementById('passwordForm').addEventListener('submit', function(e) {
         return false;
     }
     
-    console.log('Password validation passed, submitting form'); // Debug log
+
     
     // Add loading state to button
     const submitBtn = document.getElementById('changePasswordBtn');

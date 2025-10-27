@@ -118,7 +118,17 @@ $errorMessage = $errorMessage ?? null;
                 <p class="status-message">
                     Thank you for your interest in joining Kislap.
                     Unfortunately, we are unable to approve your application at this time.
-                    You may reapply after 30 days with updated information.
+                </p>
+                
+                <?php if (!empty($result['rejection_reason'])): ?>
+                <div class="rejection-reason-box">
+                    <h3><i class="fas fa-info-circle"></i> Reason for Rejection</h3>
+                    <p class="rejection-text"><?php echo nl2br(htmlspecialchars($result['rejection_reason'])); ?></p>
+                </div>
+                <?php endif; ?>
+                
+                <p class="status-message">
+                    You may address the issues mentioned above and reapply after 30 days with updated information.
                 </p>
             <?php endif; ?>
 

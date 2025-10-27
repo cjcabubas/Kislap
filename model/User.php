@@ -8,7 +8,7 @@ class User
     private ?int $user_id = null;
     private string $lastName;
     private string $firstName;
-    private string $middleName;
+    private ?string $middleName;
     private string $email;
     private string $phoneNumber;
     private string $password;
@@ -23,7 +23,7 @@ class User
     public function __construct(
         string $lastName,
         string $firstName,
-        string $middleName,
+        ?string $middleName,
         string $email,
         string $phoneNumber,
         string $password,
@@ -46,7 +46,7 @@ class User
     public function getId(): ?int { return $this->user_id; }
     public function getLastName(): string { return $this->lastName; }
     public function getFirstName(): string { return $this->firstName; }
-    public function getMiddleName(): string { return $this->middleName; }
+    public function getMiddleName(): ?string { return $this->middleName; }
     public function getEmail(): string { return $this->email; }
     public function getPhoneNumber(): string { return $this->phoneNumber; }
     public function getPassword(): string { return $this->password; }

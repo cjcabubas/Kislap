@@ -265,7 +265,9 @@ class Validator
             'image/png',
             'image/gif',
             'image/webp',
-            'image/avif'
+            'image/avif',
+            'application/octet-stream', // Some servers report AVIF as this
+            'image/x-avif' // Alternative AVIF MIME type
         ];
         
         $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif'];
@@ -286,33 +288,43 @@ class Validator
         $mimeType = finfo_file($finfo, $file['tmp_name']);
         finfo_close($finfo);
         
-        if (!in_array($mimeType, $allowedTypes)) {
-            return ['valid' => false, 'message' => 'Invalid image format. Only JPG, PNG, GIF, WebP, and AVIF are allowed'];
+        // Check file extension for AVIF fallback (some servers don't detect AVIF MIME properly)
+        $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        
+        // Allow AVIF files even if MIME type detection fails
+        $isValidMimeType = in_array($mimeType, $allowedTypes);
+        $isAvifFile = ($extension === 'avif');
+        
+        if (!$isValidMimeType && !$isAvifFile) {
+            // Debug: Log what MIME type was detected
+            error_log("DEBUG: Detected MIME type for {$file['name']}: {$mimeType}");
+            return ['valid' => false, 'message' => "Invalid image format. Only JPG, PNG, GIF, WebP, and AVIF are allowed. Detected: {$mimeType}"];
         }
         
-        // Check file extension
-        $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-        if (!in_array($extension, $allowedExtensions)) {
+        // Extension was already checked above, but double-check for non-AVIF files
+        if (!$isAvifFile && !in_array($extension, $allowedExtensions)) {
             return ['valid' => false, 'message' => 'Invalid file extension. Only .jpg, .png, .gif, .webp, .avif are allowed'];
         }
         
-        // Validate image dimensions
-        $imageInfo = getimagesize($file['tmp_name']);
-        if ($imageInfo === false) {
-            return ['valid' => false, 'message' => 'Invalid image file or corrupted'];
-        }
-        
-        $width = $imageInfo[0];
-        $height = $imageInfo[1];
-        
-        // Minimum dimensions
-        if ($width < 100 || $height < 100) {
-            return ['valid' => false, 'message' => 'Image must be at least 100x100 pixels'];
-        }
-        
-        // Maximum dimensions
-        if ($width > 5000 || $height > 5000) {
-            return ['valid' => false, 'message' => 'Image must not exceed 5000x5000 pixels'];
+        // Validate image dimensions (skip for AVIF and when MIME detection is uncertain)
+        if (!$isAvifFile && $mimeType !== 'image/avif' && $mimeType !== 'application/octet-stream') {
+            $imageInfo = getimagesize($file['tmp_name']);
+            if ($imageInfo === false) {
+                return ['valid' => false, 'message' => 'Invalid image file or corrupted'];
+            }
+            
+            $width = $imageInfo[0];
+            $height = $imageInfo[1];
+            
+            // Minimum dimensions
+            if ($width < 100 || $height < 100) {
+                return ['valid' => false, 'message' => 'Image must be at least 100x100 pixels'];
+            }
+            
+            // Maximum dimensions
+            if ($width > 5000 || $height > 5000) {
+                return ['valid' => false, 'message' => 'Image must not exceed 5000x5000 pixels'];
+            }
         }
         
         return ['valid' => true, 'message' => 'Valid image file'];
@@ -529,7 +541,7 @@ class Validator
         }
         
         // Validate middle name (optional)
-        if (!empty($data['middleName'])) {
+        if (!empty($data['middleName']) && trim($data['middleName']) !== '') {
             $middleNameValidation = self::validateName($data['middleName'], 'middle name');
             if (!$middleNameValidation['valid']) {
                 $errors['middleName'] = $middleNameValidation['message'];
@@ -537,7 +549,7 @@ class Validator
                 $sanitized['middleName'] = self::sanitizeInput($data['middleName']);
             }
         } else {
-            $sanitized['middleName'] = '';
+            $sanitized['middleName'] = null; // Use null for empty middle names
         }
         
         // Validate last name
@@ -564,12 +576,14 @@ class Validator
             $sanitized['phoneNumber'] = trim($data['phoneNumber']);
         }
         
-        // Validate password
-        $passwordValidation = self::validatePassword($data['password'] ?? '');
-        if (!$passwordValidation['valid']) {
-            $errors['password'] = $passwordValidation['message'];
+        // Validate password - simple validation
+        $password = $data['password'] ?? '';
+        if (empty($password)) {
+            $errors['password'] = 'Password is required';
+        } elseif (strlen($password) < 6) {
+            $errors['password'] = 'Password must be at least 6 characters long';
         } else {
-            $sanitized['password'] = $data['password']; // Don't sanitize password
+            $sanitized['password'] = $password; // Don't sanitize password
         }
         
         // Validate address

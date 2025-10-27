@@ -441,7 +441,7 @@ body {
     body {
         padding: 15px;
     }
-    
+
     .page-header-wrapper {
         flex-direction: column;
         gap: 15px;
@@ -494,7 +494,7 @@ body {
         gap: 8px;
         margin-top: 25px;
     }
-    
+
     .page-link {
         padding: 10px 14px;
         font-size: 12px;
@@ -506,11 +506,11 @@ body {
     .page-header h1 {
         font-size: 20px;
     }
-    
+
     .applications-container {
         padding: 15px;
     }
-    
+
     .empty-state {
         padding: 40px 20px;
         font-size: 16px;
@@ -519,4 +519,152 @@ body {
     .empty-state i {
         font-size: 48px;
     }
+}/* ======
+==================================
+   REJECTION REASON STYLING
+   ======================================== */
+
+.rejection-reason {
+    border-top: 1px solid rgba(255, 107, 107, 0.2);
+    margin-top: 15px;
+    padding-top: 15px;
+}
+
+.rejection-reason .label {
+    color: #ff6b6b;
+    font-weight: 600;
+}
+
+.rejection-text {
+    background: rgba(255, 107, 107, 0.1);
+    border: 1px solid rgba(255, 107, 107, 0.3);
+    border-radius: 6px;
+    padding: 12px;
+    color: #ff9999;
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: pre-line;
+}
+
+/* Modal Styles for Rejection */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: rgba(20, 20, 20, 0.98);
+    border: 1px solid rgba(255, 107, 0, 0.3);
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    padding: 20px 25px;
+    border-bottom: 1px solid rgba(255, 107, 0, 0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    color: #ff6b6b;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: #999;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.modal-close:hover {
+    color: #ff6b6b;
+    background: rgba(255, 107, 107, 0.1);
+}
+
+.modal-body {
+    padding: 25px;
+}
+
+.modal-body p {
+    color: #ccc;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    color: #ff6b00;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 12px;
+    background: rgba(40, 40, 40, 0.8);
+    border: 1px solid rgba(255, 107, 0, 0.3);
+    border-radius: 6px;
+    color: #fff;
+    font-size: 14px;
+    resize: vertical;
+}
+
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #ff6b00;
+    background: rgba(40, 40, 40, 0.9);
+}
+
+.modal-footer {
+    padding: 20px 25px;
+    border-top: 1px solid rgba(255, 107, 0, 0.2);
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+}
+
+.btn-cancel {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ccc;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-cancel:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
 }

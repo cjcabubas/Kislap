@@ -340,6 +340,191 @@ class WorkerController
         return ['success' => false, 'message' => 'No files uploaded. ' . implode(', ', $errors)];
     }
 
+    public function bookings(): void
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $worker = $_SESSION['worker'] ?? null;
+        if (!$worker) {
+            header('Location: index.php?controller=Worker&action=login');
+            exit;
+        }
+
+        // Get status filter from URL
+        $statusFilter = $_GET['status'] ?? null;
+
+        // Get worker's bookings/conversations with optional status filter
+        require_once __DIR__ . '/../model/repositories/ChatRepository.php';
+        $chatRepo = new ChatRepository();
+        
+        try {
+            $bookings = $chatRepo->getWorkerBookings($worker['worker_id'], $statusFilter);
+            require "views/worker/bookings.php";
+        } catch (Exception $e) {
+            error_log("Error fetching worker bookings: " . $e->getMessage());
+            $_SESSION['error'] = 'Unable to load bookings at this time.';
+            header('Location: index.php?controller=Worker&action=dashboard');
+            exit;
+        }
+    }
+
+    public function manageAvailability(): void
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $worker = $_SESSION['worker'] ?? null;
+        if (!$worker) {
+            header('Location: index.php?controller=Worker&action=login');
+            exit;
+        }
+
+        // Get worker's availability settings
+        try {
+            $availability = $this->repo->getWorkerAvailability($worker['worker_id']);
+            require "views/worker/availability.php";
+        } catch (Exception $e) {
+            error_log("Error fetching worker availability: " . $e->getMessage());
+            $_SESSION['error'] = 'Unable to load availability settings at this time.';
+            header('Location: index.php?controller=Worker&action=dashboard');
+            exit;
+        }
+    }
+
+    public function acceptBooking(): void
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $worker = $_SESSION['worker'] ?? null;
+        if (!$worker) {
+            echo json_encode(['success' => false, 'message' => 'Not authenticated']);
+            return;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['success' => false, 'message' => 'Invalid request method']);
+            return;
+        }
+
+        $conversationId = $_POST['conversation_id'] ?? null;
+        if (!$conversationId) {
+            echo json_encode(['success' => false, 'message' => 'Missing conversation ID']);
+            return;
+        }
+
+        require_once __DIR__ . '/../model/repositories/ChatRepository.php';
+        $chatRepo = new ChatRepository();
+
+        try {
+            $result = $chatRepo->acceptBooking($conversationId, $worker['worker_id']);
+            if ($result) {
+                echo json_encode(['success' => true, 'message' => 'Booking accepted successfully']);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Failed to accept booking']);
+            }
+        } catch (Exception $e) {
+            error_log("Error accepting booking: " . $e->getMessage());
+            echo json_encode(['success' => false, 'message' => 'Server error']);
+        }
+    }
+
+    public function rejectBooking(): void
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $worker = $_SESSION['worker'] ?? null;
+        if (!$worker) {
+            echo json_encode(['success' => false, 'message' => 'Not authenticated']);
+            return;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['success' => false, 'message' => 'Invalid request method']);
+            return;
+        }
+
+        $conversationId = $_POST['conversation_id'] ?? null;
+        $reason = $_POST['reason'] ?? '';
+
+        if (!$conversationId) {
+            echo json_encode(['success' => false, 'message' => 'Missing conversation ID']);
+            return;
+        }
+
+        require_once __DIR__ . '/../model/repositories/ChatRepository.php';
+        $chatRepo = new ChatRepository();
+
+        try {
+            $result = $chatRepo->rejectBooking($conversationId, $worker['worker_id'], $reason);
+            if ($result) {
+                echo json_encode(['success' => true, 'message' => 'Booking rejected successfully']);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Failed to reject booking']);
+            }
+        } catch (Exception $e) {
+            error_log("Error rejecting booking: " . $e->getMessage());
+            echo json_encode(['success' => false, 'message' => 'Server error']);
+        }
+    }
+
+    public function updateBookingDetails(): void
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $worker = $_SESSION['worker'] ?? null;
+        if (!$worker) {
+            echo json_encode(['success' => false, 'message' => 'Not authenticated']);
+            return;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['success' => false, 'message' => 'Invalid request method']);
+            return;
+        }
+
+        $conversationId = $_POST['conversation_id'] ?? null;
+        $finalPrice = $_POST['final_price'] ?? null;
+        $eventDate = $_POST['event_date'] ?? null;
+        $eventTime = $_POST['event_time'] ?? null;
+        $eventLocation = $_POST['event_location'] ?? null;
+
+        if (!$conversationId) {
+            echo json_encode(['success' => false, 'message' => 'Missing conversation ID']);
+            return;
+        }
+
+        require_once __DIR__ . '/../model/repositories/ChatRepository.php';
+        $chatRepo = new ChatRepository();
+
+        try {
+            $updateData = [
+                'final_price' => $finalPrice,
+                'event_date' => $eventDate,
+                'event_time' => $eventTime,
+                'event_location' => $eventLocation
+            ];
+
+            $result = $chatRepo->updateBookingDetails($conversationId, $updateData);
+            if ($result) {
+                echo json_encode(['success' => true, 'message' => 'Booking details updated successfully']);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Failed to update booking details']);
+            }
+        } catch (Exception $e) {
+            error_log("Error updating booking details: " . $e->getMessage());
+            echo json_encode(['success' => false, 'message' => 'Server error']);
+        }
+    }
+
     public function removePortfolioImage(): void
     {
         if (session_status() === PHP_SESSION_NONE) {

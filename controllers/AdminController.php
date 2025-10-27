@@ -266,6 +266,7 @@ class AdminController
             $data = json_decode(file_get_contents('php://input'), true);
             $id = $data['application_id'] ?? null;
             $action = $data['status'] ?? null;
+            $rejectionReason = $data['rejection_reason'] ?? null;
 
             if (!$id || !$action) {
                 http_response_code(400);
@@ -281,7 +282,12 @@ class AdminController
             }
 
             try {
-                $this->repo->updateApplicationStatus($id, $status);
+                // Update status with rejection reason if provided
+                if ($status === 'REJECTED' && $rejectionReason) {
+                    $this->repo->updateApplicationStatusWithReason($id, $status, $rejectionReason);
+                } else {
+                    $this->repo->updateApplicationStatus($id, $status);
+                }
 
                 if ($status === 'ACCEPTED') {
                     $application = $this->repo->findApplicationById($id);
