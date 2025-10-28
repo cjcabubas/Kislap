@@ -82,30 +82,7 @@ class UserRepository extends BaseRepository
         }
     }
 
-    public function createSupportTicket(array $ticketData): bool
-    {
-        try {
-            // First, create the support_tickets table if it doesn't exist
-            $this->createSupportTicketsTable();
-            
-            $stmt = $this->conn->prepare("
-                INSERT INTO support_tickets (user_id, subject, message, priority, status, created_at) 
-                VALUES (?, ?, ?, ?, ?, ?)
-            ");
-            
-            return $stmt->execute([
-                $ticketData['user_id'],
-                $ticketData['subject'],
-                $ticketData['message'],
-                $ticketData['priority'],
-                $ticketData['status'],
-                $ticketData['created_at']
-            ]);
-        } catch (Exception $e) {
-            error_log("Error creating support ticket: " . $e->getMessage());
-            return false;
-        }
-    }
+
 
     private function createSupportTicketsTable(): void
     {
@@ -127,8 +104,8 @@ class UserRepository extends BaseRepository
             error_log("Error creating support_tickets table: " . $e->getMessage());
         }
     }
-}    publ
-ic function changeUserPassword(int $userId, string $currentPassword, string $newPassword): array
+
+    public function changeUserPassword(int $userId, string $currentPassword, string $newPassword): array
     {
         try {
             // Get current user data
@@ -188,3 +165,56 @@ ic function changeUserPassword(int $userId, string $currentPassword, string $new
             return null;
         }
     }
+
+    public function getUserStatistics(int $userId): array
+    {
+        try {
+            // Initialize default statistics
+            $stats = [
+                'totalTickets' => 0,
+                'openTickets' => 0,
+                'resolvedTickets' => 0,
+                'lastLoginDate' => null,
+                'accountCreatedDate' => null
+            ];
+
+            // Get user account creation date
+            $user = $this->getUserById($userId);
+            if ($user) {
+                $stats['accountCreatedDate'] = $user['created_at'] ?? null;
+                $stats['lastLoginDate'] = $user['last_login'] ?? null;
+            }
+
+            // Get ticket statistics
+            $stmt = $this->conn->prepare("
+                SELECT 
+                    COUNT(*) as total_tickets,
+                    SUM(CASE WHEN status = 'open' THEN 1 ELSE 0 END) as open_tickets,
+                    SUM(CASE WHEN status = 'resolved' OR status = 'closed' THEN 1 ELSE 0 END) as resolved_tickets
+                FROM support_tickets 
+                WHERE user_id = ?
+            ");
+            
+            $stmt->execute([$userId]);
+            $ticketStats = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if ($ticketStats) {
+                $stats['totalTickets'] = (int)$ticketStats['total_tickets'];
+                $stats['openTickets'] = (int)$ticketStats['open_tickets'];
+                $stats['resolvedTickets'] = (int)$ticketStats['resolved_tickets'];
+            }
+
+            return $stats;
+            
+        } catch (Exception $e) {
+            error_log("Error getting user statistics: " . $e->getMessage());
+            return [
+                'totalTickets' => 0,
+                'openTickets' => 0,
+                'resolvedTickets' => 0,
+                'lastLoginDate' => null,
+                'accountCreatedDate' => null
+            ];
+        }
+    }
+}
