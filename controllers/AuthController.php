@@ -214,6 +214,112 @@ class AuthController
     }
 
     // ========================================
+    // CHANGE PASSWORD
+    // ========================================
+    
+    public function changePassword(): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header("Location: index.php?controller=Auth&action=login");
+            exit;
+        }
+
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $email = trim($_POST['email'] ?? '');
+        $phoneNumber = trim($_POST['phoneNumber'] ?? '');
+        $newPassword = $_POST['newPassword'] ?? '';
+        $confirmPassword = $_POST['confirmPassword'] ?? '';
+        $userType = $_POST['userType'] ?? 'user'; // 'user' or 'worker'
+
+        // Validation - Only require email AND phone (both must match)
+        if (empty($email) || empty($phoneNumber) || empty($newPassword) || empty($confirmPassword)) {
+            $_SESSION['notification'] = [
+                'type' => 'error',
+                'message' => 'Please fill in all required fields.'
+            ];
+            $redirectUrl = $userType === 'worker' ? 'index.php?controller=Worker&action=login' : 'index.php?controller=Auth&action=login';
+            header("Location: $redirectUrl");
+            exit;
+        }
+
+        // Validate email format
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $_SESSION['notification'] = [
+                'type' => 'error',
+                'message' => 'Please enter a valid email address.'
+            ];
+            $redirectUrl = $userType === 'worker' ? 'index.php?controller=Worker&action=login' : 'index.php?controller=Auth&action=login';
+            header("Location: $redirectUrl");
+            exit;
+        }
+
+        if ($newPassword !== $confirmPassword) {
+            $_SESSION['notification'] = [
+                'type' => 'error',
+                'message' => 'New password and confirmation do not match.'
+            ];
+            $redirectUrl = $userType === 'worker' ? 'index.php?controller=Worker&action=login' : 'index.php?controller=Auth&action=login';
+            header("Location: $redirectUrl");
+            exit;
+        }
+
+        if (strlen($newPassword) < 6) {
+            $_SESSION['notification'] = [
+                'type' => 'error',
+                'message' => 'Password must be at least 6 characters long.'
+            ];
+            $redirectUrl = $userType === 'worker' ? 'index.php?controller=Worker&action=login' : 'index.php?controller=Auth&action=login';
+            header("Location: $redirectUrl");
+            exit;
+        }
+
+        try {
+            // Verify BOTH email AND phone match the same account
+            $user = $this->repo->verifyEmailAndPhone($email, $phoneNumber, $userType);
+            
+            if (!$user) {
+                $_SESSION['notification'] = [
+                    'type' => 'error',
+                    'message' => 'Email and phone number do not match any account or do not belong to the same account.'
+                ];
+                $redirectUrl = $userType === 'worker' ? 'index.php?controller=Worker&action=login' : 'index.php?controller=Auth&action=login';
+                header("Location: $redirectUrl");
+                exit;
+            }
+
+            // Update password
+            $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
+            $success = $this->repo->updatePassword($user['id'], $hashedPassword, $userType);
+
+            if ($success) {
+                $_SESSION['notification'] = [
+                    'type' => 'success',
+                    'message' => 'Password changed successfully! You can now log in with your new password.'
+                ];
+            } else {
+                $_SESSION['notification'] = [
+                    'type' => 'error',
+                    'message' => 'Failed to update password. Please try again.'
+                ];
+            }
+
+        } catch (Exception $e) {
+            error_log("Change password error: " . $e->getMessage());
+            $_SESSION['notification'] = [
+                'type' => 'error',
+                'message' => 'An error occurred while changing password. Please try again.'
+            ];
+        }
+
+        $redirectUrl = $userType === 'worker' ? 'index.php?controller=Worker&action=login' : 'index.php?controller=Auth&action=login';
+        header("Location: $redirectUrl");
+        exit;
+    }
+
+    // ========================================
     // LOGOUT
     // ========================================
     

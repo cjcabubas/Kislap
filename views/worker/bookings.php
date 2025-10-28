@@ -1,8 +1,4 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 $worker = $_SESSION['worker'] ?? null;
 if (!$worker) {
     header("Location: index.php?controller=Worker&action=login");
@@ -289,6 +285,38 @@ function showEditModal(conversationId, booking) {
     document.getElementById('editEventTime').value = booking.event_time || '';
     document.getElementById('editEventLocation').value = booking.event_location || '';
     document.getElementById('editFinalPrice').value = booking.final_price || booking.budget || '';
+    
+    // Make price field editable only if deposit hasn't been paid
+    const priceField = document.getElementById('editFinalPrice');
+    
+    // Check if deposit has been paid
+    const depositPaid = booking.deposit_paid == 1 || 
+                       booking.deposit_paid === '1' || 
+                       booking.deposit_paid === true ||
+                       booking.booking_status === 'deposit_paid';
+    
+    if (depositPaid) {
+        priceField.readOnly = true;
+        priceField.disabled = true;
+        priceField.title = 'Price cannot be changed after deposit is paid';
+        priceField.style.backgroundColor = '#2a2a2a !important';
+        priceField.style.color = '#888 !important';
+        priceField.style.cursor = 'not-allowed !important';
+        priceField.style.border = '1px solid #444 !important';
+        priceField.setAttribute('readonly', 'readonly');
+        priceField.setAttribute('disabled', 'disabled');
+    } else {
+        priceField.readOnly = false;
+        priceField.disabled = false;
+        priceField.title = '';
+        priceField.style.backgroundColor = '';
+        priceField.style.color = '';
+        priceField.style.cursor = '';
+        priceField.style.border = '';
+        priceField.removeAttribute('readonly');
+        priceField.removeAttribute('disabled');
+    }
+    
     modal.style.display = 'block';
 }
 
@@ -413,12 +441,21 @@ async function updateBooking() {
     const eventDate = document.getElementById('editEventDate').value;
     const eventTime = document.getElementById('editEventTime').value;
     const eventLocation = document.getElementById('editEventLocation').value;
+    const finalPrice = document.getElementById('editFinalPrice').value;
+    const priceField = document.getElementById('editFinalPrice');
+    
+    let requestBody = `conversation_id=${conversationId}&event_date=${eventDate}&event_time=${eventTime}&event_location=${encodeURIComponent(eventLocation)}`;
+    
+    // Only include final price if the field is editable (deposit not paid)
+    if (!priceField.readOnly && finalPrice) {
+        requestBody += `&final_price=${finalPrice}`;
+    }
     
     try {
         const response = await fetch('?controller=Worker&action=updateBookingDetails', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `conversation_id=${conversationId}&event_date=${eventDate}&event_time=${eventTime}&event_location=${encodeURIComponent(eventLocation)}`
+            body: requestBody
         });
         
         const result = await response.json();
@@ -484,7 +521,7 @@ async function updateBooking() {
         <input type="text" id="editEventLocation" style="width: 100%; padding: 10px; margin: 10px 0;">
         
         <label>Final Price:</label>
-        <input type="number" id="editFinalPrice" step="0.01" style="width: 100%; padding: 10px; margin: 10px 0; background-color: #f5f5f5; cursor: not-allowed;" readonly>
+        <input type="number" id="editFinalPrice" step="0.01" style="width: 100%; padding: 10px; margin: 10px 0;">
         
         <button onclick="updateBooking()" class="btn btn-accept">Save Changes</button>
         <button onclick="closeModal('editModal')" class="btn" style="background: rgba(255, 107, 0, 0.1); color: #ff6b00; border: 1px solid rgba(255, 107, 0, 0.3);">Cancel</button>

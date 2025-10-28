@@ -1,11 +1,11 @@
 <?php
 
-class UserRepository
-{
-    private PDO $conn;
+require_once __DIR__ . '/BaseRepository.php';
 
+class UserRepository extends BaseRepository
+{
     public function __construct() {
-        $this->conn = new PDO("mysql:host=localhost;dbname=kislap", "root", "");
+        parent::__construct();
     }
 
     public function updateUser(int $userId, array $user): bool
@@ -127,4 +127,64 @@ class UserRepository
             error_log("Error creating support_tickets table: " . $e->getMessage());
         }
     }
-}
+}    publ
+ic function changeUserPassword(int $userId, string $currentPassword, string $newPassword): array
+    {
+        try {
+            // Get current user data
+            $user = $this->getUserById($userId);
+            
+            if (!$user || !password_verify($currentPassword, $user['password'])) {
+                return ['success' => false, 'message' => 'Current password is incorrect.'];
+            }
+
+            // Check if new password is different from current
+            if (password_verify($newPassword, $user['password'])) {
+                return ['success' => false, 'message' => 'New password must be different from your current password.'];
+            }
+
+            // Hash new password and update
+            $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+            $stmt = $this->conn->prepare("UPDATE user SET password = ? WHERE user_id = ?");
+            $result = $stmt->execute([$hashedPassword, $userId]);
+
+            if (!$result) {
+                return ['success' => false, 'message' => 'Failed to update password. Please try again.'];
+            }
+
+            return ['success' => true, 'message' => 'Password changed successfully!'];
+            
+        } catch (Exception $e) {
+            error_log("Error changing user password: " . $e->getMessage());
+            return ['success' => false, 'message' => 'An error occurred while changing password.'];
+        }
+    }
+
+    public function createSupportTicket(int $userId, string $userEmail, string $userName, string $subject, string $message, string $priority): ?int
+    {
+        try {
+            $stmt = $this->conn->prepare("
+                INSERT INTO support_tickets (user_id, user_email, user_name, subject, message, priority, status, created_at) 
+                VALUES (?, ?, ?, ?, ?, ?, 'open', NOW())
+            ");
+            
+            $result = $stmt->execute([
+                $userId,
+                $userEmail,
+                $userName,
+                $subject,
+                $message,
+                $priority
+            ]);
+
+            if ($result) {
+                return $this->conn->lastInsertId();
+            }
+            
+            return null;
+            
+        } catch (Exception $e) {
+            error_log("Error creating support ticket: " . $e->getMessage());
+            return null;
+        }
+    }

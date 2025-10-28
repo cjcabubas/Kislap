@@ -317,7 +317,10 @@ button:hover::before {
     left: 100%;
 }
 
-/* Responsive Design */
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
 @media (max-width: 768px) {
     body {
         padding: 10px;
@@ -361,12 +364,96 @@ button:hover::before {
     button {
         width: 100%;
     }
+
+    /* Stats responsive */
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
+    
+    .stat-card {
+        padding: 16px;
+        flex-direction: column;
+        text-align: center;
+        gap: 12px;
+    }
+    
+    .stat-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+    }
+    
+    .stat-number {
+        font-size: 24px;
+    }
+    
+    .booking-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    .booking-details {
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    /* Support responsive */
+    .support-options {
+        grid-template-columns: 1fr;
+    }
+    
+    .support-option {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .modal-content {
+        width: 95%;
+        margin: 10% auto;
+    }
+    
+    .modal-footer {
+        flex-direction: column;
+    }
+    
+    .btn-send-support,
+    .btn-cancel {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Password section responsive */
+    .password-section .form-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .password-section,
+    .support-section {
+        padding: 20px;
+        margin: 30px 0;
+    }
+    
+    .support-option {
+        padding: 15px;
+    }
+    
+    .support-icon {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .support-icon i {
+        font-size: 16px;
+    }
 }
 
 @media (max-width: 480px) {
     .container {
         margin: 90px 5px 20px;
         border-radius: 15px;
+        margin-top: 80px;
     }
 
     .profile-header {
@@ -389,6 +476,25 @@ button:hover::before {
 
     .section-title {
         font-size: 18px;
+    }
+
+    /* Stats responsive */
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Support responsive */
+    .password-section,
+    .support-section {
+        padding: 15px;
+        margin: 20px 0;
+    }
+    
+    .btn-change-password,
+    .btn-support,
+    .btn-send-support {
+        width: 100%;
+        justify-content: center;
     }
 }
 
@@ -608,47 +714,7 @@ button:focus-visible {
     box-shadow: 0 6px 20px rgba(255, 107, 0, 0.4);
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-    .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 16px;
-    }
-    
-    .stat-card {
-        padding: 16px;
-        flex-direction: column;
-        text-align: center;
-        gap: 12px;
-    }
-    
-    .stat-icon {
-        width: 40px;
-        height: 40px;
-        font-size: 16px;
-    }
-    
-    .stat-number {
-        font-size: 24px;
-    }
-    
-    .booking-item {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
-    }
-    
-    .booking-details {
-        flex-direction: column;
-        gap: 4px;
-    }
-}
 
-@media (max-width: 480px) {
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-}
 /* ==
 ======================================
    PASSWORD SECTION
@@ -909,35 +975,7 @@ button:focus-visible {
     box-shadow: 0 6px 20px rgba(255, 107, 0, 0.4);
 }
 
-/* ========================================
-   RESPONSIVE DESIGN
-   ======================================== */
-
-@media (max-width: 768px) {
-    .support-options {
-        grid-template-columns: 1fr;
-    }
-    
-    .support-option {
-        flex-direction: column;
-        text-align: center;
-    }
-    
-    .modal-content {
-        width: 95%;
-        margin: 10% auto;
-    }
-    
-    .modal-footer {
-        flex-direction: column;
-    }
-    
-    .btn-send-support,
-    .btn-cancel {
-        width: 100%;
-        justify-content: center;
-    }
-}/* =
+/* =
 =======================================
    ALERT MESSAGES
    ======================================== */
@@ -1095,54 +1133,7 @@ button:focus-visible {
     font-size: 20px;
 }
 
-/* ========================================
-   RESPONSIVE IMPROVEMENTS
-   ======================================== */
-
-@media (max-width: 768px) {
-    .password-section .form-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .password-section,
-    .support-section {
-        padding: 20px;
-        margin: 30px 0;
-    }
-    
-    .support-option {
-        padding: 15px;
-    }
-    
-    .support-icon {
-        width: 40px;
-        height: 40px;
-    }
-    
-    .support-icon i {
-        font-size: 16px;
-    }
-}
-
-@media (max-width: 480px) {
-    .container {
-        margin-top: 80px;
-        border-radius: 15px;
-    }
-    
-    .password-section,
-    .support-section {
-        padding: 15px;
-        margin: 20px 0;
-    }
-    
-    .btn-change-password,
-    .btn-support,
-    .btn-send-support {
-        width: 100%;
-        justify-content: center;
-    }
-}/* ========
+/* ========
 ================================
    PASSWORD REQUIREMENTS STYLING
    ======================================== */

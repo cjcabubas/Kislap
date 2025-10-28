@@ -1106,7 +1106,10 @@
     animation: fadeIn 0.3s ease-in;
 }
 
-/* Responsive Design */
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
 @media (max-width: 1024px) {
     .packages-grid,
     .packages-view-grid {

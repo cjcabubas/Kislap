@@ -663,7 +663,10 @@
     transform: translateY(-50%) rotate(180deg);
 }
 
-/* Responsive */
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
 @media (max-width: 768px) {
     .page-header h1 {
         font-size: 28px;

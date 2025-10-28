@@ -578,33 +578,8 @@ class AdminController
     
     public function bookings()
     {
-        require_once __DIR__ . '/../model/repositories/ChatRepository.php';
-        $chatRepo = new ChatRepository();
-        
         $status = $_GET['status'] ?? 'all';
-        
-        $stmt = $chatRepo->conn->prepare(
-            "SELECT c.conversation_id, c.booking_status, c.created_at,
-                    u.firstName as user_first, u.lastName as user_last,
-                    w.firstName as worker_first, w.lastName as worker_last,
-                    atb.event_type, atb.event_date, atb.budget, atb.final_price,
-                    atb.deposit_paid, atb.deposit_amount
-             FROM conversations c
-             LEFT JOIN user u ON c.user_id = u.user_id
-             LEFT JOIN workers w ON c.worker_id = w.worker_id
-             LEFT JOIN ai_temp_bookings atb ON c.conversation_id = atb.conversation_id
-             WHERE c.booking_status != 'pending_ai'
-             " . ($status != 'all' ? "AND c.booking_status = ?" : "") . "
-             ORDER BY c.created_at DESC"
-        );
-        
-        if ($status != 'all') {
-            $stmt->execute([$status]);
-        } else {
-            $stmt->execute();
-        }
-        
-        $bookings = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $bookings = $this->repo->getAllBookings($status);
         
         require 'views/admin/bookings.php';
     }

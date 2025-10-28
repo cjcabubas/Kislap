@@ -52,49 +52,9 @@ class UserController
     
     private function getUserStatistics(int $userId): array
     {
-        try {
-            require_once __DIR__ . '/../config/dbconfig.php';
-            
-            $stmt = $pdo->prepare("
-                SELECT 
-                    COALESCE(COUNT(DISTINCT c.conversation_id), 0) as total_bookings,
-                    COALESCE(COUNT(DISTINCT CASE WHEN c.booking_status = 'completed' THEN c.conversation_id END), 0) as completed_bookings,
-                    COALESCE(COUNT(DISTINCT CASE WHEN c.booking_status IN ('confirmed', 'negotiating') THEN c.conversation_id END), 0) as active_bookings,
-                    COALESCE(COUNT(DISTINCT CASE WHEN c.booking_status = 'cancelled' THEN c.conversation_id END), 0) as cancelled_bookings,
-                    COALESCE(COUNT(DISTINCT r.rating_id), 0) as total_reviews,
-                    COALESCE(AVG(r.rating), 0) as average_rating_given,
-                    COALESCE(SUM(CASE WHEN atb.final_price > 0 THEN atb.final_price ELSE atb.budget END), 0) as total_spent
-                FROM user u
-                LEFT JOIN conversations c ON u.user_id = c.user_id
-                LEFT JOIN ratings r ON c.conversation_id = r.conversation_id AND r.user_id = u.user_id
-                LEFT JOIN ai_temp_bookings atb ON c.conversation_id = atb.conversation_id
-                WHERE u.user_id = ?
-            ");
-            
-            $stmt->execute([$userId]);
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            
-            return $result ?: [
-                'total_bookings' => 0,
-                'completed_bookings' => 0,
-                'active_bookings' => 0,
-                'cancelled_bookings' => 0,
-                'total_reviews' => 0,
-                'average_rating_given' => 0,
-                'total_spent' => 0
-            ];
-        } catch (Exception $e) {
-            error_log("Error fetching user statistics: " . $e->getMessage());
-            return [
-                'total_bookings' => 0,
-                'completed_bookings' => 0,
-                'active_bookings' => 0,
-                'cancelled_bookings' => 0,
-                'total_reviews' => 0,
-                'average_rating_given' => 0,
-                'total_spent' => 0
-            ];
-        }
+        require_once __DIR__ . '/../model/repositories/UserRepository.php';
+        $userRepo = new UserRepository();
+        return $userRepo->getUserStatistics($userId);
     }
 
     private function uploadProfilePhoto(array $file, int $userId): ?string
@@ -297,32 +257,15 @@ class UserController
                 throw new Exception('Password must be at least 6 characters long.');
             }
 
-            // Verify current password
+            // Verify current password and update if valid
             $userRepo = new UserRepository();
-            $user = $userRepo->getUserById($userId);
+            $result = $userRepo->changeUserPassword($userId, $currentPassword, $newPassword);
             
-            if (!$user || !password_verify($currentPassword, $user['password'])) {
-                throw new Exception('Current password is incorrect.');
+            if ($result['success']) {
+                $_SESSION['success'] = 'Password changed successfully!';
+            } else {
+                throw new Exception($result['message']);
             }
-
-            // Check if new password is different from current
-            if (password_verify($newPassword, $user['password'])) {
-                throw new Exception('New password must be different from your current password.');
-            }
-
-            // Hash new password
-            $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
-
-            // Update password in database
-            require_once __DIR__ . '/../config/dbconfig.php';
-            $stmt = $pdo->prepare("UPDATE user SET password = ? WHERE user_id = ?");
-            $result = $stmt->execute([$hashedPassword, $userId]);
-
-            if (!$result) {
-                throw new Exception('Failed to update password. Please try again.');
-            }
-
-            $_SESSION['success'] = 'Password changed successfully!';
             
         } catch (Exception $e) {
             $_SESSION['error'] = $e->getMessage();
@@ -376,31 +319,15 @@ class UserController
             $message = Validator::sanitizeInput($message);
             $priority = Validator::sanitizeInput($priority);
 
-            // Store support ticket in database
-            require_once __DIR__ . '/../config/dbconfig.php';
-            
-            $stmt = $pdo->prepare("
-                INSERT INTO support_tickets (user_id, user_email, user_name, subject, message, priority, status, created_at) 
-                VALUES (?, ?, ?, ?, ?, ?, 'open', NOW())
-            ");
-            
-            $result = $stmt->execute([
-                $userId,
-                $userEmail,
-                $userName,
-                $subject,
-                $message,
-                $priority
-            ]);
+            // Store support ticket using repository
+            $userRepo = new UserRepository();
+            $ticketId = $userRepo->createSupportTicket($userId, $userEmail, $userName, $subject, $message, $priority);
 
-            if (!$result) {
+            if ($ticketId) {
+                $_SESSION['success'] = "Support ticket #{$ticketId} submitted successfully! We'll get back to you soon.";
+            } else {
                 throw new Exception('Failed to submit support request. Please try again.');
             }
-
-            // Get the ticket ID for reference
-            $ticketId = $pdo->lastInsertId();
-
-            $_SESSION['success'] = "Support ticket #{$ticketId} submitted successfully! We'll get back to you soon.";
             
         } catch (Exception $e) {
             $_SESSION['error'] = $e->getMessage();

@@ -459,21 +459,21 @@
 
 .booking-actions {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-end;
 }
 
 .booking-actions .package-info {
     flex-shrink: 0;
+    align-self: flex-end;
 }
 
 .booking-actions .action-buttons {
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
-    margin-left: auto;
+    align-self: flex-end;
 }
 
 .btn-action {
@@ -829,7 +829,10 @@
     box-shadow: 0 10px 30px rgba(255, 107, 0, 0.4);
 }
 
-/* Responsive Design */
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
 @media (max-width: 1200px) {
     .bookings-wrapper {
         grid-template-columns: 1fr 340px;
@@ -925,6 +928,41 @@
 
     .summary-card {
         grid-template-columns: 1fr;
+    }
+
+    /* Modal responsive */
+    .booking-details-modal .detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .booking-actions {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .btn-action {
+        flex: 1;
+        min-width: 120px;
+        justify-content: center;
+    }
+
+    .notification {
+        right: 10px;
+        left: 10px;
+        transform: translateY(-100px);
+    }
+
+    .notification.show {
+        transform: translateY(0);
+    }
+
+    /* Proposal section responsive */
+    .proposal-content {
+        grid-template-columns: 1fr;
+    }
+
+    .proposal-section {
+        padding: 16px;
     }
 }
 
@@ -1192,35 +1230,8 @@
     color: #f44336;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-    .booking-details-modal .detail-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .booking-actions {
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-
-    .btn-action {
-        flex: 1;
-        min-width: 120px;
-        justify-content: center;
-    }
-
-    .notification {
-        right: 10px;
-        left: 10px;
-        transform: translateY(-100px);
-    }
-
-    .notification.show {
-        transform: translateY(0);
-    }
-
-
-/ * Proposal Section */ .proposal-section {
+/* Proposal Section */
+.proposal-section {
     background: linear-gradient(135deg, rgba(156, 39, 176, 0.1) 0%, rgba(156, 39, 176, 0.05) 100%);
     border: 2px solid rgba(156, 39, 176, 0.3);
     border-radius: 12px;
@@ -1228,68 +1239,55 @@
     margin: 16px 0;
 }
 
-    .proposal-header {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 16px;
-        color: #9c27b0;
-    }
+.proposal-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    color: #9c27b0;
+}
 
-    .proposal-header i {
-        font-size: 18px;
-    }
+.proposal-header i {
+    font-size: 18px;
+}
 
-    .proposal-header h4 {
-        margin: 0;
-        font-size: 16px;
-        font-weight: 600;
-    }
+.proposal-header h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
 
-    .proposal-content {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-    }
+.proposal-content {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
 
-    .proposal-item {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-    }
+.proposal-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
 
-    .proposal-item.full-width {
-        grid-column: 1 / -1;
-    }
+.proposal-item.full-width {
+    grid-column: 1 / -1;
+}
 
-    .proposal-label {
-        font-size: 12px;
-        color: #9c27b0;
-        font-weight: 600;
-        text-transform: uppercase;
-    }
+.proposal-label {
+    font-size: 12px;
+    color: #9c27b0;
+    font-weight: 600;
+    text-transform: uppercase;
+}
 
-    .proposal-value {
-        font-size: 14px;
-        color: #fff;
-        font-weight: 500;
-    }
+.proposal-value {
+    font-size: 14px;
+    color: #fff;
+    font-weight: 500;
+}
 
-    .proposal-value.price {
-        font-size: 18px;
-        font-weight: 700;
-        color: #9c27b0;
-    }
-
-    /* Enhanced booking actions for proposals */
-    /* Responsive proposal section */
-    @media (max-width: 768px) {
-        .proposal-content {
-            grid-template-columns: 1fr;
-        }
-
-        .proposal-section {
-            padding: 16px;
-        }
-    }
+.proposal-value.price {
+    font-size: 18px;
+    font-weight: 700;
+    color: #9c27b0;
 }

@@ -1,8 +1,4 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 $worker = $_SESSION['worker'] ?? null;
 if (!$worker) {
     header("Location: /Kislap/index.php?controller=Auth&action=login");

@@ -1,8 +1,4 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 $user   = $_SESSION['user']   ?? null;
 $worker = $_SESSION['worker'] ?? null;
 
@@ -106,7 +102,6 @@ foreach ($bookings as $booking) {
                     $serviceType = $booking['event_type'] ?? 'Photography Session';
                     $bookingDate = $booking['event_date'] ?? '';
                     $bookingTime = $booking['event_time'] ?? '';
-                    $duration = $booking['duration'] ?? 'Not specified';
                     $location = $booking['event_location'] ?? 'Not specified';
                     $price = $booking['final_price'] ?? $booking['budget'] ?? $booking['package_price'] ?? 0;
                     $status = $booking['booking_status'] ?? 'pending';
@@ -205,13 +200,7 @@ foreach ($bookings as $booking) {
                                 </div>
                             </div>
 
-                            <div class="detail-item">
-                                <i class="fas fa-hourglass-half"></i>
-                                <div class="detail-content">
-                                    <span class="detail-label">Duration</span>
-                                    <span class="detail-value"><?php echo $duration; ?> hours</span>
-                                </div>
-                            </div>
+
 
                             <div class="detail-item">
                                 <i class="fas fa-map-marker-alt"></i>
@@ -619,10 +608,7 @@ foreach ($bookings as $booking) {
                             <strong>Location:</strong>
                             <span>${booking.event_location || 'Not specified'}</span>
                         </div>
-                        <div class="detail-item">
-                            <strong>Duration:</strong>
-                            <span>${booking.duration || 'Not specified'}</span>
-                        </div>
+
                         <div class="detail-item">
                             <strong>Budget:</strong>
                             <span>₱${parseFloat(booking.budget || 0).toLocaleString()}</span>

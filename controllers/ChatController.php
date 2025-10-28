@@ -368,13 +368,17 @@ class ChatController
             );
 
             if (empty($packages)) {
+                // Automatically redirect to photographer when no packages available
+                $this->chatRepo->updateConversationType($conversationId, 'direct');
+                $this->chatRepo->updateConversationStatus($conversationId, 'pending_worker');
+
                 return [
                     'message' => "Great! I have all the details:\n\n" .
                         "📸 Event: {$tempBooking['event_type']}\n" .
                         "📅 Date: " . date('F d, Y', strtotime($tempBooking['event_date'])) . "\n" .
                         "📍 Location: {$tempBooking['event_location']}\n" .
                         "💰 Budget: ₱" . number_format($tempBooking['budget'], 2) . "\n\n" .
-                        "Unfortunately, there are no available packages at the moment. Would you like to speak with the photographer directly?",
+                        "No packages are available at the moment, so I'm redirecting you to the photographer now. They'll be able to discuss custom options with you directly! 📸✨",
                     'packages' => []
                 ];
             }

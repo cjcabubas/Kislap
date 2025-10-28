@@ -1,13 +1,12 @@
 <?php
 
-class PaymentRepository
-{
-    private PDO $conn;
+require_once __DIR__ . '/BaseRepository.php';
 
+class PaymentRepository extends BaseRepository
+{
     public function __construct()
     {
-        $this->conn = new PDO("mysql:host=localhost;dbname=kislap", "root", "");
-        $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        parent::__construct();
     }
 
     public function processDepositPayment(int $conversationId): bool
@@ -17,7 +16,8 @@ class PaymentRepository
 
             $stmt = $this->conn->prepare(
                 "UPDATE ai_temp_bookings 
-             SET deposit_paid_at = NOW(),
+             SET deposit_paid = 1,
+                 deposit_paid_at = NOW(),
                  deposit_amount = (final_price * 0.5)
              WHERE conversation_id = ?"
             );
@@ -47,7 +47,8 @@ class PaymentRepository
 
             $stmt = $this->conn->prepare(
                 "UPDATE ai_temp_bookings 
-             SET completed_at = NOW(),
+             SET full_payment_paid = 1,
+                 completed_at = NOW(),
                  full_payment_paid_at = NOW()
              WHERE conversation_id = ?"
             );

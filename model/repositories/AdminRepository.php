@@ -1,17 +1,16 @@
 <?php
 
-class AdminRepository
-{
-    private PDO $conn;
+require_once __DIR__ . '/BaseRepository.php';
 
+class AdminRepository extends BaseRepository
+{
     // ========================================
     // CONSTRUCTOR
     // ========================================
     
     public function __construct()
     {
-        $this->conn = new PDO("mysql:host=localhost;dbname=kislap", "root", "");
-        $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        parent::__construct();
     }
 
     // ========================================
@@ -499,4 +498,33 @@ class AdminRepository
         }
     }
 
-}
+    // ========================================
+    // BOOKING MANAGEMENT
+    // ========================================
+    
+    public function getAllBookings(string $status = 'all'): array
+    {
+        $sql = "SELECT c.conversation_id, c.booking_status, c.created_at,
+                       u.firstName as user_first, u.lastName as user_last,
+                       w.firstName as worker_first, w.lastName as worker_last,
+                       atb.event_type, atb.event_date, atb.budget, atb.final_price,
+                       atb.deposit_paid, atb.deposit_amount
+                FROM conversations c
+                LEFT JOIN user u ON c.user_id = u.user_id
+                LEFT JOIN workers w ON c.worker_id = w.worker_id
+                LEFT JOIN ai_temp_bookings atb ON c.conversation_id = atb.conversation_id
+                WHERE c.booking_status != 'pending_ai'";
+        
+        $params = [];
+        if ($status !== 'all') {
+            $sql .= " AND c.booking_status = ?";
+            $params[] = $status;
+        }
+        
+        $sql .= " ORDER BY c.created_at DESC";
+        
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute($params);
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }}

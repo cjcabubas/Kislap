@@ -321,20 +321,17 @@ $sortBy = $_GET['sort'] ?? 'featured';
                                        class="btn-primary">
                                         <i class="fas fa-comments"></i> Continue Booking
                                     </a>
+                                <?php elseif (!empty($photographer['has_completed_booking'])): ?>
+                                    <!-- Book Again (replaces Book Now for users with completed bookings) -->
+                                    <a href="index.php?controller=Chat&action=newBooking&worker_id=<?php echo $photogId; ?>"
+                                       class="btn-primary">
+                                        <i class="fas fa-redo"></i> Book Again
+                                    </a>
                                 <?php else: ?>
-                                    <!-- Start New Booking -->
+                                    <!-- Start New Booking (for first-time users) -->
                                     <a href="index.php?controller=Chat&action=newBooking&worker_id=<?php echo $photogId; ?>"
                                        class="btn-primary">
                                         <i class="fas fa-calendar-check"></i> Book Now
-                                    </a>
-                                <?php endif; ?>
-
-                                <?php if (!empty($photographer['has_completed_booking'])): ?>
-                                    <!-- Book Again Option (for completed bookings) -->
-                                    <a href="index.php?controller=Chat&action=newBooking&worker_id=<?php echo $photogId; ?>"
-                                       class="btn-secondary btn-sm"
-                                       style="margin-top: 8px;">
-                                        <i class="fas fa-redo"></i> Book Again
                                     </a>
                                 <?php endif; ?>
                             <?php else: ?>

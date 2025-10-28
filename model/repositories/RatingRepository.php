@@ -1,13 +1,12 @@
 <?php
 
-class RatingRepository
-{
-    private PDO $conn;
+require_once __DIR__ . '/BaseRepository.php';
 
+class RatingRepository extends BaseRepository
+{
     public function __construct()
     {
-        $this->conn = new PDO("mysql:host=localhost;dbname=kislap", "root", "");
-        $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        parent::__construct();
     }
 
     public function saveRating(int $conversationId, int $userId, int $workerId, int $rating, string $review): bool

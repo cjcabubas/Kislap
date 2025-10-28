@@ -1,13 +1,12 @@
 <?php
 
-class ChatRepository
-{
-    public PDO $conn;
+require_once __DIR__ . '/BaseRepository.php';
 
+class ChatRepository extends BaseRepository
+{
     public function __construct()
     {
-        $this->conn = new PDO("mysql:host=localhost;dbname=kislap", "root", "");
-        $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        parent::__construct();
     }
 
     // ========================================
@@ -402,6 +401,7 @@ class ChatRepository
                 atb.*,
                 p.name as package_name,
                 p.price as package_price,
+                p.duration_hours as duration,
                 w.worker_id,
                 CONCAT(w.firstName, ' ', COALESCE(w.middleName, ''), ' ', w.lastName) as photographer_name,
                 w.email as photographer_email,
@@ -524,7 +524,7 @@ class ChatRepository
                            atb.event_type, atb.event_date, atb.event_time, atb.event_location,
                            atb.budget, atb.final_price, atb.deposit_paid, atb.deposit_amount,
                            atb.special_requests,
-                           p.name as package_name, p.price as package_price
+                           p.name as package_name, p.price as package_price, p.duration_hours as duration
                     FROM conversations c
                     LEFT JOIN user u ON c.user_id = u.user_id
                     LEFT JOIN ai_temp_bookings atb ON c.conversation_id = atb.conversation_id

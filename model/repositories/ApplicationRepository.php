@@ -1,14 +1,15 @@
 <?php
-class ApplicationRepository
-{
-    private PDO $conn;
 
+require_once __DIR__ . '/BaseRepository.php';
+
+class ApplicationRepository extends BaseRepository
+{
     // ========================================
     // CONSTRUCTOR
     // ========================================
     
     public function __construct() {
-        $this->conn = new PDO("mysql:host=localhost;dbname=kislap", "root", "");
+        parent::__construct();
     }
 
     // ========================================

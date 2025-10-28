@@ -310,6 +310,48 @@ input::placeholder {
         font-size: 13px;
         padding: 9px 18px;
     }
+
+    /* Modal responsive */
+    .modal-content {
+        margin: 1% auto;
+        width: 95%;
+        max-height: 98vh;
+        overflow-y: auto;
+    }
+    
+    .modal-body {
+        padding: 15px 20px;
+        max-height: calc(98vh - 120px);
+        overflow-y: auto;
+    }
+    
+    .modal-header,
+    .modal-footer {
+        padding: 15px 20px;
+        flex-shrink: 0;
+    }
+    
+    .modal-footer {
+        flex-direction: column;
+    }
+    
+    .btn-cancel,
+    .btn-send-support,
+    .btn-change-password {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .support-section {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .support-section .support-link {
+        width: 100%;
+        justify-content: center;
+        margin: 0;
+    }
 }
 /* ========================================
    FORM ENHANCEMENTS
@@ -464,12 +506,14 @@ input:focus:valid {
 
 .modal-content {
     background: rgba(15, 15, 15, 0.98);
-    margin: 5% auto;
+    margin: 2% auto;
     padding: 0;
     border: 1px solid rgba(255, 107, 0, 0.3);
     border-radius: 12px;
     width: 90%;
     max-width: 500px;
+    max-height: 95vh;
+    overflow-y: auto;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
     animation: slideDown 0.3s ease;
 }
@@ -525,6 +569,8 @@ input:focus:valid {
 
 .modal-body {
     padding: 25px;
+    max-height: calc(95vh - 140px);
+    overflow-y: auto;
 }
 
 .modal-footer {
@@ -574,29 +620,125 @@ input:focus:valid {
 }
 
 /* ========================================
-   RESPONSIVE DESIGN
+   MODAL SCROLLING FIXES
    ======================================== */
 
-@media (max-width: 768px) {
-    .modal-content {
-        margin: 10% auto;
-        width: 95%;
-    }
-    
-    .modal-header,
-    .modal-body,
-    .modal-footer {
-        padding: 15px 20px;
-    }
-    
-    .modal-footer {
-        flex-direction: column;
-    }
-    
-    .btn-cancel,
-    .btn-send-support,
-    .btn-change-password {
-        width: 100%;
-        justify-content: center;
-    }
+/* Custom scrollbar for modal */
+.modal-content::-webkit-scrollbar,
+.modal-body::-webkit-scrollbar {
+    width: 8px;
 }
+
+.modal-content::-webkit-scrollbar-track,
+.modal-body::-webkit-scrollbar-track {
+    background: rgba(255, 107, 0, 0.1);
+    border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb,
+.modal-body::-webkit-scrollbar-thumb {
+    background: rgba(255, 107, 0, 0.5);
+    border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover,
+.modal-body::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 107, 0, 0.7);
+}
+
+/* Ensure modal content is properly contained */
+.modal {
+    overflow-y: auto;
+}
+
+/* ========================================
+   CHANGE PASSWORD MODAL SPECIFIC STYLES
+   ======================================== */
+
+.modal-info {
+    background: rgba(255, 107, 0, 0.1);
+    border: 1px solid rgba(255, 107, 0, 0.3);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    color: #ff6b00;
+    font-size: 14px;
+    line-height: 1.4;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.modal-info::before {
+    content: "ℹ️";
+    flex-shrink: 0;
+    font-size: 16px;
+}
+
+#changePasswordModal .form-group {
+    margin-bottom: 15px;
+}
+
+#changePasswordModal .form-group label {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: block;
+}
+
+#changePasswordModal input[type="text"],
+#changePasswordModal input[type="email"],
+#changePasswordModal input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid rgba(255, 107, 0, 0.3);
+    border-radius: 6px;
+    background: rgba(30, 30, 30, 0.8);
+    color: #fff;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+#changePasswordModal input[type="text"]:focus,
+#changePasswordModal input[type="email"]:focus,
+#changePasswordModal input[type="password"]:focus {
+    outline: none;
+    border-color: #ff6b00;
+    background: rgba(35, 35, 35, 0.9);
+    box-shadow: 0 0 0 2px rgba(255, 107, 0, 0.2);
+}
+
+#changePasswordModal input::placeholder {
+    color: #888;
+    font-size: 13px;
+}
+
+/* Password strength indicator for modal */
+#changePasswordModal .password-match {
+    margin-top: 5px;
+    font-size: 12px;
+    color: #28a745;
+    display: none;
+}
+
+#changePasswordModal .password-mismatch {
+    margin-top: 5px;
+    font-size: 12px;
+    color: #dc3545;
+    display: none;
+}
+
+/* Support section styling improvements */
+.support-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+}
+
+.support-section .support-link {
+    margin: 0 5px;
+}
+

@@ -1,8 +1,4 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 // Ensure worker data is passed from controller
 $photographer = $worker ?? null;
 
@@ -121,7 +117,8 @@ $joinedYear = $joinedDate ? date('Y', strtotime($joinedDate)) : date('Y');
     <title><?php echo htmlspecialchars($businessName); ?> - Photographer Profile | Kislap</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/Kislap/public/css/style.css" type="text/css">
-    <link rel="stylesheet" href="/Kislap/public/css/viewProfile.css" type="text/css">
+    <link rel="stylesheet" href="/Kislap/public/css/viewProfile.css?v=<?php echo rand(1000, 9999) . time(); ?>" type="text/css">
+    <link rel="stylesheet" href="/Kislap/public/css/packages.css?v=<?php echo time(); ?>" type="text/css">
 </head>
 <body>
 <?php require __DIR__ . '/../shared/navbar.php'; ?>
@@ -451,7 +448,7 @@ $joinedYear = $joinedDate ? date('Y', strtotime($joinedDate)) : date('Y');
         <!-- Right Column -->
         <div class="profile-right-column">
             <!-- Contact Information -->
-            <div class="profile-section sticky-section">
+            <div class="profile-section">
                 <div class="section-header">
                     <h2><i class="fas fa-address-card"></i> Contact Information</h2>
                 </div>
