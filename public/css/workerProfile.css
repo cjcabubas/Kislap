@@ -154,6 +154,43 @@
     object-fit: cover;
 }
 
+/* Photo Container with Remove Button */
+.photo-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.btn-remove-photo {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #dc3545;
+    border: 2px solid #fff;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    z-index: 10;
+}
+
+.btn-remove-photo:hover {
+    background: #c82333;
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+}
+
+.btn-remove-photo:active {
+    transform: scale(0.95);
+}
+
 .photo-placeholder {
     width: 100%;
     height: 100%;
@@ -807,6 +844,36 @@
 }
 
 .btn-remove:hover {
+    background: #ef5350;
+    transform: scale(1.1);
+}
+
+/* Portfolio Preview Remove Button */
+.btn-remove-portfolio {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(239, 83, 80, 0.9);
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    z-index: 10;
+    opacity: 0;
+}
+
+.portfolio-item:hover .btn-remove-portfolio {
+    opacity: 1;
+}
+
+.btn-remove-portfolio:hover {
     background: #ef5350;
     transform: scale(1.1);
 }

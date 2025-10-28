@@ -110,15 +110,6 @@ class ChatController
         $conversationId = $this->chatRepo->createAiConversation($userId, $workerId);
 
         if ($conversationId) {
-            $initialAiMessage = "Hi! I'm Kislap's AI assistant. I'm here to help you get started with your booking by asking a few quick questions. What kind of **service** are you looking for? (e.g., event, portrait, product, etc.)";
-
-            $this->chatRepo->saveMessage(
-                $conversationId,
-                0,
-                'ai',
-                $initialAiMessage
-            );
-
             header("Location: index.php?controller=Chat&action=view&conversation_id={$conversationId}");
             exit;
         } else {

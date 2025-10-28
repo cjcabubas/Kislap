@@ -687,50 +687,7 @@ class WorkerController
         exit;
     }
     
-    public function proposeDateTime(): void
-    {
-        header('Content-Type: application/json');
-        
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
 
-        $worker = $_SESSION['worker'] ?? null;
-        if (!$worker) {
-            echo json_encode(['success' => false, 'error' => 'Not authenticated']);
-            exit;
-        }
-
-        $conversationId = $_POST['conversation_id'] ?? null;
-        $proposedDate = $_POST['proposed_date'] ?? null;
-        $proposedTime = $_POST['proposed_time'] ?? null;
-        $reason = $_POST['reason'] ?? null;
-        
-        if (!$conversationId || !$proposedDate) {
-            echo json_encode(['success' => false, 'error' => 'Missing required fields']);
-            exit;
-        }
-
-        require_once __DIR__ . '/../model/repositories/ChatRepository.php';
-        $chatRepo = new ChatRepository();
-        
-        if ($chatRepo->proposeDateTime($conversationId, $proposedDate, $proposedTime, $reason)) {
-            // Send notification message to client
-            $message = "I'd like to propose an alternative date: " . date('F d, Y', strtotime($proposedDate));
-            if ($proposedTime) {
-                $message .= " at " . date('h:i A', strtotime($proposedTime));
-            }
-            if ($reason) {
-                $message .= "\n\nReason: " . $reason;
-            }
-            $chatRepo->saveMessage($conversationId, $worker['worker_id'], 'worker', $message);
-            
-            echo json_encode(['success' => true, 'message' => 'Date/time proposal sent']);
-        } else {
-            echo json_encode(['success' => false, 'error' => 'Failed to propose date/time']);
-        }
-        exit;
-    }
     
     public function requestMoreInfo(): void
     {
@@ -767,47 +724,61 @@ class WorkerController
     
     public function updateBookingDetails(): void
     {
-        header('Content-Type: application/json');
+        // Start output buffering to catch any unexpected output
+        ob_start();
         
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
-        $worker = $_SESSION['worker'] ?? null;
-        if (!$worker) {
-            echo json_encode(['success' => false, 'error' => 'Not authenticated']);
-            exit;
-        }
-
-        $conversationId = $_POST['conversation_id'] ?? null;
-        
-        if (!$conversationId) {
-            echo json_encode(['success' => false, 'error' => 'Missing conversation ID']);
-            exit;
-        }
-        
-        // Collect updates
-        $updates = [];
-        $allowedFields = ['event_date', 'event_time', 'event_location', 'final_price', 'worker_notes', 'package_id'];
-        
-        foreach ($allowedFields as $field) {
-            if (isset($_POST[$field]) && $_POST[$field] !== '') {
-                $updates[$field] = $_POST[$field];
+        try {
+            header('Content-Type: application/json');
+            
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
             }
-        }
-        
-        if (empty($updates)) {
-            echo json_encode(['success' => false, 'error' => 'No updates provided']);
-            exit;
-        }
 
-        require_once __DIR__ . '/../model/repositories/ChatRepository.php';
-        $chatRepo = new ChatRepository();
-        
-        if ($chatRepo->updateBookingDetails($conversationId, $updates)) {
-            echo json_encode(['success' => true, 'message' => 'Booking updated successfully']);
-        } else {
-            echo json_encode(['success' => false, 'error' => 'Failed to update booking']);
+            $worker = $_SESSION['worker'] ?? null;
+            if (!$worker) {
+                ob_clean();
+                echo json_encode(['success' => false, 'error' => 'Not authenticated']);
+                exit;
+            }
+
+            $conversationId = $_POST['conversation_id'] ?? null;
+            
+            if (!$conversationId) {
+                ob_clean();
+                echo json_encode(['success' => false, 'error' => 'Missing conversation ID']);
+                exit;
+            }
+            
+            // Collect updates
+            $updates = [];
+            $allowedFields = ['event_date', 'event_time', 'event_location', 'worker_notes', 'package_id'];
+            
+            foreach ($allowedFields as $field) {
+                if (isset($_POST[$field]) && $_POST[$field] !== '') {
+                    $updates[$field] = $_POST[$field];
+                }
+            }
+            
+            if (empty($updates)) {
+                ob_clean();
+                echo json_encode(['success' => false, 'error' => 'No updates provided']);
+                exit;
+            }
+
+            require_once __DIR__ . '/../model/repositories/ChatRepository.php';
+            $chatRepo = new ChatRepository();
+            
+            if ($chatRepo->updateBookingDetails($conversationId, $updates)) {
+                ob_clean();
+                echo json_encode(['success' => true, 'message' => 'Booking updated successfully']);
+            } else {
+                ob_clean();
+                echo json_encode(['success' => false, 'error' => 'Failed to update booking']);
+            }
+        } catch (Exception $e) {
+            ob_clean();
+            error_log("Update booking details error: " . $e->getMessage());
+            echo json_encode(['success' => false, 'error' => 'Server error: ' . $e->getMessage()]);
         }
         exit;
     }
@@ -921,7 +892,7 @@ class WorkerController
         $isAvailable = isset($_POST['is_available']) ? (bool)$_POST['is_available'] : true;
         $startTime = $_POST['start_time'] ?? null;
         $endTime = $_POST['end_time'] ?? null;
-        $maxBookings = $_POST['max_bookings'] ?? 1;T['max_bookings'] ?? 1;
+        $maxBookings = $_POST['max_bookings'] ?? 1;
         
         if (!$date) {
             echo json_encode(['success' => false, 'error' => 'Missing date']);

@@ -655,11 +655,39 @@ $existingPortfolio = $existingPortfolio ?? [];
             const reader = new FileReader();
             reader.onload = function (e) {
                 const preview = document.getElementById('photoPreview');
-                preview.innerHTML = `<img src="${e.target.result}" alt="Profile Photo">`;
+                preview.innerHTML = `
+                    <div class="photo-container">
+                        <img src="${e.target.result}" alt="Profile Photo">
+                        <button type="button" class="btn-remove-photo" onclick="removeProfilePhoto()" title="Remove photo">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
             };
             reader.readAsDataURL(file);
         }
     });
+
+    // Remove profile photo function
+    function removeProfilePhoto() {
+        const preview = document.getElementById('photoPreview');
+        const fileInput = document.getElementById('profilePhoto');
+        
+        // Reset the file input
+        fileInput.value = '';
+        
+        // Restore original preview or placeholder
+        <?php if ($worker['profile_photo']): ?>
+            preview.innerHTML = `<img src="<?php echo htmlspecialchars($worker['profile_photo']); ?>" alt="Profile Photo">`;
+        <?php else: ?>
+            preview.innerHTML = `
+                <div class="photo-placeholder">
+                    <i class="fas fa-user"></i>
+                    <p>No photo uploaded</p>
+                </div>
+            `;
+        <?php endif; ?>
+    }
 
     // ===== PORTFOLIO IMAGES PREVIEW =====
     const portfolioImagesInput = document.getElementById('portfolioImages');
@@ -708,11 +736,15 @@ $existingPortfolio = $existingPortfolio ?? [];
                     const portfolioItem = document.createElement('div');
                     portfolioItem.className = 'portfolio-item';
                     portfolioItem.setAttribute('data-preview', 'true');
+                    portfolioItem.setAttribute('data-file-index', index);
                     portfolioItem.innerHTML = `
                         <img src="${e.target.result}" alt="Portfolio Preview">
                         <div class="preview-badge">
                             <i class="fas fa-clock"></i> New
                         </div>
+                        <button type="button" class="btn-remove-portfolio" onclick="removePortfolioPreview(this)" title="Remove image">
+                            <i class="fas fa-times"></i>
+                        </button>
                     `;
 
                     portfolioGrid.appendChild(portfolioItem);
@@ -727,6 +759,44 @@ $existingPortfolio = $existingPortfolio ?? [];
     }
 
 
+
+    // Remove portfolio preview function
+    function removePortfolioPreview(button) {
+        const portfolioItem = button.closest('.portfolio-item');
+        const portfolioGrid = document.getElementById('portfolioGrid');
+        
+        // Remove the preview item
+        portfolioItem.remove();
+        
+        // Update the file input to remove the corresponding file
+        updatePortfolioFileInput();
+        
+        // Update count
+        updatePortfolioCount();
+        
+        // If no images left, show placeholder
+        const remainingItems = portfolioGrid.querySelectorAll('.portfolio-item');
+        if (remainingItems.length === 0) {
+            portfolioGrid.innerHTML = `
+                <div class="no-portfolio">
+                    <i class="fas fa-images"></i>
+                    <p>No portfolio images uploaded yet</p>
+                </div>
+            `;
+        }
+    }
+
+    // Update portfolio file input after removal
+    function updatePortfolioFileInput() {
+        const portfolioInput = document.getElementById('portfolioImages');
+        const portfolioGrid = document.getElementById('portfolioGrid');
+        const previewItems = portfolioGrid.querySelectorAll('.portfolio-item[data-preview="true"]');
+        
+        // If no preview items left, clear the input
+        if (previewItems.length === 0) {
+            portfolioInput.value = '';
+        }
+    }
 
     // Update portfolio count
     function updatePortfolioCount() {

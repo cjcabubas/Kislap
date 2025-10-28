@@ -457,44 +457,7 @@ class ChatRepository
         }
     }
 
-    public function proposeDateTime(int $conversationId, string $proposedDate, ?string $proposedTime = null, ?string $reason = null): bool
-    {
-        try {
-            $this->conn->beginTransaction();
 
-            $fields = ['worker_proposed_date = ?'];
-            $params = [$proposedDate];
-
-            if ($proposedTime) {
-                $fields[] = 'worker_proposed_time = ?';
-                $params[] = $proposedTime;
-            }
-
-            if ($reason) {
-                $fields[] = 'worker_notes = ?';
-                $params[] = $reason;
-            }
-
-            $params[] = $conversationId;
-
-            $stmt = $this->conn->prepare(
-                "UPDATE ai_temp_bookings SET " . implode(', ', $fields) . " WHERE conversation_id = ?"
-            );
-            $stmt->execute($params);
-
-            $stmt = $this->conn->prepare(
-                "UPDATE conversations SET booking_status = 'negotiating' WHERE conversation_id = ?"
-            );
-            $stmt->execute([$conversationId]);
-
-            $this->conn->commit();
-            return true;
-        } catch (Exception $e) {
-            $this->conn->rollBack();
-            error_log("Error proposing date/time: " . $e->getMessage());
-            return false;
-        }
-    }
 
     public function getWorkerBookingStats(int $workerId, ?string $startDate = null, ?string $endDate = null): array
     {
@@ -588,6 +551,77 @@ class ChatRepository
         } catch (Exception $e) {
             error_log("Error fetching worker bookings: " . $e->getMessage());
             return [];
+        }
+    }
+
+    public function requestMoreInfo(int $conversationId, string $message): bool
+    {
+        try {
+            // Update status to requires_info
+            $stmt = $this->conn->prepare(
+                "UPDATE conversations SET booking_status = 'requires_info' WHERE conversation_id = ?"
+            );
+            $stmt->execute([$conversationId]);
+
+            // Save the message
+            $this->saveMessage($conversationId, 0, 'worker', $message);
+
+            return true;
+        } catch (Exception $e) {
+            error_log("Error requesting more info: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function updateBookingDetails(int $conversationId, array $updates): bool
+    {
+        try {
+            if (empty($updates)) {
+                return false;
+            }
+
+            // Build the SET clause dynamically
+            $fields = [];
+            $params = [];
+            
+            $allowedFields = [
+                'event_date', 'event_time', 'event_location', 'final_price', 
+                'worker_notes', 'package_id', 'event_type', 'special_requests'
+            ];
+            
+            foreach ($updates as $field => $value) {
+                if (in_array($field, $allowedFields)) {
+                    $fields[] = "$field = ?";
+                    $params[] = $value;
+                }
+            }
+            
+            if (empty($fields)) {
+                return false;
+            }
+            
+            $params[] = $conversationId;
+            
+            $sql = "UPDATE ai_temp_bookings SET " . implode(', ', $fields) . " WHERE conversation_id = ?";
+            $stmt = $this->conn->prepare($sql);
+            
+            return $stmt->execute($params);
+        } catch (Exception $e) {
+            error_log("Error updating booking details: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function setDepositAmount(int $conversationId, float $depositAmount): bool
+    {
+        try {
+            $stmt = $this->conn->prepare(
+                "UPDATE ai_temp_bookings SET deposit_amount = ? WHERE conversation_id = ?"
+            );
+            return $stmt->execute([$depositAmount, $conversationId]);
+        } catch (Exception $e) {
+            error_log("Error setting deposit amount: " . $e->getMessage());
+            return false;
         }
     }
 

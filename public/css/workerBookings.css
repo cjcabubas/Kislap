@@ -195,13 +195,18 @@ body {
 }
 
 .btn {
-    padding: 10px 20px;
+    padding: 10px 16px;
     border: none;
     border-radius: 8px;
     cursor: pointer;
     font-weight: 600;
     transition: all 0.3s;
     font-size: 14px;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
 }
 
 .btn i {
@@ -414,4 +419,62 @@ body {
     border: none;
     border-top: 1px solid rgba(255, 107, 0, 0.2);
     margin: 25px 0;
+}
+
+/* Readonly input styling */
+input[readonly] {
+    background-color: #2a2a2a !important;
+    color: #888 !important;
+    cursor: not-allowed !important;
+    border: 1px solid #444 !important;
+}
+
+input[readonly]:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    border-color: #444 !important;
+}
+
+/* Specific styling for readonly price field */
+#editFinalPrice[readonly] {
+    background-color: #2a2a2a !important;
+    color: #888 !important;
+    cursor: not-allowed !important;
+    border: 1px solid #444 !important;
+}/* 
+Responsive improvements */
+@media (max-width: 768px) {
+    .booking-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .booking-actions .btn {
+        width: 100%;
+        margin-bottom: 8px;
+        justify-content: center;
+    }
+    
+    .booking-details {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .bookings-container {
+        margin-top: 80px;
+        padding: 15px;
+    }
+    
+    .booking-card {
+        padding: 20px;
+    }
+    
+    .filter-tabs {
+        flex-direction: column;
+    }
+    
+    .filter-tab {
+        text-align: center;
+    }
 }

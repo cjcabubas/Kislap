@@ -459,8 +459,21 @@
 
 .booking-actions {
     display: flex;
+    justify-content: space-between;
+    align-items: center;
     gap: 10px;
     flex-wrap: wrap;
+}
+
+.booking-actions .package-info {
+    flex-shrink: 0;
+}
+
+.booking-actions .action-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-left: auto;
 }
 
 .btn-action {
@@ -894,6 +907,14 @@
 
     .booking-actions {
         width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+
+    .booking-actions .action-buttons {
+        width: 100%;
+        margin-left: 0;
     }
 
     .btn-action {
@@ -961,6 +982,13 @@
 
     .booking-actions {
         flex-direction: column;
+        gap: 15px;
+    }
+
+    .booking-actions .action-buttons {
+        flex-direction: column;
+        width: 100%;
+        margin-left: 0;
     }
 
     .btn-action {

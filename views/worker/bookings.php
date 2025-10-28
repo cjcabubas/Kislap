@@ -376,39 +376,7 @@ async function proposePrice() {
     }
 }
 
-// Propose date/time
-async function proposeDateTime() {
-    const conversationId = document.getElementById('negotiateConversationId').value;
-    const proposedDate = document.getElementById('proposedDate').value;
-    const proposedTime = document.getElementById('proposedTime').value;
-    const reason = document.getElementById('dateReason').value;
-    
-    if (!proposedDate) {
-        alert('Please select a date');
-        return;
-    }
-    
-    try {
-        const response = await fetch('?controller=Worker&action=proposeDateTime', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `conversation_id=${conversationId}&proposed_date=${proposedDate}&proposed_time=${proposedTime}&reason=${encodeURIComponent(reason)}`
-        });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-            alert('Date/time proposal sent!');
-            closeModal('negotiateModal');
-            location.reload();
-        } else {
-            alert('Error: ' + result.error);
-        }
-    } catch (error) {
-        alert('Failed to send proposal');
-        console.error(error);
-    }
-}
+
 
 // Reject with reason
 async function rejectWithReason() {
@@ -445,13 +413,12 @@ async function updateBooking() {
     const eventDate = document.getElementById('editEventDate').value;
     const eventTime = document.getElementById('editEventTime').value;
     const eventLocation = document.getElementById('editEventLocation').value;
-    const finalPrice = document.getElementById('editFinalPrice').value;
     
     try {
         const response = await fetch('?controller=Worker&action=updateBookingDetails', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `conversation_id=${conversationId}&event_date=${eventDate}&event_time=${eventTime}&event_location=${encodeURIComponent(eventLocation)}&final_price=${finalPrice}`
+            body: `conversation_id=${conversationId}&event_date=${eventDate}&event_time=${eventTime}&event_location=${encodeURIComponent(eventLocation)}`
         });
         
         const result = await response.json();
@@ -483,16 +450,6 @@ async function updateBooking() {
             <input type="number" id="proposedPrice" placeholder="Your proposed price" step="0.01" style="width: 100%; padding: 10px; margin: 10px 0;">
             <textarea id="priceNotes" placeholder="Explanation (optional)" style="width: 100%; padding: 10px; margin: 10px 0;" rows="3"></textarea>
             <button onclick="proposePrice()" class="btn btn-accept">Send Price Proposal</button>
-        </div>
-        
-        <hr style="margin: 20px 0;">
-        
-        <div class="modal-section">
-            <h3>Propose Alternative Date/Time</h3>
-            <input type="date" id="proposedDate" style="width: 100%; padding: 10px; margin: 10px 0;">
-            <input type="time" id="proposedTime" style="width: 100%; padding: 10px; margin: 10px 0;">
-            <textarea id="dateReason" placeholder="Reason for date change (optional)" style="width: 100%; padding: 10px; margin: 10px 0;" rows="3"></textarea>
-            <button onclick="proposeDateTime()" class="btn btn-accept">Send Date Proposal</button>
         </div>
     </div>
 </div>
@@ -527,7 +484,7 @@ async function updateBooking() {
         <input type="text" id="editEventLocation" style="width: 100%; padding: 10px; margin: 10px 0;">
         
         <label>Final Price:</label>
-        <input type="number" id="editFinalPrice" step="0.01" style="width: 100%; padding: 10px; margin: 10px 0;">
+        <input type="number" id="editFinalPrice" step="0.01" style="width: 100%; padding: 10px; margin: 10px 0; background-color: #f5f5f5; cursor: not-allowed;" readonly>
         
         <button onclick="updateBooking()" class="btn btn-accept">Save Changes</button>
         <button onclick="closeModal('editModal')" class="btn" style="background: rgba(255, 107, 0, 0.1); color: #ff6b00; border: 1px solid rgba(255, 107, 0, 0.3);">Cancel</button>

@@ -278,79 +278,81 @@ foreach ($bookings as $booking) {
                                     </div>
                                 <?php endif; ?>
                                 
-                                <!-- Actions based on booking status -->
-                                <?php if ($status === 'collecting_info' || $status === 'pending_details'): ?>
-                                    <button class="btn-action btn-edit" onclick="editBookingDetails(<?php echo $conversationId; ?>)">
-                                        <i class="fas fa-edit"></i> Complete Details
-                                    </button>
-                                    <button class="btn-action btn-message" onclick="openConversation(<?php echo $conversationId; ?>)">
-                                        <i class="fas fa-comment"></i> Message
-                                    </button>
-                                    <button class="btn-action btn-cancel" onclick="cancelBooking(<?php echo $conversationId; ?>)">
-                                        <i class="fas fa-times"></i> Cancel
-                                    </button>
-                                
-                                <?php elseif ($status === 'pending_worker'): ?>
-                                    <button class="btn-action btn-message" onclick="openConversation(<?php echo $conversationId; ?>)">
-                                        <i class="fas fa-comment"></i> Message
-                                    </button>
-                                    <button class="btn-action btn-edit" onclick="editBookingDetails(<?php echo $conversationId; ?>)">
-                                        <i class="fas fa-edit"></i> Edit Details
-                                    </button>
-                                    <button class="btn-action btn-cancel" onclick="cancelBooking(<?php echo $conversationId; ?>)">
-                                        <i class="fas fa-times"></i> Cancel
-                                    </button>
-                                
-                                <?php elseif ($status === 'negotiating'): ?>
-                                    <?php 
-                                    // Check if photographer proposed something
-                                    $hasProposal = !empty($booking['worker_proposed_price']) || !empty($booking['worker_proposed_date']);
-                                    ?>
-                                    <?php if ($hasProposal): ?>
-                                        <button class="btn-action btn-accept" onclick="acceptProposal(<?php echo $conversationId; ?>)">
-                                            <i class="fas fa-check"></i> Accept Proposal
+                                <div class="action-buttons">
+                                    <!-- Actions based on booking status -->
+                                    <?php if ($status === 'collecting_info' || $status === 'pending_details'): ?>
+                                        <button class="btn-action btn-edit" onclick="editBookingDetails(<?php echo $conversationId; ?>)">
+                                            <i class="fas fa-edit"></i> Complete Details
                                         </button>
-                                        <button class="btn-action btn-reject" onclick="rejectProposal(<?php echo $conversationId; ?>)">
-                                            <i class="fas fa-times"></i> Reject Proposal
+                                        <button class="btn-action btn-message" onclick="openConversation(<?php echo $conversationId; ?>)">
+                                            <i class="fas fa-comment"></i> Message
+                                        </button>
+                                        <button class="btn-action btn-cancel" onclick="cancelBooking(<?php echo $conversationId; ?>)">
+                                            <i class="fas fa-times"></i> Cancel
+                                        </button>
+                                    
+                                    <?php elseif ($status === 'pending_worker'): ?>
+                                        <button class="btn-action btn-message" onclick="openConversation(<?php echo $conversationId; ?>)">
+                                            <i class="fas fa-comment"></i> Message
+                                        </button>
+                                        <button class="btn-action btn-edit" onclick="editBookingDetails(<?php echo $conversationId; ?>)">
+                                            <i class="fas fa-edit"></i> Edit Details
+                                        </button>
+                                        <button class="btn-action btn-cancel" onclick="cancelBooking(<?php echo $conversationId; ?>)">
+                                            <i class="fas fa-times"></i> Cancel
+                                        </button>
+                                    
+                                    <?php elseif ($status === 'negotiating'): ?>
+                                        <?php 
+                                        // Check if photographer proposed something
+                                        $hasProposal = !empty($booking['worker_proposed_price']) || !empty($booking['worker_proposed_date']);
+                                        ?>
+                                        <?php if ($hasProposal): ?>
+                                            <button class="btn-action btn-accept" onclick="acceptProposal(<?php echo $conversationId; ?>)">
+                                                <i class="fas fa-check"></i> Accept Proposal
+                                            </button>
+                                            <button class="btn-action btn-reject" onclick="rejectProposal(<?php echo $conversationId; ?>)">
+                                                <i class="fas fa-times"></i> Reject Proposal
+                                            </button>
+                                        <?php endif; ?>
+                                        <button class="btn-action btn-message" onclick="openConversation(<?php echo $conversationId; ?>)">
+                                            <i class="fas fa-comment"></i> Message
+                                        </button>
+                                        <button class="btn-action btn-cancel" onclick="cancelBooking(<?php echo $conversationId; ?>)">
+                                            <i class="fas fa-times"></i> Cancel
+                                        </button>
+                                    
+                                    <?php elseif ($status === 'confirmed'): ?>
+                                        <button class="btn-action btn-message" onclick="openConversation(<?php echo $conversationId; ?>)">
+                                            <i class="fas fa-comment"></i> Message
+                                        </button>
+                                        <button class="btn-action btn-details" onclick="showBookingDetails(<?php echo htmlspecialchars(json_encode($booking)); ?>)">
+                                            <i class="fas fa-info-circle"></i> View Details
+                                        </button>
+                                        <button class="btn-action btn-edit" onclick="editBookingDetails(<?php echo $conversationId; ?>)">
+                                            <i class="fas fa-edit"></i> Edit Details
+                                        </button>
+                                    
+                                    <?php elseif ($status === 'completed' || $status === 'rated'): ?>
+                                        <button class="btn-action btn-message" onclick="openConversation(<?php echo $conversationId; ?>)">
+                                            <i class="fas fa-comment"></i> Message
+                                        </button>
+                                        <button class="btn-action btn-details" onclick="showBookingDetails(<?php echo htmlspecialchars(json_encode($booking)); ?>)">
+                                            <i class="fas fa-info-circle"></i> View Details
+                                        </button>
+                                        <button class="btn-action btn-rebook" onclick="bookAgain(<?php echo $booking['worker_id']; ?>)">
+                                            <i class="fas fa-redo"></i> Book Again
+                                        </button>
+                                    
+                                    <?php else: ?>
+                                        <button class="btn-action btn-message" onclick="openConversation(<?php echo $conversationId; ?>)">
+                                            <i class="fas fa-comment"></i> Message
+                                        </button>
+                                        <button class="btn-action btn-details" onclick="showBookingDetails(<?php echo htmlspecialchars(json_encode($booking)); ?>)">
+                                            <i class="fas fa-info-circle"></i> View Details
                                         </button>
                                     <?php endif; ?>
-                                    <button class="btn-action btn-message" onclick="openConversation(<?php echo $conversationId; ?>)">
-                                        <i class="fas fa-comment"></i> Message
-                                    </button>
-                                    <button class="btn-action btn-cancel" onclick="cancelBooking(<?php echo $conversationId; ?>)">
-                                        <i class="fas fa-times"></i> Cancel
-                                    </button>
-                                
-                                <?php elseif ($status === 'confirmed'): ?>
-                                    <button class="btn-action btn-message" onclick="openConversation(<?php echo $conversationId; ?>)">
-                                        <i class="fas fa-comment"></i> Message
-                                    </button>
-                                    <button class="btn-action btn-details" onclick="showBookingDetails(<?php echo htmlspecialchars(json_encode($booking)); ?>)">
-                                        <i class="fas fa-info-circle"></i> View Details
-                                    </button>
-                                    <button class="btn-action btn-edit" onclick="editBookingDetails(<?php echo $conversationId; ?>)">
-                                        <i class="fas fa-edit"></i> Edit Details
-                                    </button>
-                                
-                                <?php elseif ($status === 'completed' || $status === 'rated'): ?>
-                                    <button class="btn-action btn-message" onclick="openConversation(<?php echo $conversationId; ?>)">
-                                        <i class="fas fa-comment"></i> Message
-                                    </button>
-                                    <button class="btn-action btn-details" onclick="showBookingDetails(<?php echo htmlspecialchars(json_encode($booking)); ?>)">
-                                        <i class="fas fa-info-circle"></i> View Details
-                                    </button>
-                                    <button class="btn-action btn-rebook" onclick="bookAgain(<?php echo $booking['worker_id']; ?>)">
-                                        <i class="fas fa-redo"></i> Book Again
-                                    </button>
-                                
-                                <?php else: ?>
-                                    <button class="btn-action btn-message" onclick="openConversation(<?php echo $conversationId; ?>)">
-                                        <i class="fas fa-comment"></i> Message
-                                    </button>
-                                    <button class="btn-action btn-details" onclick="showBookingDetails(<?php echo htmlspecialchars(json_encode($booking)); ?>)">
-                                        <i class="fas fa-info-circle"></i> View Details
-                                    </button>
-                                <?php endif; ?>
+                                </div>
                             </div>
                         </div>
 
