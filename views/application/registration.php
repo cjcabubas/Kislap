@@ -65,13 +65,13 @@ require __DIR__ . '/../shared/navbar.php';
     </div>
 
     <div class="form-group">
-        <label for="images">Upload Work Samples (Up to 8)</label>
-        <input id="images" type="file" name="images[]" multiple accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,image/avif,.jpg,.jpeg,.png,.gif,.webp,.avif">
+        <label for="images">Upload Work Samples (Up to 8) <span class="required">*</span></label>
+        <input id="images" type="file" name="images[]" multiple required accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,image/avif,.jpg,.jpeg,.png,.gif,.webp,.avif">
     </div>
 
     <div class="form-group">
-        <label for="resume">Upload Resume</label>
-        <input id="resume" type="file" name="resume">
+        <label for="resume">Upload Resume <span class="required">*</span></label>
+        <input id="resume" type="file" name="resume" required>
     </div>
 
     <button type="submit">Apply</button>
