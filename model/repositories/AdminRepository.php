@@ -300,7 +300,7 @@ class AdminRepository extends BaseRepository
     public function getApprovedWorkers(int $limit, int $offset, string $search = '', string $statusFilter = 'all'): array
     {
         $sql = "SELECT worker_id, firstName, middleName, lastName, email, phoneNumber, address, 
-                       status AS account_status, total_bookings, total_earnings, rating_average, created_at, updated_at
+                       status AS account_status, total_bookings, total_earnings, average_rating, created_at, updated_at
                 FROM workers w WHERE 1=1";
         $params = [];
 

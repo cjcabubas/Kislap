@@ -1,4 +1,11 @@
+/* ========================================
+   APPLICATION CSS - WORKER APPLICATIONS ADMIN PAGE
+   Main stylesheet for worker application management
+   ======================================== */
 
+/* ========================================
+   GLOBAL RESET & BASE STYLES
+   ======================================== */
 * {
     margin: 0;
     padding: 0;
@@ -18,6 +25,9 @@ body {
     margin: 0 auto;
 }
 
+/* ========================================
+   PAGE HEADER & NAVIGATION
+   ======================================== */
 .page-header-wrapper {
     display: flex;
     align-items: flex-start;
@@ -25,6 +35,7 @@ body {
     margin-bottom: 30px;
 }
 
+/* Back Button */
 .btn-back {
     display: inline-flex !important;
     align-items: center !important;
@@ -57,6 +68,7 @@ body {
     transform: translateX(-3px);
 }
 
+/* Page Header */
 .page-header {
     background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
     padding: 30px;
@@ -78,6 +90,7 @@ body {
     margin-bottom: 5px;
 }
 
+/* Filter Section */
 .filter-section {
     display: flex;
     gap: 15px;
@@ -85,6 +98,7 @@ body {
     flex-wrap: wrap;
 }
 
+/* Search Box */
 .search-box {
     position: relative;
 }
@@ -114,22 +128,27 @@ body {
     color: #ff6b00;
 }
 
+/* ========================================
+   APPLICATION CARDS
+   ======================================== */
 .applications-grid {
     display: grid;
     gap: 25px;
 }
 
+/* Application Card Container */
 .application-card {
     background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
     border-radius: 15px;
     padding: 25px;
     border: 1px solid #333;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
 }
 
+/* Orange accent border */
 .application-card::before {
     content: '';
     position: absolute;
@@ -141,12 +160,14 @@ body {
     box-shadow: 0 0 15px #ff6b00;
 }
 
+/* Hover effects */
 .application-card:hover {
     transform: translateY(-3px);
     box-shadow: 0 15px 40px rgba(255, 107, 0, 0.2);
     border-color: #ff6b00;
 }
 
+/* Card Header */
 .card-header {
     display: flex;
     justify-content: space-between;
@@ -155,6 +176,7 @@ body {
     gap: 15px;
 }
 
+/* Applicant Information */
 .applicant-info h3 {
     color: #fff;
     font-size: 20px;
@@ -166,6 +188,7 @@ body {
     font-size: 13px;
 }
 
+/* Status Badge */
 .status-badge {
     padding: 6px 12px;
     border-radius: 6px;
@@ -177,6 +200,7 @@ body {
     border: 1px solid rgba(255, 107, 0, 0.3);
 }
 
+/* Card Body */
 .card-body {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -184,6 +208,7 @@ body {
     margin-bottom: 20px;
 }
 
+/* Information Items */
 .info-item {
     display: flex;
     align-items: flex-start;
@@ -207,6 +232,9 @@ body {
     font-size: 14px;
 }
 
+/* ========================================
+   IMAGES SECTION
+   ======================================== */
 .images-section {
     margin: 20px 0;
 }
@@ -219,12 +247,14 @@ body {
     letter-spacing: 0.5px;
 }
 
+/* Images Grid */
 .images-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 10px;
 }
 
+/* Individual Image Item */
 .image-item {
     position: relative;
     border-radius: 8px;
@@ -247,6 +277,9 @@ body {
     object-fit: cover;
 }
 
+/* ========================================
+   RESUME SECTION
+   ======================================== */
 .resume-section {
     display: flex;
     align-items: center;
@@ -281,6 +314,9 @@ body {
     font-size: 12px;
 }
 
+/* ========================================
+   ACTION BUTTONS
+   ======================================== */
 .actions {
     display: flex;
     gap: 10px;
@@ -288,6 +324,7 @@ body {
     margin-top: 20px;
 }
 
+/* Base Button Styles */
 .btn {
     padding: 12px 24px;
     border-radius: 8px;
@@ -301,6 +338,7 @@ body {
     gap: 8px;
 }
 
+/* Approve Button */
 .btn-approve {
     background: rgba(173, 255, 51, 0.2);
     color: #d3ff33;
@@ -313,6 +351,7 @@ body {
     box-shadow: 0 0 20px rgba(173, 255, 51, 0.5);
 }
 
+/* Reject Button */
 .btn-reject {
     background: rgba(255, 69, 0, 0.2);
     color: #ff4500;
@@ -325,6 +364,11 @@ body {
     box-shadow: 0 0 20px rgba(255, 69, 0, 0.5);
 }
 
+/* ========================================
+   LOAD MORE & EMPTY STATES
+   ======================================== */
+
+/* Load More Section */
 .load-more {
     text-align: center;
     margin-top: 30px;
@@ -344,6 +388,7 @@ body {
     box-shadow: 0 0 20px rgba(255, 107, 0, 0.3);
 }
 
+/* Empty State */
 .empty-state {
     text-align: center;
     padding: 60px 20px;
@@ -364,6 +409,11 @@ body {
     font-size: 18px;
 }
 
+/* ========================================
+   MODAL COMPONENTS
+   ======================================== */
+
+/* Image Modal */
 .modal {
     display: none;
     position: fixed;
@@ -388,6 +438,7 @@ body {
     box-shadow: 0 0 50px rgba(255, 107, 0, 0.5);
 }
 
+/* Modal Close Button */
 .modal-close {
     position: absolute;
     top: 20px;
@@ -397,26 +448,36 @@ body {
     cursor: pointer;
 }
 
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
 @media (max-width: 768px) {
+
+    /* Page Layout */
     .page-header-wrapper {
         flex-direction: column;
         gap: 15px;
     }
 
+    /* Back Button */
     .btn-back {
         width: 100%;
         justify-content: center;
     }
 
+    /* Card Layout */
     .card-body {
         grid-template-columns: 1fr;
     }
 
+    /* Page Header */
     .page-header {
         flex-direction: column;
         align-items: flex-start;
     }
 
+    /* Action Buttons */
     .actions {
         flex-direction: column;
     }
@@ -426,6 +487,7 @@ body {
         justify-content: center;
     }
 }
+
 /* ========================================
    REJECTION REASON BOX
    ======================================== */

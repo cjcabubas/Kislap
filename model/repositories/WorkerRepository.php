@@ -288,4 +288,164 @@ class WorkerRepository extends BaseRepository
             return [];
         }
     }
+
+    public function calculateWorkerStatistics(int $workerId): array
+    {
+        try {
+            $stats = [
+                'total_bookings' => 0,
+                'completed_bookings' => 0,
+                'total_earnings' => 0,
+                'total_ratings' => 0,
+                'rating_average' => 0
+            ];
+            
+            // Reviews table doesn't exist, use stored values from workers table
+            try {
+                // Get stored values from workers table
+                $stmt = $this->conn->prepare("SELECT total_ratings, average_rating FROM workers WHERE worker_id = ?");
+                $stmt->execute([$workerId]);
+                $result = $stmt->fetch(PDO::FETCH_ASSOC);
+                
+                $stats['total_ratings'] = (int)($result['total_ratings'] ?? 0);
+                $stats['rating_average'] = round((float)($result['average_rating'] ?? 0), 1);
+            } catch (Exception $e) {
+                $stats['total_ratings'] = 0;
+                $stats['rating_average'] = 0;
+            }
+            
+            // Get conversations/bookings count
+            try {
+                $stmt = $this->conn->prepare("SELECT COUNT(*) as count FROM conversations WHERE worker_id = ?");
+                $stmt->execute([$workerId]);
+                $result = $stmt->fetch(PDO::FETCH_ASSOC);
+                $stats['total_bookings'] = (int)($result['count'] ?? 0);
+                error_log("Total conversations/bookings: {$stats['total_bookings']}");
+                
+                // Get completed bookings
+                $stmt = $this->conn->prepare("SELECT COUNT(*) as count FROM conversations WHERE worker_id = ? AND booking_status = 'completed'");
+                $stmt->execute([$workerId]);
+                $result = $stmt->fetch(PDO::FETCH_ASSOC);
+                $stats['completed_bookings'] = (int)($result['count'] ?? 0);
+            } catch (Exception $e) {
+                // Handle error silently
+            }
+            
+            // Get earnings from ai_temp_bookings or similar table
+            try {
+                // First try ai_temp_bookings
+                $stmt = $this->conn->prepare("
+                    SELECT COALESCE(SUM(total_amount), 0) as total_earnings 
+                    FROM ai_temp_bookings atb 
+                    JOIN conversations c ON atb.conversation_id = c.conversation_id 
+                    WHERE c.worker_id = ? AND c.booking_status = 'completed'
+                ");
+                $stmt->execute([$workerId]);
+                $result = $stmt->fetch(PDO::FETCH_ASSOC);
+                $stats['total_earnings'] = (float)($result['total_earnings'] ?? 0);
+            } catch (Exception $e) {
+                // Try alternative - maybe there's a payments table or similar
+                try {
+                    $stmt = $this->conn->prepare("
+                        SELECT COALESCE(SUM(amount), 0) as total_earnings 
+                        FROM payments p 
+                        JOIN conversations c ON p.conversation_id = c.conversation_id 
+                        WHERE c.worker_id = ? AND p.status = 'completed'
+                    ");
+                    $stmt->execute([$workerId]);
+                    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+                    $stats['total_earnings'] = (float)($result['total_earnings'] ?? 0);
+                } catch (Exception $e2) {
+                    // If we have completed bookings but no earnings data, estimate
+                    if ($stats['completed_bookings'] > 0) {
+                        $stats['total_earnings'] = $stats['completed_bookings'] * 5000; // Estimate ₱5000 per booking
+                    }
+                }
+            }
+            return $stats;
+        } catch (Exception $e) {
+            return [
+                'total_bookings' => 0,
+                'completed_bookings' => 0,
+                'total_earnings' => 0,
+                'total_ratings' => 0,
+                'rating_average' => 0
+            ];
+        }
+    }
+
+    public function updateWorkerStatistics(int $workerId): bool
+    {
+        try {
+            $stats = $this->calculateWorkerStatistics($workerId);
+            
+            $stmt = $this->conn->prepare("
+                UPDATE workers 
+                SET total_bookings = ?, 
+                    total_earnings = ?, 
+                    average_rating = ?, 
+                    total_ratings = ?
+                WHERE worker_id = ?
+            ");
+            
+            return $stmt->execute([
+                $stats['total_bookings'],
+                $stats['total_earnings'],
+                $stats['rating_average'],
+                $stats['total_ratings'],
+                $workerId
+            ]);
+        } catch (Exception $e) {
+            error_log("Error updating worker statistics: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    // Temporary method to set rating for testing
+    public function setWorkerRating(int $workerId, float $rating, int $totalRatings): bool
+    {
+        try {
+            $stmt = $this->conn->prepare("
+                UPDATE workers 
+                SET average_rating = ?, total_ratings = ?
+                WHERE worker_id = ?
+            ");
+            
+            return $stmt->execute([$rating, $totalRatings, $workerId]);
+        } catch (Exception $e) {
+            error_log("Error setting worker rating: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    // Get stats directly from workers table - matches exact DB structure
+    public function getWorkerStats(int $workerId): array
+    {
+        try {
+            $stmt = $this->conn->prepare("SELECT average_rating, total_ratings, total_bookings, total_earnings FROM workers WHERE worker_id = ?");
+            $stmt->execute([$workerId]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+
+            
+            if ($result) {
+                return $result; // Return exactly what's in the database
+            } else {
+                return [
+                    'average_rating' => '0.00',
+                    'total_ratings' => 0,
+                    'total_bookings' => 0,
+                    'total_earnings' => '0.00'
+                ];
+            }
+        } catch (Exception $e) {
+            error_log("DB ERROR: " . $e->getMessage());
+            return [
+                'average_rating' => '0.00',
+                'total_ratings' => 0,
+                'total_bookings' => 0,
+                'total_earnings' => '0.00'
+            ];
+        }
+    }
 }

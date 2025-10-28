@@ -1,3 +1,11 @@
+/* ========================================
+   APPROVED WORKERS CSS - WORKER MANAGEMENT PAGE
+   Main stylesheet for approved worker management
+   ======================================== */
+
+/* ========================================
+   GLOBAL RESET & BASE STYLES
+   ======================================== */
 * {
     margin: 0;
     padding: 0;
@@ -17,6 +25,10 @@ body {
     margin: 0 auto;
 }
 
+/* ========================================
+   PAGE HEADER & NAVIGATION
+   ======================================== */
+
 /* Header Section */
 .page-header-wrapper {
     display: flex;
@@ -25,6 +37,7 @@ body {
     margin-bottom: 30px;
 }
 
+/* Back Button */
 .btn-back {
     display: inline-flex;
     align-items: center;
@@ -41,21 +54,22 @@ body {
     height: fit-content;
 }
 
-.btn-back i {
-    font-size: 16px;
-    transition: transform 0.3s ease;
-}
+    .btn-back i {
+        font-size: 16px;
+        transition: transform 0.3s ease;
+    }
 
-.btn-back:hover {
-    border-color: #ff6b00;
-    color: #ff8533;
-    transform: translateY(-2px);
-}
+    .btn-back:hover {
+        border-color: #ff6b00;
+        color: #ff8533;
+        transform: translateY(-2px);
+    }
 
-.btn-back:hover i {
-    transform: translateX(-3px);
-}
+    .btn-back:hover i {
+        transform: translateX(-3px);
+    }
 
+/* Page Header */
 .page-header {
     background: #1a1a1a;
     padding: 30px;
@@ -70,32 +84,37 @@ body {
     border-left: 5px solid #28a745;
 }
 
-.page-header h1 {
-    color: #28a745;
-    font-size: 28px;
-    margin-bottom: 5px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
+    .page-header h1 {
+        color: #28a745;
+        font-size: 28px;
+        margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
 
-.page-header h1 i {
-    font-size: 24px;
-    color: #34ce57;
-}
+    .page-header h1 i {
+        font-size: 24px;
+        color: #34ce57;
+    }
 
-.header-content p {
-    color: #999;
-    font-size: 14px;
-    margin-top: 5px;
-}
+    .header-content p {
+        color: #999;
+        font-size: 14px;
+        margin-top: 5px;
+    }
 
+/* Filter Section */
 .filter-section {
     display: flex;
     gap: 20px;
     align-items: center;
     flex-wrap: wrap;
 }
+
+/* ========================================
+   SEARCH & FILTER COMPONENTS
+   ======================================== */
 
 /* Search Input */
 #searchInput {
@@ -109,15 +128,15 @@ body {
     transition: all 0.3s ease;
 }
 
-#searchInput:focus {
-    outline: none;
-    border-color: #34ce57;
-    background: #333;
-}
+    #searchInput:focus {
+        outline: none;
+        border-color: #34ce57;
+        background: #333;
+    }
 
-#searchInput::placeholder {
-    color: #999;
-}
+    #searchInput::placeholder {
+        color: #999;
+    }
 
 /* Status Filter Buttons */
 .status-filters {
@@ -142,15 +161,19 @@ body {
     letter-spacing: 0.5px;
 }
 
-.filter-btn:hover {
-    background: #28a745;
-    color: #1a1a1a;
-}
+    .filter-btn:hover {
+        background: #28a745;
+        color: #1a1a1a;
+    }
 
-.filter-btn.active {
-    background: #28a745;
-    color: #1a1a1a;
-}
+    .filter-btn.active {
+        background: #28a745;
+        color: #1a1a1a;
+    }
+
+/* ========================================
+   WORKER TABLE
+   ======================================== */
 
 /* Table Container */
 .table-container {
@@ -171,30 +194,37 @@ body {
     overflow: hidden;
 }
 
-.worker-table th {
-    background: #2d2d2d;
-    color: #28a745;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-size: 13px;
-    padding: 20px 15px;
-    border-bottom: 2px solid #28a745;
-}
+    /* Table Headers */
+    .worker-table th {
+        background: #2d2d2d;
+        color: #28a745;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 13px;
+        padding: 20px 15px;
+        border-bottom: 2px solid #28a745;
+    }
 
-.worker-table td {
-    color: #fff;
-    padding: 18px 15px;
-    border-bottom: 1px solid #333;
-    vertical-align: middle;
-    transition: all 0.3s ease;
-}
+    /* Table Data */
+    .worker-table td {
+        color: #fff;
+        padding: 18px 15px;
+        border-bottom: 1px solid #333;
+        vertical-align: middle;
+        transition: all 0.3s ease;
+    }
 
-.worker-table tr:hover {
-    background: #2d2d2d;
-}
+    /* Table Row Hover */
+    .worker-table tr:hover {
+        background: #2d2d2d;
+    }
 
-/* Status Badges */
+/* ========================================
+   STATUS BADGES
+   ======================================== */
+
+/* Base Status Badge */
 .status-badge {
     padding: 8px 16px;
     border-radius: 20px;
@@ -207,37 +237,44 @@ body {
     gap: 6px;
 }
 
+/* Active Status */
 .status-active {
     background: #28a745;
     color: #fff;
 }
 
-.status-active::after {
-    content: '●';
-    color: #fff;
-}
+    .status-active::after {
+        content: '●';
+        color: #fff;
+    }
 
+/* Suspended Status */
 .status-suspended {
     background: #ffc107;
     color: #1a1a1a;
 }
 
-.status-suspended::after {
-    content: '⏸';
-    color: #1a1a1a;
-}
+    .status-suspended::after {
+        content: '⏸';
+        color: #1a1a1a;
+    }
 
+/* Banned Status */
 .status-banned {
     background: #dc3545;
     color: #fff;
 }
 
-.status-banned::after {
-    content: '⛔';
-    color: #fff;
-}
+    .status-banned::after {
+        content: '⛔';
+        color: #fff;
+    }
 
-/* Action Buttons */
+/* ========================================
+   ACTION BUTTONS
+   ======================================== */
+
+/* Action Button Container */
 .action-btns {
     display: flex;
     gap: 10px;
@@ -245,48 +282,56 @@ body {
     justify-content: center;
 }
 
-.action-btns .btn {
-    padding: 10px 18px;
-    font-size: 12px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    min-width: 80px;
-}
+    /* Base Action Button */
+    .action-btns .btn {
+        padding: 10px 18px;
+        font-size: 12px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        min-width: 80px;
+    }
 
+/* Suspend Button */
 .btn-suspend {
     background: #ffc107;
     color: #1a1a1a;
 }
 
-.btn-suspend:hover {
-    background: #ffb300;
-    transform: translateY(-2px);
-}
+    .btn-suspend:hover {
+        background: #ffb300;
+        transform: translateY(-2px);
+    }
 
+/* Ban Button */
 .btn-ban {
     background: #dc3545;
     color: white;
 }
 
-.btn-ban:hover {
-    background: #c82333;
-    transform: translateY(-2px);
-}
+    .btn-ban:hover {
+        background: #c82333;
+        transform: translateY(-2px);
+    }
 
+/* Activate Button */
 .btn-activate {
     background: #28a745;
     color: white;
 }
 
-.btn-activate:hover {
-    background: #218838;
-    transform: translateY(-2px);
-}
+    .btn-activate:hover {
+        background: #218838;
+        transform: translateY(-2px);
+    }
+
+/* ========================================
+   PAGINATION & EMPTY STATES
+   ======================================== */
 
 /* Pagination */
 .pagination {
@@ -310,16 +355,16 @@ body {
     text-align: center;
 }
 
-.page-link:hover {
-    background: #28a745;
-    color: #1a1a1a;
-    transform: translateY(-2px);
-}
+    .page-link:hover {
+        background: #28a745;
+        color: #1a1a1a;
+        transform: translateY(-2px);
+    }
 
-.page-link.active {
-    background: #28a745;
-    color: #1a1a1a;
-}
+    .page-link.active {
+        background: #28a745;
+        color: #1a1a1a;
+    }
 
 /* No Results Message */
 .no-results {
@@ -332,15 +377,19 @@ body {
     border: 2px dashed #28a745;
 }
 
-.no-results::before {
-    content: '📋';
-    display: block;
-    font-size: 48px;
-    margin-bottom: 15px;
-    opacity: 0.5;
-}
+    .no-results::before {
+        content: '📋';
+        display: block;
+        font-size: 48px;
+        margin-bottom: 15px;
+        opacity: 0.5;
+    }
 
-/* Mobile Responsiveness */
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
+/* Tablet Landscape - 1024px and below */
 @media (max-width: 1024px) {
     .container {
         padding: 0 15px;
@@ -351,11 +400,14 @@ body {
     }
 }
 
+/* Mobile - 768px and below */
 @media (max-width: 768px) {
+    /* Base Layout */
     body {
         padding: 15px;
     }
 
+    /* Header Layout */
     .page-header-wrapper {
         flex-direction: column;
         gap: 15px;
@@ -377,6 +429,7 @@ body {
         font-size: 24px;
     }
 
+    /* Filter Section */
     .filter-section {
         width: 100%;
         justify-content: center;
@@ -394,6 +447,7 @@ body {
         width: 100%;
     }
 
+    /* Table Layout */
     .table-container {
         padding: 20px;
         overflow-x: auto;
@@ -409,6 +463,7 @@ body {
         padding: 12px 8px;
     }
 
+    /* Action Buttons */
     .action-btns {
         flex-direction: column;
         gap: 6px;
@@ -422,6 +477,7 @@ body {
         padding: 8px 12px;
     }
 
+    /* Pagination */
     .pagination {
         gap: 8px;
         margin-top: 25px;
@@ -433,17 +489,21 @@ body {
         min-width: 40px;
     }
 
+    /* Status Badges */
     .status-badge {
         font-size: 10px;
         padding: 6px 12px;
     }
 }
 
+/* Small Mobile - 480px and below */
 @media (max-width: 480px) {
+    /* Header */
     .page-header h1 {
         font-size: 20px;
     }
 
+    /* Table */
     .worker-table th,
     .worker-table td {
         padding: 10px 6px;
@@ -454,11 +514,13 @@ body {
         padding: 15px;
     }
 
+    /* Empty State */
     .no-results {
         padding: 40px 20px;
         font-size: 16px;
     }
 
+    /* Filter Buttons */
     .filter-btn {
         padding: 8px 12px;
         font-size: 11px;

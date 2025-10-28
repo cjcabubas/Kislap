@@ -65,28 +65,9 @@ class WorkerController
 
                 unset($worker['password']);
 
-                $_SESSION['worker'] = [
-                    'worker_id' => $worker['worker_id'],
-                    'application_id' => $worker['application_id'],
-                    'lastName' => $worker['lastName'],
-                    'firstName' => $worker['firstName'],
-                    'middleName' => $worker['middleName'],
-                    'email' => $worker['email'],
-                    'phoneNumber' => $worker['phoneNumber'],
-                    'address' => $worker['address'],
-                    'specialty' => $worker['specialty'],
-                    'experience_years' => $worker['experience_years'],
-                    'bio' => $worker['bio'],
-                    'profile_photo' => $worker['profile_photo'],
-                    'rating_average' => $worker['rating_average'],
-                    'total_ratings' => $worker['total_ratings'],
-                    'total_bookings' => $worker['total_bookings'],
-                    'total_earnings' => $worker['total_earnings'],
-                    'status' => $worker['status'],
-                    'created_at' => $worker['created_at'],
-                    'role' => 'worker'
-
-                ];
+                // Just store the complete worker data (minus password)
+                $_SESSION['worker'] = $worker;
+                $_SESSION['worker']['role'] = 'worker';
                 header("Location: index.php?controller=Worker&action=dashboard");
                 exit;
             } catch (Exception $e) {
@@ -164,10 +145,23 @@ class WorkerController
         }
 
         $worker = array_merge($worker, $workerData);
+        
+        // Get stats directly from workers table - no complex merging
+        $stats = $this->repo->getWorkerStats($workerId);
+        
+        // Create a clean worker data array with stats
+        $workerData = array_merge($worker, $stats);
+        
+        // Update session with complete data including stats
+        $_SESSION['worker'] = $workerData;
+        $_SESSION['worker']['role'] = 'worker';
+        
         $existingPortfolio = $this->repo->getWorkerPortfolio($workerId);
         $existingPackages = $this->repo->getWorkerPackages($workerId);
         $isEditMode = isset($_GET['edit']) && $_GET['edit'] === 'true';
 
+        // Pass clean data to view
+        $worker = $workerData;
         require __DIR__ . '/../views/worker/profile.php';
     }
 
@@ -227,6 +221,16 @@ class WorkerController
                 error_log("specialty: '" . $profileData['specialty'] . "'");
                 error_log("bio: '" . $profileData['bio'] . "'");
                 $_SESSION['error'] = 'Please fill in all required fields.';
+                header("Location: index.php?controller=Worker&action=profile&edit=true");
+                exit;
+            }
+
+            // Validate phone number format
+            require_once __DIR__ . '/../model/Validator.php';
+            $phoneValidation = Validator::validatePhoneNumber($profileData['phoneNumber']);
+            if (!$phoneValidation['valid']) {
+                error_log("Phone validation failed: " . $phoneValidation['message']);
+                $_SESSION['error'] = $phoneValidation['message'];
                 header("Location: index.php?controller=Worker&action=profile&edit=true");
                 exit;
             }

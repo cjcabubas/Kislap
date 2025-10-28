@@ -139,6 +139,13 @@ class UserController
                 throw new Exception('First name and last name are required');
             }
 
+            // Validate phone number
+            require_once __DIR__ . '/../model/Validator.php';
+            $phoneValidation = Validator::validatePhoneNumber($phoneNumber);
+            if (!$phoneValidation['valid']) {
+                throw new Exception($phoneValidation['message']);
+            }
+
             $photoPath = null;
             if (!empty($_FILES['profilePhotoUrl']['name'])) {
                 try {

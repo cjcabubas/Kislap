@@ -184,7 +184,12 @@ $user = $_SESSION['user'];
                 </div>
                 <div class="form-group">
                     <label for="phoneNumber">Phone Number</label>
-                    <input type="tel" id="phoneNumber" name="phoneNumber" value="<?= htmlspecialchars($user['phoneNumber']) ?>" disabled>
+                    <input type="tel" id="phoneNumber" name="phoneNumber" 
+                           value="<?= htmlspecialchars($user['phoneNumber']) ?>" 
+                           disabled
+                           pattern="^09[0-9]{9}$"
+                           title="Enter a valid Philippine phone number (e.g., 09123456789)"
+                           placeholder="09XXXXXXXXX">
                 </div>
                 <div class="form-group full-width">
                     <label for="email">Email Address</label>
@@ -471,6 +476,112 @@ document.getElementById('supportForm').addEventListener('submit', function(e) {
         e.preventDefault();
         alert('Please provide a more detailed message (at least 10 characters)!');
         return false;
+    }
+});
+
+// Phone number validation for profile form
+const phoneInput = document.getElementById('phoneNumber');
+if (phoneInput) {
+    phoneInput.addEventListener('input', function() {
+        let value = this.value.replace(/\D/g, ''); // Remove non-digits
+        
+        // Allow empty field
+        if (value === '') {
+            this.value = '';
+            this.style.borderColor = '';
+            this.style.backgroundColor = '';
+            // Remove any error message
+            const errorMsg = this.parentNode.querySelector('.phone-error');
+            if (errorMsg) {
+                errorMsg.remove();
+            }
+            return;
+        }
+        
+        // Limit to 11 digits for 09XXXXXXXXX format
+        if (value.length > 11) {
+            value = value.slice(0, 11);
+        }
+        
+        // Format as 09XXXXXXXXX only if user starts typing
+        if (value.length > 0 && !value.startsWith('09')) {
+            // If starts with 63, convert to 09
+            if (value.startsWith('63')) {
+                value = '0' + value.slice(2);
+            }
+            // If starts with 9, add 0
+            else if (value.startsWith('9')) {
+                value = '0' + value;
+            }
+            // If doesn't start with 0, add 09
+            else if (!value.startsWith('0')) {
+                value = '09' + value;
+            }
+        }
+        
+        this.value = value;
+        
+        // Visual validation feedback
+        const phonePattern = /^09[0-9]{9}$/;
+        if (value.length > 0) {
+            if (phonePattern.test(value)) {
+                this.style.borderColor = '#28a745';
+                this.style.backgroundColor = '';
+                // Remove any error message
+                const errorMsg = this.parentNode.querySelector('.phone-error');
+                if (errorMsg) {
+                    errorMsg.remove();
+                }
+            } else {
+                this.style.borderColor = '#ffc107';
+                this.style.backgroundColor = '';
+            }
+        }
+    });
+    
+    phoneInput.addEventListener('blur', function() {
+        // Only show validation message if field has content and is invalid
+        // But don't use alert - just visual feedback
+        const phonePattern = /^09[0-9]{9}$/;
+        if (this.value && !phonePattern.test(this.value)) {
+            this.style.borderColor = '#dc3545';
+            this.style.backgroundColor = '';
+            
+            // Add or update error message below the field
+            let errorMsg = this.parentNode.querySelector('.phone-error');
+            if (!errorMsg) {
+                errorMsg = document.createElement('small');
+                errorMsg.className = 'phone-error';
+                errorMsg.style.color = '#dc3545';
+                errorMsg.style.fontSize = '12px';
+                errorMsg.style.marginTop = '4px';
+                errorMsg.style.display = 'block';
+                this.parentNode.appendChild(errorMsg);
+            }
+            errorMsg.textContent = 'Please enter a valid Philippine phone number (e.g., 09123456789)';
+        } else {
+            // Remove error message if valid
+            const errorMsg = this.parentNode.querySelector('.phone-error');
+            if (errorMsg) {
+                errorMsg.remove();
+            }
+        }
+    });
+}
+
+// Profile form validation
+document.getElementById('profileForm').addEventListener('submit', function(e) {
+    const phoneNumber = document.getElementById('phoneNumber').value.trim();
+    
+    // Only validate if phone number is provided and form is in edit mode
+    if (phoneNumber && !document.getElementById('phoneNumber').disabled) {
+        const phonePattern = /^09[0-9]{9}$/;
+        if (!phonePattern.test(phoneNumber)) {
+            e.preventDefault();
+            alert('Please complete the phone number. It should be 11 digits starting with 09 (e.g., 09123456789)');
+            document.getElementById('phoneNumber').focus();
+            return false;
+        }
     }
 });
 </script>

@@ -287,6 +287,39 @@
     background: rgba(255, 107, 0, 0.08);
 }
 
+/* Select dropdown styling */
+.form-group select {
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ff6b00' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+    padding-right: 40px;
+}
+
+.form-group select option {
+    background: #2d2d2d;
+    color: #fff;
+    padding: 10px 15px;
+    border: none;
+    font-size: 14px;
+}
+
+.form-group select option:hover,
+.form-group select option:focus,
+.form-group select option:checked {
+    background: rgba(255, 107, 0, 0.2);
+    color: #fff;
+}
+
+.form-group select option:disabled {
+    background: #1a1a1a;
+    color: #666;
+}
+
 .form-group textarea {
     resize: vertical;
 }

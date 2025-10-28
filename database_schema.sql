@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 27, 2025 at 04:49 PM
+-- Generation Time: Oct 28, 2025 at 05:28 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -85,7 +85,10 @@ CREATE TABLE `ai_temp_bookings` (
 --
 
 INSERT INTO `ai_temp_bookings` (`temp_booking_id`, `conversation_id`, `worker_id`, `package_id`, `package_selection`, `event_type`, `event_date`, `event_time`, `event_location`, `budget`, `worker_proposed_price`, `final_price`, `special_requests`, `worker_proposed_date`, `worker_proposed_time`, `worker_notes`, `deposit_amount`, `deposit_paid`, `deposit_paid_at`, `full_payment_paid`, `full_payment_paid_at`, `completed_at`, `rated_at`, `cancellation_reason`, `cancelled_by`, `created_at`, `updated_at`) VALUES
-(1, 1, 1, NULL, NULL, 'Wedding', '2025-12-28', NULL, 'Dagupan City, Pangasinan', 10000.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, 0, NULL, NULL, NULL, NULL, NULL, '2025-10-27 14:14:51', '2025-10-27 14:19:29');
+(1, 1, 8, NULL, NULL, 'Wedding', '2025-12-25', NULL, 'Manila', 3000.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, 0, NULL, NULL, NULL, NULL, NULL, '2025-10-28 06:00:34', '2025-10-28 06:01:01'),
+(2, 2, 5, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, 0, NULL, NULL, NULL, NULL, NULL, '2025-10-28 06:05:22', '2025-10-28 06:05:22'),
+(3, 3, 23, 6, 1, 'Graduation', '2024-12-25', '02:00:00', 'Dagupan, Pangasinan', 3000.00, 3000.00, 3000.00, NULL, NULL, NULL, 'ito boss presyong hindi barat', 1500.00, 1, '2025-10-28 12:17:06', 1, '2025-10-28 12:19:48', '2025-10-28 12:19:48', '2025-10-28 12:20:34', NULL, NULL, '2025-10-28 12:10:58', '2025-10-28 12:20:34'),
+(4, 4, 23, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, 0, NULL, NULL, NULL, NULL, NULL, '2025-10-28 12:22:42', '2025-10-28 12:22:42');
 
 --
 -- Triggers `ai_temp_bookings`
@@ -133,18 +136,37 @@ CREATE TABLE `application` (
 --
 
 INSERT INTO `application` (`application_id`, `lastName`, `firstName`, `middleName`, `email`, `phoneNumber`, `password`, `address`, `status`, `rejection_reason`, `created_at`, `updated_at`) VALUES
-(1, 'Navarro', 'Miguel', 'Santos', 'miguel.navarro@gmail.com', '09171234567', '$2y$10$WfQwbX19RhDSNmUxV0FIKeFkNUJs6iy9berhaoGS5vvqBGlpNO5eO', '12 Rizal St., Brgy. San Jose, Lucena City, Quezon', 'pending', NULL, '2025-10-27 12:10:20', '2025-10-27 12:10:20'),
-(2, 'Flores', 'Anna', NULL, 'anna.flores@yahoo.com', '09281234678', '$2y$10$yM7CO8CRnXz0dw3tvXp7xufRNsxvDw17DxbcjGUePXEDymaWvj2EC', '45 Mabini Ave., Brgy. Poblacion, Iloilo City, Iloilo', 'pending', NULL, '2025-10-27 12:14:33', '2025-10-27 12:14:33'),
-(3, 'Cruz', 'Diego', 'Ramos', 'diego.cruz@outlook.com', '09391234789', '$2y$10$OWgqbgTuqN.LqPTb7Y3zlu3PvSuEGeJ.zGCi5Ov4NyBUvauyb0z5.', '78 Magsaysay Rd., Brgy. Centro, Tagbilaran, Bohol', 'pending', NULL, '2025-10-27 12:16:16', '2025-10-27 12:16:16'),
-(4, 'Mercado', 'Beatrice', 'Gomez', 'bea.mercado@mail.com', '09181234890', '$2y$10$rsJIq5UikdexzEnCtEVfJOj2w0lH0czsaVk06Khaomm.djsKziDX.', '101 San Miguel St., Brgy. Burgos, Batangas City, Batangas', 'pending', NULL, '2025-10-27 12:19:11', '2025-10-27 12:19:11'),
-(5, 'Ilagan', 'Rafael', 'Torres', 'rafael.ilagan@protonmail.com', '09271234901', '$2y$10$G.87VjREljAzBMX5zVaV3u8GVbPv0pEQJOeeZ1FxP82Gnk0DP0E1W', '9 Laurel Lane, Brgy. San Isidro, Cagayan de Oro, Misamis Oriental', 'pending', NULL, '2025-10-27 12:23:17', '2025-10-27 12:23:17'),
-(6, 'Valdez', 'Camille', NULL, 'camille.valdez@gmail.com', '09371234560', '$2y$10$SWMs88YwEDYF3heLzEI0AOID21d0qcZnRs/2u4HgOhcc2bjtXSEsO', '222 Mango St., Brgy. Pasonanca, Zamboanga City, Zamboanga del Sur', 'pending', NULL, '2025-10-27 12:25:19', '2025-10-27 12:25:19'),
+(1, 'Navarro', 'Miguel', 'Santos', 'miguel.navarro@gmail.com', '09171234567', '$2y$10$WfQwbX19RhDSNmUxV0FIKeFkNUJs6iy9berhaoGS5vvqBGlpNO5eO', '12 Rizal St., Brgy. San Jose, Lucena City, Quezon', 'accepted', NULL, '2025-10-27 12:10:20', '2025-10-27 17:51:35'),
+(2, 'Flores', 'Anna', NULL, 'anna.flores@yahoo.com', '09281234678', '$2y$10$yM7CO8CRnXz0dw3tvXp7xufRNsxvDw17DxbcjGUePXEDymaWvj2EC', '45 Mabini Ave., Brgy. Poblacion, Iloilo City, Iloilo', 'accepted', NULL, '2025-10-27 12:14:33', '2025-10-27 17:51:32'),
+(3, 'Cruz', 'Diego', 'Ramos', 'diego.cruz@outlook.com', '09391234789', '$2y$10$OWgqbgTuqN.LqPTb7Y3zlu3PvSuEGeJ.zGCi5Ov4NyBUvauyb0z5.', '78 Magsaysay Rd., Brgy. Centro, Tagbilaran, Bohol', 'accepted', NULL, '2025-10-27 12:16:16', '2025-10-27 17:51:28'),
+(4, 'Mercado', 'Beatrice', 'Gomez', 'bea.mercado@mail.com', '09181234890', '$2y$10$rsJIq5UikdexzEnCtEVfJOj2w0lH0czsaVk06Khaomm.djsKziDX.', '101 San Miguel St., Brgy. Burgos, Batangas City, Batangas', 'accepted', NULL, '2025-10-27 12:19:11', '2025-10-27 17:51:24'),
+(5, 'Ilagan', 'Rafael', 'Torres', 'rafael.ilagan@protonmail.com', '09271234901', '$2y$10$G.87VjREljAzBMX5zVaV3u8GVbPv0pEQJOeeZ1FxP82Gnk0DP0E1W', '9 Laurel Lane, Brgy. San Isidro, Cagayan de Oro, Misamis Oriental', 'accepted', NULL, '2025-10-27 12:23:17', '2025-10-27 17:51:19'),
+(6, 'Valdez', 'Camille', NULL, 'camille.valdez@gmail.com', '09371234560', '$2y$10$SWMs88YwEDYF3heLzEI0AOID21d0qcZnRs/2u4HgOhcc2bjtXSEsO', '222 Mango St., Brgy. Pasonanca, Zamboanga City, Zamboanga del Sur', 'accepted', NULL, '2025-10-27 12:25:19', '2025-10-27 17:51:13'),
 (7, 'Pineda', 'Arnel', 'Bautista', 'arnel.pineda@yahoo.com', '09191234561', '$2y$10$wVYNjkkONA69HvN33Qpc/ePovUvcsU/hEXevW7RGd4vMVKEXDYBXy', '33 Acacia Dr., Brgy. San Roque, Naga City, Camarines Sur', 'accepted', NULL, '2025-10-27 12:55:16', '2025-10-27 14:13:24'),
 (8, 'Aquino', 'Liza', 'dela Cruz', 'liza.aquino@icloud.com', '09291234562', '$2y$10$7ogiDcSrkZQ.gseekxlYFu7KGu3nQ1PJFzR48VVTJUZxOUAKxzTjS', '7 Coconut Rd., Brgy. San Antonio, Laoag City, Ilocos Norte', 'accepted', NULL, '2025-10-27 13:00:51', '2025-10-27 14:13:19'),
 (9, 'Santos', 'Marco', 'Perez', 'marco.santos@ymail.com', '09391234563', '$2y$10$StezBCsrjo/f1dF4iiaXGO8Aam665PxmSXyeVtYVXSD2T24lBBSpq', '150 Bamboo St., Brgy. San Vicente, Puerto Princesa, Palawan', 'accepted', NULL, '2025-10-27 13:05:42', '2025-10-27 14:13:01'),
 (10, 'Ortega', 'Nelia', 'Ramos', 'nelia.ortega@zoho.com', '09171234564', '$2y$10$H/J3coqb7KKdjZ4UwmDBQu5XNfkPgW0fuJUwLq4mRy0ZzLsTd8kY6', '56 Sampaguita Ln., Brgy. Divisoria, Tarlac City, Tarlac', 'accepted', NULL, '2025-10-27 14:05:25', '2025-10-27 14:12:57'),
 (11, 'Reyes', 'Carlo', 'Alonzo', 'carlo.reyes@gmail.com', '09281234565', '$2y$10$7oefTFOYDubZ./S5lALSLueTYTt9jTocYMYL0sj/YgVt/b0kHdrIS', '88 Bago Blvd., Brgy. Banilad, Cebu City, Cebu', 'accepted', NULL, '2025-10-27 14:07:08', '2025-10-27 14:12:46'),
-(12, 'Gonzaga', 'Melinda', 'Santos', 'melinda.gonzaga@mail.com', '09371234566', '$2y$10$F2hpK8VIR.jlGuzH/k8sbO7/PDwAyR.X2H6JtmqmVAj3Oj.qyzfHa', '14 Lapu-Lapu St., Brgy. Durano, Mandaue City, Cebu', 'accepted', NULL, '2025-10-27 14:11:00', '2025-10-27 14:12:53');
+(12, 'Gonzaga', 'Melinda', 'Santos', 'melinda.gonzaga@mail.com', '09371234566', '$2y$10$F2hpK8VIR.jlGuzH/k8sbO7/PDwAyR.X2H6JtmqmVAj3Oj.qyzfHa', '14 Lapu-Lapu St., Brgy. Durano, Mandaue City, Cebu', 'accepted', NULL, '2025-10-27 14:11:00', '2025-10-27 14:12:53'),
+(13, 'Herrera', 'Jason', 'Villanueva', 'j.herrera@outlook.com', '09191234567', '$2y$10$p.9qOxMe6pxhjQbi6k8aJOnlATnhs9oMKNgZs0aHtk.HJrZEMezk.', '300 Pine Rd., Brgy. Malvar, Angeles City, Pampanga', 'accepted', NULL, '2025-10-28 10:21:29', '2025-10-28 10:38:46'),
+(14, 'Tan', 'Elaine', 'Yu', 'elaine.tan@gmail.com', '09291234568', '$2y$10$3YtzPYMiUS7asEXy6A.OK.cehDvTc3/RGOEe0BOYe91Xl/QqjMHIC', '19 Orchid Way, Brgy. Bagong Silang, Baguio City, Benguet', 'accepted', NULL, '2025-10-28 10:31:48', '2025-10-28 10:38:33'),
+(15, 'De Guzman', 'Victor', 'Navarro', 'victor.dguzman@protonmail.com', '09391234569', '$2y$10$Iz8szcEQujNaHbO98mv3WukiI5Xxiq9kCKU1miKn7VtZSevomqfCO', '77 Sampaloc St., Brgy. Divisoria, Tarlac City, Tarlac', 'accepted', NULL, '2025-10-28 10:37:00', '2025-10-28 10:38:28'),
+(16, 'Manalo', 'Rica', 'Santos', 'rica.manalo@yahoo.com', '09171234570', '$2y$10$K0euKLQpferIzA3REa27buMkszXiH9uxBxq87trzQCOF1g1RELwUW', '5 Palm Grove, Brgy. Poblacion, Roxas City, Capiz', 'accepted', NULL, '2025-10-28 10:42:27', '2025-10-28 10:49:52'),
+(17, 'Fabillar', 'Jonah', 'Cruz', 'jonah.fabillar@gmail.com', '09281234571', '$2y$10$FYgbNr3.CCeodrcHctf6z.jwCF7DesRiJhAoy5kgMgfpFmYdk7TYC', '402 Pearl St., Brgy. Baybay, Legazpi City, Albay', 'accepted', NULL, '2025-10-28 10:44:40', '2025-10-28 10:49:49'),
+(18, 'Catindig', 'Maribel', 'Aquino', 'maribel.catindig@aol.com', '09371234572', '$2y$10$YGcmmzn4pzHFi16ZETaTBeyQm5FVD34C.Rlz6UOFlsFhW0ylsaBgO', '21 Tulip Ln., Brgy. San Jose, Lucena City, Quezon', 'accepted', NULL, '2025-10-28 10:46:52', '2025-10-28 10:49:41'),
+(19, 'Lozano', 'Edwin', 'Ramos', 'edwin.lozano@mail.com', '09191234573', '$2y$10$8nxwDLsbCKq.KT6WJrpSje4zg.eUFvUJf720QGMsntV..HZglDOBa', '9 Camia St., Brgy. San Miguel, Dumaguete City, Negros Oriental', 'accepted', NULL, '2025-10-28 10:49:22', '2025-10-28 10:49:38'),
+(20, 'Salazar', 'Faye', 'Navarro', 'faye.salazar@outlook.com', '09291234574', '$2y$10$f/ooOupmflo4slCzns.YA.NTMKLukuuxBEzuOQoyB8HlFQvGonI/.', '9 Camia St., Brgy. San Miguel, Dumaguete City, Negros Oriental', 'accepted', NULL, '2025-10-28 10:54:53', '2025-10-28 10:55:12'),
+(21, 'Pascual', 'Ruben', 'Morales', 'ruben.pascual@gmail.com', '09391234575', '$2y$10$HeAUVXpbC3BgA6iwrD0bIeZLO0Wawdr.fYRyjvjttcSGz8Ha8zMFe', '150 Maharlika Rd., Brgy. Poblacion, Butuan City, Agusan del Norte', 'pending', NULL, '2025-10-28 11:19:00', '2025-10-28 11:19:00'),
+(22, 'Almeda', 'Sonia', 'dela Cruz', 'sonia.almeda@yahoo.com', '09171234576', '$2y$10$HpVMq3ymca56XUY/GUis0ukiKa0j0B3Xi1svF1x1YRUjXrC7W0RfK', '27 Sampaloc Ave., Brgy. Mabini, Calapan, Oriental Mindoro', 'rejected', 'Incomplete portfolio - needs more samples\n\nAdditional Notes: i need more samples', '2025-10-28 11:21:11', '2025-10-28 12:24:58'),
+(23, 'Quiroz', 'Kelvin', 'Lacerna', 'kelvin.quiroz@gmail.com', '09281234577', '$2y$10$uaUtguYXixLSiM3yw3Ac.On3EegSpGqnS5kT1Ownma4f5CoBoRasi', '310 Baybayon St., Brgy. Poblacion, Legazpi City, Albay', 'pending', NULL, '2025-10-28 11:23:09', '2025-10-28 11:23:09'),
+(24, 'Borja', 'Ma Teresa', 'Salonga', 'teresa.borja@zoho.com', '09371234578', '$2y$10$UfigzXtTPBOfqnsejSG/x.aakgXSoc4tNa7JIh19ZCYjsT2aNqxPO', '4 Sampaguita Rd., Brgy. Centro, Tuguegarao City, Cagayan', 'pending', NULL, '2025-10-28 11:27:35', '2025-10-28 11:27:35'),
+(25, 'Lomboy', 'Arlene', 'Quinto', 'arlene.lomboy@icloud.com', '09191234579', '$2y$10$W11miF/ThJTH86LBkZwHOeVW00neeyVllxTmH7GnXrY3/nIuxTl1a', '88 Coconut Ln., Brgy. Baybay, Calbayog City, Samar', 'pending', NULL, '2025-10-28 11:28:50', '2025-10-28 11:28:50'),
+(26, 'Dela Cruz', 'Luis', 'Mendoza', 'luis.delacruz@gmail.com', '09281234580', '$2y$10$Gq2JDdYBZkA9TKH/JeGZOePfPc3xe4udK71E8OHBcW8qQudPSFBeO', '234 Palmera St., Brgy. Victoria, San Fernando, Pampanga', 'pending', NULL, '2025-10-28 11:29:43', '2025-10-28 11:29:43'),
+(27, 'Torres', 'Hannah', 'Perez', 'hannah.torres@outlook.com', '09371234581', '$2y$10$VUzS6HoYyvZAAnl8ll.yAOVIlHHqvyEfcdZqnv1yQiad3vNLI82W6', '57 Mango Blvd., Brgy. Panghulo, Malolos City, Bulacan', 'pending', NULL, '2025-10-28 11:32:43', '2025-10-28 11:32:43'),
+(28, 'Sison', 'Jerome', 'Reyes', 'jerome.sison@aol.com', '09171234582', '$2y$10$jd8KjIMlSZWLtMu7bDArfemy/xl4mmxTJZ/P.qlecEa9Nxl4Gg2hW', '400 Maharlika Rd., Brgy. San Juan, Laoag City, Ilocos Norte', 'pending', NULL, '2025-10-28 11:40:45', '2025-10-28 11:40:45'),
+(29, 'Aguilar', 'Rafael', 'Salcedo', 'rafael.aguilar@gmail.com', '09291234583', '$2y$10$j4e3ANeharlTRpKezc.IW.B/DIAp4G7bPo5anGP7eOhFocN4MfxTq', '182 Laurel St., Brgy. San Isidro, Batangas City, Batangas', 'pending', NULL, '2025-10-28 11:42:31', '2025-10-28 11:42:31'),
+(30, 'Delos Reyes', 'Cynthia', 'Aquino', 'cynthia.delosreyes@zoho.com', '09391234584', '$2y$10$4C6q7H5G2hfIeuEPZu/L6.Jhlg.hGH5PcqyHgwRzlzEkZ22GBFbgy', '118 Palm St., Brgy. Bagumbayan, Davao City, Davao del Sur', 'pending', NULL, '2025-10-28 11:45:12', '2025-10-28 11:45:12'),
+(31, 'Cruz', 'Marlon', 'Gomez', 'marlon.cruz@gmail.com', '09181234585', '$2y$10$qHOcaxQ4axoxD7H29OvgL.UpjiOqh9cDSKxjPOdoCtKhtxxztI5/C', '123 Juniper St., Brgy. Malanday, Valenzuela City, Metro Manila', 'accepted', NULL, '2025-10-28 11:59:12', '2025-10-28 12:01:03');
 
 -- --------------------------------------------------------
 
@@ -175,7 +197,26 @@ INSERT INTO `application_resume` (`resume_id`, `application_id`, `resumeFilePath
 (9, 9, 'uploads/application/resumes/resume_app_9_1761570342_e3bac9fbd92d1568.pdf', '2025-10-27 13:05:42'),
 (10, 10, 'uploads/application/resumes/resume_app_10_1761573925_de67423d0d806f4d.pdf', '2025-10-27 14:05:25'),
 (11, 11, 'uploads/application/resumes/resume_app_11_1761574028_2a2d4f3ea15caf16.pdf', '2025-10-27 14:07:08'),
-(12, 12, 'uploads/application/resumes/resume_app_12_1761574260_7f09569f0ef3f0af.pdf', '2025-10-27 14:11:00');
+(12, 12, 'uploads/application/resumes/resume_app_12_1761574260_7f09569f0ef3f0af.pdf', '2025-10-27 14:11:00'),
+(13, 13, 'uploads/application/resumes/resume_app_13_1761646889_8d8e1efbd866b3cf.pdf', '2025-10-28 10:21:29'),
+(14, 14, 'uploads/application/resumes/resume_app_14_1761647508_3e4c839a45a2f66c.pdf', '2025-10-28 10:31:48'),
+(15, 15, 'uploads/application/resumes/resume_app_15_1761647820_7c48672681217fca.pdf', '2025-10-28 10:37:00'),
+(16, 16, 'uploads/application/resumes/resume_app_16_1761648147_e3999c3da618993e.pdf', '2025-10-28 10:42:27'),
+(17, 17, 'uploads/application/resumes/resume_app_17_1761648280_b4cd74497e5a8111.pdf', '2025-10-28 10:44:40'),
+(18, 18, 'uploads/application/resumes/resume_app_18_1761648412_641523923c333fbc.pdf', '2025-10-28 10:46:52'),
+(19, 19, 'uploads/application/resumes/resume_app_19_1761648562_c87725bfa5c2a27c.pdf', '2025-10-28 10:49:22'),
+(20, 20, 'uploads/application/resumes/resume_app_20_1761648893_f31eeec81c684c2a.pdf', '2025-10-28 10:54:53'),
+(21, 21, 'uploads/application/resumes/resume_app_21_1761650340_93390ede40bddead.pdf', '2025-10-28 11:19:00'),
+(22, 22, 'uploads/application/resumes/resume_app_22_1761650471_2b43bb2c0d5ed878.pdf', '2025-10-28 11:21:11'),
+(23, 23, 'uploads/application/resumes/resume_app_23_1761650589_04b1ecb0ec9addc0.pdf', '2025-10-28 11:23:09'),
+(24, 24, 'uploads/application/resumes/resume_app_24_1761650855_a7284ba45e4ea599.pdf', '2025-10-28 11:27:35'),
+(25, 25, 'uploads/application/resumes/resume_app_25_1761650930_10b4390dfbef49a8.pdf', '2025-10-28 11:28:50'),
+(26, 26, 'uploads/application/resumes/resume_app_26_1761650983_11e3dbe922ed7b20.pdf', '2025-10-28 11:29:43'),
+(27, 27, 'uploads/application/resumes/resume_app_27_1761651163_e74fc93d4c87a410.pdf', '2025-10-28 11:32:43'),
+(28, 28, 'uploads/application/resumes/resume_app_28_1761651645_711d15754b483432.pdf', '2025-10-28 11:40:45'),
+(29, 29, 'uploads/application/resumes/resume_app_29_1761651751_84800726922cc463.pdf', '2025-10-28 11:42:31'),
+(30, 30, 'uploads/application/resumes/resume_app_30_1761651912_80bf0bf7d439d8d3.pdf', '2025-10-28 11:45:12'),
+(31, 31, 'uploads/application/resumes/resume_app_31_1761652752_2add487c447ebfdd.pdf', '2025-10-28 11:59:12');
 
 -- --------------------------------------------------------
 
@@ -272,7 +313,119 @@ INSERT INTO `application_works` (`work_id`, `application_id`, `worksFilePath`, `
 (75, 12, 'uploads/application/works/work_1_app_12_1761574260_879c4a0fa3db3795.avif', '2025-10-27 14:11:00'),
 (76, 12, 'uploads/application/works/work_2_app_12_1761574260_474b799b4f161d6a.avif', '2025-10-27 14:11:00'),
 (77, 12, 'uploads/application/works/work_3_app_12_1761574260_dcac47a183e7ce42.avif', '2025-10-27 14:11:00'),
-(78, 12, 'uploads/application/works/work_4_app_12_1761574260_397b7f09589a14b1.avif', '2025-10-27 14:11:00');
+(78, 12, 'uploads/application/works/work_4_app_12_1761574260_397b7f09589a14b1.avif', '2025-10-27 14:11:00'),
+(79, 13, 'uploads/application/works/work_0_app_13_1761646889_002edbc68530ac24.avif', '2025-10-28 10:21:29'),
+(80, 13, 'uploads/application/works/work_1_app_13_1761646889_4bc2a8ae4b8cf1b1.avif', '2025-10-28 10:21:29'),
+(81, 13, 'uploads/application/works/work_2_app_13_1761646889_e91d2d58e1e3d212.avif', '2025-10-28 10:21:29'),
+(82, 13, 'uploads/application/works/work_3_app_13_1761646889_a2a4a2da9efc6328.avif', '2025-10-28 10:21:29'),
+(83, 13, 'uploads/application/works/work_4_app_13_1761646889_1093df28ad581dd8.avif', '2025-10-28 10:21:29'),
+(84, 14, 'uploads/application/works/work_0_app_14_1761647508_2d983bac7b074743.avif', '2025-10-28 10:31:48'),
+(85, 14, 'uploads/application/works/work_1_app_14_1761647508_34c9a3837d325fa9.avif', '2025-10-28 10:31:48'),
+(86, 14, 'uploads/application/works/work_2_app_14_1761647508_284f664d55b9b558.avif', '2025-10-28 10:31:48'),
+(87, 14, 'uploads/application/works/work_3_app_14_1761647508_a97246bca08251ad.avif', '2025-10-28 10:31:48'),
+(88, 14, 'uploads/application/works/work_4_app_14_1761647508_541e7e7c40af63c4.avif', '2025-10-28 10:31:48'),
+(89, 15, 'uploads/application/works/work_0_app_15_1761647820_354b671f9809146d.avif', '2025-10-28 10:37:00'),
+(90, 15, 'uploads/application/works/work_1_app_15_1761647820_ba6438ba0000c496.avif', '2025-10-28 10:37:00'),
+(91, 15, 'uploads/application/works/work_2_app_15_1761647820_03a39f8aa5e7fbcb.avif', '2025-10-28 10:37:00'),
+(92, 15, 'uploads/application/works/work_3_app_15_1761647820_5e50d0a191284320.avif', '2025-10-28 10:37:00'),
+(93, 15, 'uploads/application/works/work_4_app_15_1761647820_52da7c874689da03.avif', '2025-10-28 10:37:00'),
+(94, 15, 'uploads/application/works/work_5_app_15_1761647820_d6609ae317ff39aa.avif', '2025-10-28 10:37:00'),
+(95, 16, 'uploads/application/works/work_0_app_16_1761648147_12c27e95b6a0dbaa.avif', '2025-10-28 10:42:27'),
+(96, 16, 'uploads/application/works/work_1_app_16_1761648147_526dd6bb5dd36ade.avif', '2025-10-28 10:42:27'),
+(97, 16, 'uploads/application/works/work_2_app_16_1761648147_ebabe4ba00d405e7.avif', '2025-10-28 10:42:27'),
+(98, 16, 'uploads/application/works/work_3_app_16_1761648147_26ae3e2cae979852.avif', '2025-10-28 10:42:27'),
+(99, 16, 'uploads/application/works/work_4_app_16_1761648147_b5a06fa9b7059aa8.avif', '2025-10-28 10:42:27'),
+(100, 17, 'uploads/application/works/work_0_app_17_1761648280_28eeded0d684fdb3.avif', '2025-10-28 10:44:40'),
+(101, 17, 'uploads/application/works/work_1_app_17_1761648280_7de6d4dcd20bbd9a.avif', '2025-10-28 10:44:40'),
+(102, 17, 'uploads/application/works/work_2_app_17_1761648280_50985c6d3ac5535b.avif', '2025-10-28 10:44:40'),
+(103, 17, 'uploads/application/works/work_3_app_17_1761648280_177b87744ce25c73.avif', '2025-10-28 10:44:40'),
+(104, 17, 'uploads/application/works/work_4_app_17_1761648280_640fd49fbdaa9383.avif', '2025-10-28 10:44:40'),
+(105, 17, 'uploads/application/works/work_5_app_17_1761648280_0e432a9374cefc5d.avif', '2025-10-28 10:44:40'),
+(106, 18, 'uploads/application/works/work_0_app_18_1761648412_9664b93c6f192be3.avif', '2025-10-28 10:46:52'),
+(107, 18, 'uploads/application/works/work_1_app_18_1761648412_2d9f9e7f7fda7f37.avif', '2025-10-28 10:46:52'),
+(108, 18, 'uploads/application/works/work_2_app_18_1761648412_3234aa5d14fdd2e0.avif', '2025-10-28 10:46:52'),
+(109, 18, 'uploads/application/works/work_3_app_18_1761648412_aaa16c7eb5980494.avif', '2025-10-28 10:46:52'),
+(110, 18, 'uploads/application/works/work_4_app_18_1761648412_297f37e9bbeb0aea.avif', '2025-10-28 10:46:52'),
+(111, 18, 'uploads/application/works/work_5_app_18_1761648412_70866c4d60d82ada.avif', '2025-10-28 10:46:52'),
+(112, 18, 'uploads/application/works/work_6_app_18_1761648412_5196c91d7fc9c2b1.avif', '2025-10-28 10:46:52'),
+(113, 19, 'uploads/application/works/work_0_app_19_1761648562_3ede0ed094082fff.avif', '2025-10-28 10:49:22'),
+(114, 19, 'uploads/application/works/work_1_app_19_1761648562_4a39d528da05b590.avif', '2025-10-28 10:49:22'),
+(115, 19, 'uploads/application/works/work_2_app_19_1761648562_b857bd17f7bea7ad.avif', '2025-10-28 10:49:22'),
+(116, 19, 'uploads/application/works/work_3_app_19_1761648562_7f69ae142b6ed661.avif', '2025-10-28 10:49:22'),
+(117, 19, 'uploads/application/works/work_4_app_19_1761648562_dbf98111b8a5e19b.avif', '2025-10-28 10:49:22'),
+(118, 20, 'uploads/application/works/work_0_app_20_1761648893_e0d4c4a7c48872e3.avif', '2025-10-28 10:54:53'),
+(119, 20, 'uploads/application/works/work_1_app_20_1761648893_1853021200a1300c.avif', '2025-10-28 10:54:53'),
+(120, 20, 'uploads/application/works/work_2_app_20_1761648893_76dc4f7ffa32c58f.avif', '2025-10-28 10:54:53'),
+(121, 20, 'uploads/application/works/work_3_app_20_1761648893_255467d2f7fd9b79.avif', '2025-10-28 10:54:53'),
+(122, 20, 'uploads/application/works/work_4_app_20_1761648893_ceaac2e29ef64a68.avif', '2025-10-28 10:54:53'),
+(123, 20, 'uploads/application/works/work_5_app_20_1761648893_2cc45b34c6f48848.avif', '2025-10-28 10:54:53'),
+(124, 21, 'uploads/application/works/work_0_app_21_1761650340_cd7a3966ab8c765c.avif', '2025-10-28 11:19:00'),
+(125, 21, 'uploads/application/works/work_1_app_21_1761650340_449a626ab58844c0.avif', '2025-10-28 11:19:00'),
+(126, 21, 'uploads/application/works/work_2_app_21_1761650340_9b38a4c35203f8ac.avif', '2025-10-28 11:19:00'),
+(127, 21, 'uploads/application/works/work_3_app_21_1761650340_3dbf8e895ac400fd.avif', '2025-10-28 11:19:00'),
+(128, 21, 'uploads/application/works/work_4_app_21_1761650340_4abb2d71a8cace02.avif', '2025-10-28 11:19:00'),
+(129, 21, 'uploads/application/works/work_5_app_21_1761650340_56a57d60ec5a67d1.avif', '2025-10-28 11:19:00'),
+(130, 22, 'uploads/application/works/work_0_app_22_1761650471_6ccc6d43f7b8e21a.avif', '2025-10-28 11:21:11'),
+(131, 22, 'uploads/application/works/work_1_app_22_1761650471_32230c85b817833c.avif', '2025-10-28 11:21:11'),
+(132, 22, 'uploads/application/works/work_2_app_22_1761650471_960186e046a3cc2d.avif', '2025-10-28 11:21:11'),
+(133, 22, 'uploads/application/works/work_3_app_22_1761650471_6faca46b4176cb85.avif', '2025-10-28 11:21:11'),
+(134, 22, 'uploads/application/works/work_4_app_22_1761650471_b88fe63b4c4ed3eb.avif', '2025-10-28 11:21:11'),
+(135, 23, 'uploads/application/works/work_0_app_23_1761650589_04485559534eb34a.avif', '2025-10-28 11:23:09'),
+(136, 23, 'uploads/application/works/work_1_app_23_1761650589_7417582d2f954a1b.avif', '2025-10-28 11:23:09'),
+(137, 23, 'uploads/application/works/work_2_app_23_1761650589_f8a000b12d7a5a7d.avif', '2025-10-28 11:23:09'),
+(138, 23, 'uploads/application/works/work_3_app_23_1761650589_d5b5c9cdbf7e7514.avif', '2025-10-28 11:23:09'),
+(139, 23, 'uploads/application/works/work_4_app_23_1761650589_e1ad8d68627605b5.avif', '2025-10-28 11:23:09'),
+(140, 23, 'uploads/application/works/work_5_app_23_1761650589_6c328568cd3a9255.avif', '2025-10-28 11:23:09'),
+(141, 23, 'uploads/application/works/work_6_app_23_1761650589_35b6f730869f9221.avif', '2025-10-28 11:23:09'),
+(142, 24, 'uploads/application/works/work_0_app_24_1761650855_90012a5cdaf32c0c.avif', '2025-10-28 11:27:35'),
+(143, 24, 'uploads/application/works/work_1_app_24_1761650855_9af680816fb479a1.avif', '2025-10-28 11:27:35'),
+(144, 24, 'uploads/application/works/work_2_app_24_1761650855_5ce6554fcfffb188.avif', '2025-10-28 11:27:35'),
+(145, 24, 'uploads/application/works/work_3_app_24_1761650855_9572bdf648e327bd.avif', '2025-10-28 11:27:35'),
+(146, 24, 'uploads/application/works/work_4_app_24_1761650855_14f275968dd4e384.avif', '2025-10-28 11:27:35'),
+(147, 24, 'uploads/application/works/work_5_app_24_1761650855_be69f6242cf4ff46.avif', '2025-10-28 11:27:35'),
+(148, 25, 'uploads/application/works/work_0_app_25_1761650930_86aa6f22c94bf49a.avif', '2025-10-28 11:28:50'),
+(149, 25, 'uploads/application/works/work_1_app_25_1761650930_698f422bfeff9f17.avif', '2025-10-28 11:28:50'),
+(150, 25, 'uploads/application/works/work_2_app_25_1761650930_f6a3b42027cc330d.avif', '2025-10-28 11:28:50'),
+(151, 25, 'uploads/application/works/work_3_app_25_1761650930_d2826ef5bb253f87.avif', '2025-10-28 11:28:50'),
+(152, 25, 'uploads/application/works/work_4_app_25_1761650930_d0c21f9f4d142bf4.avif', '2025-10-28 11:28:50'),
+(153, 25, 'uploads/application/works/work_5_app_25_1761650930_2f4d108dbb8ea2cf.avif', '2025-10-28 11:28:50'),
+(154, 26, 'uploads/application/works/work_0_app_26_1761650983_0d46bc4aaf6b14ba.avif', '2025-10-28 11:29:43'),
+(155, 26, 'uploads/application/works/work_1_app_26_1761650983_bf9780d3e79d981c.avif', '2025-10-28 11:29:43'),
+(156, 26, 'uploads/application/works/work_2_app_26_1761650983_991bd24c13404a65.avif', '2025-10-28 11:29:43'),
+(157, 26, 'uploads/application/works/work_3_app_26_1761650983_5b917a49a763a1ad.avif', '2025-10-28 11:29:43'),
+(158, 26, 'uploads/application/works/work_4_app_26_1761650983_de659648bb2b596b.avif', '2025-10-28 11:29:43'),
+(159, 26, 'uploads/application/works/work_5_app_26_1761650983_fb35e1b7dc84b7be.avif', '2025-10-28 11:29:43'),
+(160, 26, 'uploads/application/works/work_6_app_26_1761650983_4a8585e478ff0a8e.avif', '2025-10-28 11:29:43'),
+(161, 26, 'uploads/application/works/work_7_app_26_1761650983_2905ffdfbc11f13f.avif', '2025-10-28 11:29:43'),
+(162, 27, 'uploads/application/works/work_0_app_27_1761651163_420851f7bd2a209a.avif', '2025-10-28 11:32:43'),
+(163, 27, 'uploads/application/works/work_1_app_27_1761651163_eb0b9b0ee23bba09.avif', '2025-10-28 11:32:43'),
+(164, 27, 'uploads/application/works/work_2_app_27_1761651163_b0803ddc2533ec16.avif', '2025-10-28 11:32:43'),
+(165, 27, 'uploads/application/works/work_3_app_27_1761651163_bb1eca807fb1c9d5.avif', '2025-10-28 11:32:43'),
+(166, 27, 'uploads/application/works/work_4_app_27_1761651163_6ffec14eccbe0b26.avif', '2025-10-28 11:32:43'),
+(167, 28, 'uploads/application/works/work_0_app_28_1761651645_d68afc4bcb623e3a.avif', '2025-10-28 11:40:45'),
+(168, 28, 'uploads/application/works/work_1_app_28_1761651645_1e74de385d5d0bd3.avif', '2025-10-28 11:40:45'),
+(169, 28, 'uploads/application/works/work_2_app_28_1761651645_bc5ed4f7ec7a5bee.avif', '2025-10-28 11:40:45'),
+(170, 28, 'uploads/application/works/work_3_app_28_1761651645_86aed3dfe490636a.avif', '2025-10-28 11:40:45'),
+(171, 28, 'uploads/application/works/work_4_app_28_1761651645_2d942035f20ff269.avif', '2025-10-28 11:40:45'),
+(172, 28, 'uploads/application/works/work_5_app_28_1761651645_09d296f08618ec89.avif', '2025-10-28 11:40:45'),
+(173, 28, 'uploads/application/works/work_6_app_28_1761651645_7b4877205b5a47db.avif', '2025-10-28 11:40:45'),
+(174, 28, 'uploads/application/works/work_7_app_28_1761651645_8a53c923b7d4b688.avif', '2025-10-28 11:40:45'),
+(175, 29, 'uploads/application/works/work_0_app_29_1761651751_81ddad4d2180a4c9.avif', '2025-10-28 11:42:31'),
+(176, 29, 'uploads/application/works/work_1_app_29_1761651751_fb3517ce4c15df02.avif', '2025-10-28 11:42:31'),
+(177, 29, 'uploads/application/works/work_2_app_29_1761651751_ac089b85066abc8b.avif', '2025-10-28 11:42:31'),
+(178, 29, 'uploads/application/works/work_3_app_29_1761651751_3eef4680fce63493.avif', '2025-10-28 11:42:31'),
+(179, 29, 'uploads/application/works/work_4_app_29_1761651751_b45577fd7b0e9f09.avif', '2025-10-28 11:42:31'),
+(180, 30, 'uploads/application/works/work_0_app_30_1761651912_c372e08afa845408.avif', '2025-10-28 11:45:12'),
+(181, 30, 'uploads/application/works/work_1_app_30_1761651912_39bdd5f02fc03b69.avif', '2025-10-28 11:45:12'),
+(182, 30, 'uploads/application/works/work_2_app_30_1761651912_5642db13da82f375.avif', '2025-10-28 11:45:12'),
+(183, 30, 'uploads/application/works/work_3_app_30_1761651912_418cf145cfd8f6cb.avif', '2025-10-28 11:45:12'),
+(184, 30, 'uploads/application/works/work_4_app_30_1761651912_c2946c2ac96d82da.avif', '2025-10-28 11:45:12'),
+(185, 30, 'uploads/application/works/work_5_app_30_1761651912_ef278365f1b4e4eb.avif', '2025-10-28 11:45:12'),
+(186, 31, 'uploads/application/works/work_0_app_31_1761652752_71d5097fb0393626.avif', '2025-10-28 11:59:12'),
+(187, 31, 'uploads/application/works/work_1_app_31_1761652752_f05fd8232d159ba2.avif', '2025-10-28 11:59:12'),
+(188, 31, 'uploads/application/works/work_2_app_31_1761652752_e36d37d1a103af0c.avif', '2025-10-28 11:59:12'),
+(189, 31, 'uploads/application/works/work_3_app_31_1761652752_b796ae6aa01bf6b3.avif', '2025-10-28 11:59:12'),
+(190, 31, 'uploads/application/works/work_4_app_31_1761652752_1267b4ddd5d0a994.avif', '2025-10-28 11:59:12');
 
 -- --------------------------------------------------------
 
@@ -312,7 +465,10 @@ CREATE TABLE `conversations` (
 --
 
 INSERT INTO `conversations` (`conversation_id`, `user_id`, `worker_id`, `type`, `booking_status`, `created_at`, `updated_at`) VALUES
-(1, 1, 1, 'ai', '', '2025-10-27 14:14:51', '2025-10-27 14:14:51');
+(1, 8, 8, 'direct', 'pending_worker', '2025-10-28 06:00:34', '2025-10-28 06:01:09'),
+(2, 8, 5, 'direct', 'pending_worker', '2025-10-28 06:05:22', '2025-10-28 06:06:00'),
+(3, 2, 23, 'direct', 'completed', '2025-10-28 12:10:58', '2025-10-28 12:19:48'),
+(4, 2, 23, 'ai', '', '2025-10-28 12:22:42', '2025-10-28 12:22:42');
 
 -- --------------------------------------------------------
 
@@ -335,18 +491,47 @@ CREATE TABLE `messages` (
 --
 
 INSERT INTO `messages` (`message_id`, `conversation_id`, `sender_id`, `sender_type`, `message_text`, `is_read`, `sent_at`) VALUES
-(1, 1, 0, '', 'Hi! I\'m here to help you book a photographer. 📸\n\nWhat type of event are you planning?\n(e.g., Wedding, Birthday, Portrait, Corporate)', 0, '2025-10-27 14:14:51'),
-(2, 1, 1, 'user', 'Wedding', 0, '2025-10-27 14:15:09'),
-(3, 1, 0, '', 'Great! When is your **Wedding** scheduled?\n(e.g., December 25, 2024 or 12/25/2024)', 0, '2025-10-27 14:15:09'),
-(4, 1, 1, 'user', 'December 28 2025', 0, '2025-10-27 14:15:19'),
-(5, 1, 0, '', 'Perfect! Where will the event take place?\n(e.g., Manila, Quezon City, or specific venue)', 0, '2025-10-27 14:15:19'),
-(6, 1, 1, 'user', 'Dagupan City, Pangasinan', 0, '2025-10-27 14:15:30'),
-(7, 1, 0, '', 'Almost done! What\'s your budget for photography?\n(e.g., 10000 or 15000)', 0, '2025-10-27 14:15:30'),
-(8, 1, 1, 'user', '10000', 0, '2025-10-27 14:19:29'),
-(9, 1, 0, '', 'Great! I have all the details:\n\n📸 Event: Wedding\n📅 Date: December 28, 2025\n📍 Location: Dagupan City, Pangasinan\n💰 Budget: ₱10,000.00\n\nUnfortunately, there are no available packages at the moment. Would you like to speak with the photographer directly?', 0, '2025-10-27 14:19:29'),
-(10, 1, 1, 'user', 'Sure', 0, '2025-10-27 14:19:34'),
-(11, 1, 0, '', 'Great! I have all the details:\n\n📸 Event: Wedding\n📅 Date: December 28, 2025\n📍 Location: Dagupan City, Pangasinan\n💰 Budget: ₱10,000.00\n\nUnfortunately, there are no available packages at the moment. Would you like to speak with the photographer directly?', 0, '2025-10-27 14:19:34'),
-(12, 1, 1, 'worker', 'Hello?', 0, '2025-10-27 14:46:19');
+(1, 1, 0, '', 'Hi! I\'m here to help you book a photographer. 📸\n\nWhat type of event are you planning?\n(e.g., Wedding, Birthday, Portrait, Corporate)', 0, '2025-10-28 06:00:34'),
+(2, 1, 8, 'user', 'Wedding', 0, '2025-10-28 06:00:42'),
+(3, 1, 0, '', 'Great! When is your **Wedding** scheduled?\n(e.g., December 25, 2024 or 12/25/2024)', 0, '2025-10-28 06:00:42'),
+(4, 1, 8, 'user', 'December 25', 0, '2025-10-28 06:00:54'),
+(5, 1, 0, '', 'Perfect! Where will the event take place?\n(e.g., Manila, Quezon City, or specific venue)', 0, '2025-10-28 06:00:54'),
+(6, 1, 8, 'user', 'Manila', 0, '2025-10-28 06:00:58'),
+(7, 1, 0, '', 'Almost done! What\'s your budget for photography?\n(e.g., 10000 or 15000)', 0, '2025-10-28 06:00:58'),
+(8, 1, 8, 'user', '3000', 0, '2025-10-28 06:01:01'),
+(9, 1, 0, '', 'Great! I have all the details:\n\n📸 Event: Wedding\n📅 Date: December 25, 2025\n📍 Location: Manila\n💰 Budget: ₱3,000.00\n\nUnfortunately, there are no available packages at the moment. Would you like to speak with the photographer directly?', 0, '2025-10-28 06:01:01'),
+(10, 1, 8, 'user', 'no', 0, '2025-10-28 06:01:06'),
+(11, 1, 0, '', 'Great! I have all the details:\n\n📸 Event: Wedding\n📅 Date: December 25, 2025\n📍 Location: Manila\n💰 Budget: ₱3,000.00\n\nUnfortunately, there are no available packages at the moment. Would you like to speak with the photographer directly?', 0, '2025-10-28 06:01:06'),
+(12, 1, 8, 'user', 'yes', 0, '2025-10-28 06:01:09'),
+(13, 1, 0, '', 'Perfect! I\'m redirecting you to the photographer now. They\'ll be able to discuss custom options with you directly. 📸✨', 0, '2025-10-28 06:01:09'),
+(14, 2, 0, '', 'Hi! I\'m here to help you book a photographer. 📸\n\nWhat type of event are you planning?\n(e.g., Wedding, Birthday, Portrait, Corporate)', 0, '2025-10-28 06:05:22'),
+(15, 2, 8, 'user', 'I would like to talk to a human agent', 0, '2025-10-28 06:06:00'),
+(16, 2, 0, '', 'I\'ll connect you with the photographer now. They\'ll respond to you shortly! 👋', 0, '2025-10-28 06:06:00'),
+(17, 3, 0, '', 'Hi! I\'m here to help you book a photographer. 📸\n\nWhat type of event are you planning?\n(e.g., Wedding, Birthday, Portrait, Corporate)', 0, '2025-10-28 12:10:58'),
+(18, 3, 2, 'user', 'College graduation photoshoot', 0, '2025-10-28 12:11:33'),
+(19, 3, 0, '', 'Great! When is your **Graduation** scheduled?\n(e.g., December 25, 2024 or 12/25/2024)', 0, '2025-10-28 12:11:33'),
+(20, 3, 2, 'user', 'December 25', 0, '2025-10-28 12:11:49'),
+(21, 3, 0, '', 'Perfect! Where will the event take place?\n(e.g., Manila, Quezon City, or specific venue)', 0, '2025-10-28 12:11:49'),
+(22, 3, 2, 'user', 'Dagupan, Pangasinan', 0, '2025-10-28 12:12:00'),
+(23, 3, 0, '', 'Almost done! What\'s your budget for photography?\n(e.g., 10000 or 15000)', 0, '2025-10-28 12:12:00'),
+(24, 3, 2, 'user', '1000', 0, '2025-10-28 12:12:13'),
+(25, 3, 0, '', 'Perfect! Here\'s a summary of your event:\n\n📸 Event: Graduation\n📅 Date: December 25, 2025\n📍 Location: Dagupan, Pangasinan\n💰 Budget: ₱1,000.00\n\nHere are the recommended packages below. **Type the package number (1, 2, or 3)** to select one:', 0, '2025-10-28 12:12:13'),
+(26, 3, 2, 'user', '1', 0, '2025-10-28 12:12:32'),
+(27, 3, 0, '', 'Perfect choice! 🎉\n\nYour booking request has been sent to the photographer.\n\n📋 **Booking Summary:**\n📸 Event: Graduation\n📅 Date: December 25, 2025\n📍 Location: Dagupan, Pangasinan\n💰 Budget: ₱1,000.00\n📦 Package: Basic Portrait Session\n\nThe photographer will review your request and respond here. You can now chat with them directly!', 0, '2025-10-28 12:12:32'),
+(28, 3, 2, 'user', '1', 0, '2025-10-28 12:12:32'),
+(29, 3, 23, 'worker', 'Hello Lester', 0, '2025-10-28 12:12:55'),
+(30, 3, 2, 'user', 'boss pwede pobang 30 photos?', 0, '2025-10-28 12:13:50'),
+(31, 3, 23, 'worker', 'grabe ka naman boss isang libo lang prinopose mong bayad', 0, '2025-10-28 12:14:06'),
+(32, 3, 23, 'worker', 'sige ito nalang', 0, '2025-10-28 12:14:12'),
+(33, 3, 23, 'worker', 'I\'ve reviewed your booking request. I\'d like to propose a price of ₱3,000.00\n\nNote: ito boss presyong hindi barat', 0, '2025-10-28 12:14:46'),
+(34, 3, 2, 'user', 'okay na ako sa presyo nayan', 0, '2025-10-28 12:15:18'),
+(35, 3, 2, 'user', 'I accept your proposal! Let\'s proceed with the booking.', 0, '2025-10-28 12:15:22'),
+(36, 3, 2, 'user', 'should i pay now?', 0, '2025-10-28 12:16:17'),
+(37, 3, 23, 'worker', 'yes boss', 0, '2025-10-28 12:16:28'),
+(38, 3, 2, 'user', '✅ Down payment of ₱1,500.00 has been processed successfully! The photographer has been notified.', 0, '2025-10-28 12:17:06'),
+(39, 3, 2, 'user', '🎉 Final payment of ₱1,500.00 has been processed. Thank you for using our service! Please rate your experience.', 0, '2025-10-28 12:19:48'),
+(40, 3, 2, 'user', '⭐ I\'ve rated this service 5/5 stars. Review: 10/10 Marlon made me comfortable during the photo session', 0, '2025-10-28 12:20:35'),
+(41, 4, 0, '', 'Hi! I\'m here to help you book a photographer. 📸\n\nWhat type of event are you planning?\n(e.g., Wedding, Birthday, Portrait, Corporate)', 0, '2025-10-28 12:22:42');
 
 -- --------------------------------------------------------
 
@@ -373,7 +558,14 @@ CREATE TABLE `packages` (
 --
 
 INSERT INTO `packages` (`package_id`, `worker_id`, `name`, `description`, `price`, `duration_hours`, `photo_count`, `delivery_days`, `status`, `created_at`, `updated_at`) VALUES
-(1, 3, 'aaa', 'aaa', 1.00, 1, 1, 1, 'active', '2025-10-27 15:14:19', '2025-10-27 15:14:19');
+(1, 3, 'aaa', 'aaa', 1.00, 1, 1, 1, 'active', '2025-10-27 15:14:19', '2025-10-27 15:14:19'),
+(2, 1, 'Portrait ', 'dkmkfm', 1500.00, 2, 11, 3, 'active', '2025-10-27 15:57:30', '2025-10-27 15:57:30'),
+(3, 12, 'Basic Portrait Session', 'Perfect for quick portraits or profile updates. Includes one outfit, one location, and light photo retouching.', 1500.00, 1, 15, 3, 'active', '2025-10-28 03:28:27', '2025-10-28 03:28:27'),
+(4, 12, 'Standard Portrait Session', 'Great for personal shoots, couples, or small group portraits. Includes up to two outfits, one to two locations, and enhanced photo editing.', 2500.00, 2, 25, 5, 'active', '2025-10-28 03:28:27', '2025-10-28 03:28:27'),
+(5, 12, 'Premium Portrait Experience', 'Full creative session with multiple outfits and locations. Includes advanced retouching, mood-based color grading, and all best shots edited.\r\n', 4000.00, 3, 40, 5, 'active', '2025-10-28 03:28:27', '2025-10-28 03:28:27'),
+(6, 23, 'Basic Portrait Session', 'Short Portrait Session', 1500.00, 1, 15, 3, 'active', '2025-10-28 12:06:54', '2025-10-28 12:06:54'),
+(7, 23, 'Standard Portrait Session', 'Quick but High Quality Session', 2500.00, 2, 25, 5, 'active', '2025-10-28 12:06:54', '2025-10-28 12:06:54'),
+(8, 23, 'Premium Portrait Experience', '4k Resolution!', 4000.00, 3, 40, 5, 'active', '2025-10-28 12:06:54', '2025-10-28 12:06:54');
 
 -- --------------------------------------------------------
 
@@ -390,6 +582,13 @@ CREATE TABLE `ratings` (
   `review` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `ratings`
+--
+
+INSERT INTO `ratings` (`rating_id`, `conversation_id`, `user_id`, `worker_id`, `rating`, `review`, `created_at`) VALUES
+(1, 3, 2, 23, 5, '10/10 Marlon made me comfortable during the photo session', '2025-10-28 12:20:34');
 
 -- --------------------------------------------------------
 
@@ -415,8 +614,8 @@ CREATE TABLE `user` (
 --
 
 INSERT INTO `user` (`user_id`, `lastName`, `firstName`, `middleName`, `email`, `phoneNumber`, `password`, `address`, `profilePhotoUrl`, `createdAt`) VALUES
-(1, 'Cabubas', 'Christian Joseph', 'Caguiat', 'cjplaysgames83@gmail.com', '09193695376', '$2y$10$/BRthBHQgQFQqEL/mMF5JOilbtlpKeKkyrkYHAnj4tde1b9qmjuv.', '231, Tapuac District, Dagupan City, Pangasinan', NULL, '2025-10-26 15:59:38'),
-(2, 'Ari', 'Lester', '', 'lesterari@outlook.com', '09991234343', '$2y$10$6LHYPqglERjRqggtZz7S0uJB4u0XZVl9Xk0ZIlE05rt0IHrbhMShm', '445, Las Vegas Street, Binmaley, Pangasinan', NULL, '2025-10-27 09:51:31'),
+(1, 'Cabubas', 'Christian Joseph', 'Caguiat', 'cjplaysgames83@gmail.com', '09193695376', '$2y$10$I8HIODc2IOB8N4CGEJfEweBZZ3nG/wz/yQRq8.GUNxzz/HxtUoszm', '231, Tapuac District, Dagupan City, Pangasinan', '/Kislap/uploads/user/profile_photos/profile_1_1761641689_d5833d03b5824a54.avif', '2025-10-26 15:59:38'),
+(2, 'Ari', 'Lester', '', 'lesterari@outlook.com', '09991234343', '$2y$10$3TBUAIDI8tc3Qc24c.tk1e3hcrARFuX0yHMatKTfwuY2/UpmJMKTS', '445, Las Vegas Street, Binmaley, Pangasinan', NULL, '2025-10-27 09:51:31'),
 (3, 'Balonzo', 'Mildred', 'Torio', 'balonzomildred@gmail.com', '09291113534', '$2y$10$iRrdRV2pRDgwx8hemgU4K.V5CRHmZrSxxMDypooHH9F7/p2nVWt02', '424 Fiesta Communities, Mexico, Pampanga', NULL, '2025-10-27 09:55:02'),
 (4, 'Morales', 'Antonio', 'Villanueva', 'antonio.morales@live.com', '09371234567', '$2y$10$y4Nch5rbjrE2Ha3nkz0uVuSEmdCvg2BLTbAvDbowjVVtRaMjKxnbi', '7816 Batangas St., Barangay San Isidro, Batangas City, Batangas', NULL, '2025-10-27 10:17:48'),
 (5, 'Vargas', 'Clara', 'Cruz', 'clara.vargas@rocketmail.com', '09241234567', '$2y$10$aIBp84z1G13B5lczGdJxEeiYb0166GNbK6pTzjwl2ghWgQAKgPs1a', '4532 Pine Ave., Barangay Langtang, Tarlac City, Tarlac', NULL, '2025-10-27 10:18:26'),
@@ -448,7 +647,6 @@ CREATE TABLE `workers` (
   `experience_years` int(11) DEFAULT 0,
   `bio` text DEFAULT NULL,
   `profile_photo` varchar(255) DEFAULT NULL,
-  `rating_average` decimal(3,2) DEFAULT 0.00,
   `total_ratings` int(11) DEFAULT 0,
   `total_bookings` int(11) DEFAULT 0,
   `total_earnings` decimal(10,2) DEFAULT 0.00,
@@ -461,13 +659,28 @@ CREATE TABLE `workers` (
 -- Dumping data for table `workers`
 --
 
-INSERT INTO `workers` (`worker_id`, `application_id`, `status`, `lastName`, `firstName`, `middleName`, `email`, `phoneNumber`, `password`, `address`, `specialty`, `experience_years`, `bio`, `profile_photo`, `rating_average`, `total_ratings`, `total_bookings`, `total_earnings`, `created_at`, `updated_at`, `average_rating`) VALUES
-(1, 11, 'active', 'Reyes', 'Carlo', 'Alonzo', 'carlo.reyes@gmail.com', '09281234565', '$2y$10$7oefTFOYDubZ./S5lALSLueTYTt9jTocYMYL0sj/YgVt/b0kHdrIS', '88 Bago Blvd., Brgy. Banilad, Cebu City, Cebu', 'creative', 12, 'I am a creative/conceptual artist', NULL, 0.00, 0, 0, 0.00, '2025-10-27 14:12:46', '2025-10-27 14:35:31', 0.00),
-(2, 12, 'active', 'Gonzaga', 'Melinda', 'Santos', 'melinda.gonzaga@mail.com', '09371234566', '$2y$10$F2hpK8VIR.jlGuzH/k8sbO7/PDwAyR.X2H6JtmqmVAj3Oj.qyzfHa', '14 Lapu-Lapu St., Brgy. Durano, Mandaue City, Cebu', '', 0, NULL, NULL, 0.00, 0, 0, 0.00, '2025-10-27 14:12:53', '2025-10-27 14:12:53', 0.00),
-(3, 10, 'active', 'Ortega', 'Nelia', 'Ramos', 'nelia.ortega@zoho.com', '09171234564', '$2y$10$H/J3coqb7KKdjZ4UwmDBQu5XNfkPgW0fuJUwLq4mRy0ZzLsTd8kY6', '56 Sampaguita Ln., Brgy. Divisoria, Tarlac City, Tarlac', 'event', 0, 'AAA', NULL, 0.00, 0, 0, 0.00, '2025-10-27 14:12:57', '2025-10-27 15:14:19', 0.00),
-(4, 9, 'active', 'Santos', 'Marco', 'Perez', 'marco.santos@ymail.com', '09391234563', '$2y$10$StezBCsrjo/f1dF4iiaXGO8Aam665PxmSXyeVtYVXSD2T24lBBSpq', '150 Bamboo St., Brgy. San Vicente, Puerto Princesa, Palawan', '', 0, NULL, NULL, 0.00, 0, 0, 0.00, '2025-10-27 14:13:01', '2025-10-27 14:13:01', 0.00),
-(5, 8, 'active', 'Aquino', 'Liza', 'dela Cruz', 'liza.aquino@icloud.com', '09291234562', '$2y$10$7ogiDcSrkZQ.gseekxlYFu7KGu3nQ1PJFzR48VVTJUZxOUAKxzTjS', '7 Coconut Rd., Brgy. San Antonio, Laoag City, Ilocos Norte', '', 0, NULL, NULL, 0.00, 0, 0, 0.00, '2025-10-27 14:13:19', '2025-10-27 14:13:19', 0.00),
-(6, 7, 'active', 'Pineda', 'Arnel', 'Bautista', 'arnel.pineda@yahoo.com', '09191234561', '$2y$10$wVYNjkkONA69HvN33Qpc/ePovUvcsU/hEXevW7RGd4vMVKEXDYBXy', '33 Acacia Dr., Brgy. San Roque, Naga City, Camarines Sur', '', 0, NULL, NULL, 0.00, 0, 0, 0.00, '2025-10-27 14:13:24', '2025-10-27 14:13:24', 0.00);
+INSERT INTO `workers` (`worker_id`, `application_id`, `status`, `lastName`, `firstName`, `middleName`, `email`, `phoneNumber`, `password`, `address`, `specialty`, `experience_years`, `bio`, `profile_photo`, `total_ratings`, `total_bookings`, `total_earnings`, `created_at`, `updated_at`, `average_rating`) VALUES
+(1, 11, 'active', 'Reyes', 'Carlo', 'Alonzo', 'carlo.reyes@gmail.com', '09281234565', '$2y$10$7oefTFOYDubZ./S5lALSLueTYTt9jTocYMYL0sj/YgVt/b0kHdrIS', '88 Bago Blvd., Brgy. Banilad, Cebu City, Cebu', 'creative', 12, 'I am a creative/conceptual artist', 'uploads/workers/1/worker1_profile_1761586848_30e34ac39faf32c4.avif', 0, 0, 0.00, '2025-10-27 14:12:46', '2025-10-28 08:53:48', 0.00),
+(2, 12, 'active', 'Gonzaga', 'Melinda', 'Santos', 'melinda.gonzaga@mail.com', '09371234566', '$2y$10$F2hpK8VIR.jlGuzH/k8sbO7/PDwAyR.X2H6JtmqmVAj3Oj.qyzfHa', '14 Lapu-Lapu St., Brgy. Durano, Mandaue City, Cebu', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-27 14:12:53', '2025-10-27 14:12:53', 0.00),
+(3, 10, 'active', 'Ortega', 'Nelia', 'Ramos', 'nelia.ortega@zoho.com', '09171234564', '$2y$10$H/J3coqb7KKdjZ4UwmDBQu5XNfkPgW0fuJUwLq4mRy0ZzLsTd8kY6', '56 Sampaguita Ln., Brgy. Divisoria, Tarlac City, Tarlac', 'event', 0, 'AAA', NULL, 0, 0, 0.00, '2025-10-27 14:12:57', '2025-10-27 15:14:19', 0.00),
+(4, 9, 'active', 'Santos', 'Marco', 'Perez', 'marco.santos@ymail.com', '09391234563', '$2y$10$StezBCsrjo/f1dF4iiaXGO8Aam665PxmSXyeVtYVXSD2T24lBBSpq', '150 Bamboo St., Brgy. San Vicente, Puerto Princesa, Palawan', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-27 14:13:01', '2025-10-27 14:13:01', 0.00),
+(5, 8, 'active', 'Aquino', 'Liza', 'dela Cruz', 'liza.aquino@icloud.com', '09291234562', '$2y$10$7ogiDcSrkZQ.gseekxlYFu7KGu3nQ1PJFzR48VVTJUZxOUAKxzTjS', '7 Coconut Rd., Brgy. San Antonio, Laoag City, Ilocos Norte', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-27 14:13:19', '2025-10-27 14:13:19', 0.00),
+(6, 7, 'active', 'Pineda', 'Arnel', 'Bautista', 'arnel.pineda@yahoo.com', '09191234561', '$2y$10$wVYNjkkONA69HvN33Qpc/ePovUvcsU/hEXevW7RGd4vMVKEXDYBXy', '33 Acacia Dr., Brgy. San Roque, Naga City, Camarines Sur', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-27 14:13:24', '2025-10-27 14:13:24', 0.00),
+(7, 6, 'active', 'Valdez', 'Camille', '', 'camille.valdez@gmail.com', '09371234560', '$2y$10$SWMs88YwEDYF3heLzEI0AOID21d0qcZnRs/2u4HgOhcc2bjtXSEsO', '222 Mango St., Brgy. Pasonanca, Zamboanga City, Zamboanga del Sur', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-27 17:51:13', '2025-10-27 17:51:13', 0.00),
+(8, 5, 'active', 'Ilagan', 'Rafael', 'Torres', 'rafael.ilagan@protonmail.com', '09271234901', '$2y$10$XscyCKLI3t9TSSwhrYKpmeDnJdS98LYPrx1E4S/UZSXS7hgKLtZ6u', '9 Laurel Lane, Brgy. San Isidro, Cagayan de Oro, Misamis Oriental', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-27 17:51:19', '2025-10-28 06:29:30', 0.00),
+(9, 4, 'active', 'Mercado', 'Beatrice', 'Gomez', 'bea.mercado@mail.com', '09181234890', '$2y$10$rsJIq5UikdexzEnCtEVfJOj2w0lH0czsaVk06Khaomm.djsKziDX.', '101 San Miguel St., Brgy. Burgos, Batangas City, Batangas', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-27 17:51:24', '2025-10-27 17:51:24', 0.00),
+(10, 3, 'active', 'Cruz', 'Diego', 'Ramos', 'diego.cruz@outlook.com', '09391234789', '$2y$10$OWgqbgTuqN.LqPTb7Y3zlu3PvSuEGeJ.zGCi5Ov4NyBUvauyb0z5.', '78 Magsaysay Rd., Brgy. Centro, Tagbilaran, Bohol', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-27 17:51:28', '2025-10-27 17:51:28', 0.00),
+(11, 2, 'active', 'Flores', 'Anna', '', 'anna.flores@yahoo.com', '09281234678', '$2y$10$yM7CO8CRnXz0dw3tvXp7xufRNsxvDw17DxbcjGUePXEDymaWvj2EC', '45 Mabini Ave., Brgy. Poblacion, Iloilo City, Iloilo', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-27 17:51:32', '2025-10-27 17:51:32', 0.00),
+(12, 1, 'active', 'Navarro', 'Miguel', 'Santos', 'miguel.navarro@gmail.com', '09171234567', '$2y$10$WfQwbX19RhDSNmUxV0FIKeFkNUJs6iy9berhaoGS5vvqBGlpNO5eO', '12 Rizal St., Brgy. San Jose, Lucena City, Quezon', 'portrait', 4, 'Hi, I’m Miguel, a photographer who captures genuine moments and emotions through my lens. I focus on creating clean, natural, and creative shots that tell real stories — whether it’s portraits, events, or everyday life', 'uploads/workers/12/worker12_profile_1761622494_f4c87e8d9f984259.avif', 0, 0, 0.00, '2025-10-27 17:51:35', '2025-10-28 03:34:54', 0.00),
+(13, 15, 'active', 'De Guzman', 'Victor', 'Navarro', 'victor.dguzman@protonmail.com', '09391234569', '$2y$10$Iz8szcEQujNaHbO98mv3WukiI5Xxiq9kCKU1miKn7VtZSevomqfCO', '77 Sampaloc St., Brgy. Divisoria, Tarlac City, Tarlac', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-28 10:38:28', '2025-10-28 10:38:28', 0.00),
+(14, 14, 'active', 'Tan', 'Elaine', 'Yu', 'elaine.tan@gmail.com', '09291234568', '$2y$10$3YtzPYMiUS7asEXy6A.OK.cehDvTc3/RGOEe0BOYe91Xl/QqjMHIC', '19 Orchid Way, Brgy. Bagong Silang, Baguio City, Benguet', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-28 10:38:33', '2025-10-28 10:38:33', 0.00),
+(16, 13, 'active', 'Herrera', 'Jason', 'Villanueva', 'j.herrera@outlook.com', '09191234567', '$2y$10$p.9qOxMe6pxhjQbi6k8aJOnlATnhs9oMKNgZs0aHtk.HJrZEMezk.', '300 Pine Rd., Brgy. Malvar, Angeles City, Pampanga', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-28 10:38:46', '2025-10-28 10:38:46', 0.00),
+(17, 19, 'active', 'Lozano', 'Edwin', 'Ramos', 'edwin.lozano@mail.com', '09191234573', '$2y$10$8nxwDLsbCKq.KT6WJrpSje4zg.eUFvUJf720QGMsntV..HZglDOBa', '9 Camia St., Brgy. San Miguel, Dumaguete City, Negros Oriental', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-28 10:49:38', '2025-10-28 10:49:38', 0.00),
+(18, 18, 'active', 'Catindig', 'Maribel', 'Aquino', 'maribel.catindig@aol.com', '09371234572', '$2y$10$YGcmmzn4pzHFi16ZETaTBeyQm5FVD34C.Rlz6UOFlsFhW0ylsaBgO', '21 Tulip Ln., Brgy. San Jose, Lucena City, Quezon', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-28 10:49:41', '2025-10-28 10:49:41', 0.00),
+(20, 17, 'active', 'Fabillar', 'Jonah', 'Cruz', 'jonah.fabillar@gmail.com', '09281234571', '$2y$10$FYgbNr3.CCeodrcHctf6z.jwCF7DesRiJhAoy5kgMgfpFmYdk7TYC', '402 Pearl St., Brgy. Baybay, Legazpi City, Albay', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-28 10:49:49', '2025-10-28 10:49:49', 0.00),
+(21, 16, 'active', 'Manalo', 'Rica', 'Santos', 'rica.manalo@yahoo.com', '09171234570', '$2y$10$K0euKLQpferIzA3REa27buMkszXiH9uxBxq87trzQCOF1g1RELwUW', '5 Palm Grove, Brgy. Poblacion, Roxas City, Capiz', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-28 10:49:52', '2025-10-28 10:49:52', 0.00),
+(22, 20, 'active', 'Salazar', 'Faye', 'Navarro', 'faye.salazar@outlook.com', '09291234574', '$2y$10$f/ooOupmflo4slCzns.YA.NTMKLukuuxBEzuOQoyB8HlFQvGonI/.', '9 Camia St., Brgy. San Miguel, Dumaguete City, Negros Oriental', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-28 10:55:12', '2025-10-28 10:55:12', 0.00),
+(23, 31, 'active', 'Cruz', 'Marlon', 'Gomez', 'marlon.cruz@gmail.com', '09181234585', '$2y$10$qHOcaxQ4axoxD7H29OvgL.UpjiOqh9cDSKxjPOdoCtKhtxxztI5/C', '123 Juniper St., Brgy. Malanday, Valenzuela City, Metro Manila', 'portrait', 15, 'Hi, I’m Marlon – a portrait photographer passionate about capturing the real you. I believe in creating images that tell a story, whether it\'s in the studio or on location. My goal is to make you feel at ease so your true personality shines through.\r\n\r\nWith every shoot, I focus on the details that bring out your best self – the moments, expressions, and light that make each portrait unique. Whether it\'s a professional headshot or a personal portrait, I’m here to help you look and feel your best.\r\n\r\nLet’s connect and create something memorable.', 'uploads/workers/23/worker23_profile_1761667371_2b197d86a648001f.avif', 1, 2, 5000.00, '2025-10-28 12:01:03', '2025-10-28 16:02:51', 4.50);
 
 -- --------------------------------------------------------
 
@@ -531,7 +744,6 @@ CREATE TABLE `worker_works` (
 
 INSERT INTO `worker_works` (`work_id`, `worker_id`, `image_path`, `uploaded_at`) VALUES
 (1, 1, 'uploads/workers/1/worker1_work1.avif', '2025-10-27 14:12:46'),
-(2, 1, 'uploads/workers/1/worker1_work2.avif', '2025-10-27 14:12:46'),
 (3, 1, 'uploads/workers/1/worker1_work3.avif', '2025-10-27 14:12:46'),
 (4, 1, 'uploads/workers/1/worker1_work4.avif', '2025-10-27 14:12:46'),
 (5, 1, 'uploads/workers/1/worker1_work5.avif', '2025-10-27 14:12:46'),
@@ -564,7 +776,105 @@ INSERT INTO `worker_works` (`work_id`, `worker_id`, `image_path`, `uploaded_at`)
 (32, 6, 'uploads/workers/6/worker6_work4.avif', '2025-10-27 14:13:24'),
 (33, 6, 'uploads/workers/6/worker6_work5.avif', '2025-10-27 14:13:24'),
 (34, 6, 'uploads/workers/6/worker6_work6.avif', '2025-10-27 14:13:24'),
-(35, 6, 'uploads/workers/6/worker6_work7.avif', '2025-10-27 14:13:24');
+(35, 6, 'uploads/workers/6/worker6_work7.avif', '2025-10-27 14:13:24'),
+(36, 1, 'uploads/workers/1/worker1_work_1761586912_aa21962e239fbc9c.avif', '2025-10-27 17:41:52'),
+(37, 1, 'uploads/workers/1/worker1_work_1761586923_cbccef7e11653728.avif', '2025-10-27 17:42:03'),
+(38, 1, 'uploads/workers/1/worker1_work_1761586923_d4c73c39349122fc.avif', '2025-10-27 17:42:03'),
+(39, 1, 'uploads/workers/1/worker1_work_1761586923_6fd9bd9f1d42e7ae.avif', '2025-10-27 17:42:03'),
+(40, 7, 'uploads/workers/7/worker7_work1.avif', '2025-10-27 17:51:13'),
+(41, 7, 'uploads/workers/7/worker7_work2.avif', '2025-10-27 17:51:13'),
+(42, 7, 'uploads/workers/7/worker7_work3.avif', '2025-10-27 17:51:13'),
+(43, 7, 'uploads/workers/7/worker7_work4.avif', '2025-10-27 17:51:13'),
+(44, 7, 'uploads/workers/7/worker7_work5.avif', '2025-10-27 17:51:13'),
+(45, 7, 'uploads/workers/7/worker7_work6.avif', '2025-10-27 17:51:13'),
+(46, 7, 'uploads/workers/7/worker7_work7.avif', '2025-10-27 17:51:13'),
+(47, 7, 'uploads/workers/7/worker7_work8.avif', '2025-10-27 17:51:13'),
+(48, 8, 'uploads/workers/8/worker8_work1.avif', '2025-10-27 17:51:19'),
+(49, 8, 'uploads/workers/8/worker8_work2.avif', '2025-10-27 17:51:19'),
+(50, 8, 'uploads/workers/8/worker8_work3.avif', '2025-10-27 17:51:19'),
+(51, 8, 'uploads/workers/8/worker8_work4.avif', '2025-10-27 17:51:19'),
+(52, 8, 'uploads/workers/8/worker8_work5.avif', '2025-10-27 17:51:19'),
+(53, 8, 'uploads/workers/8/worker8_work6.avif', '2025-10-27 17:51:19'),
+(54, 9, 'uploads/workers/9/worker9_work1.avif', '2025-10-27 17:51:24'),
+(55, 9, 'uploads/workers/9/worker9_work2.avif', '2025-10-27 17:51:24'),
+(56, 9, 'uploads/workers/9/worker9_work3.avif', '2025-10-27 17:51:24'),
+(57, 9, 'uploads/workers/9/worker9_work4.avif', '2025-10-27 17:51:24'),
+(58, 9, 'uploads/workers/9/worker9_work5.avif', '2025-10-27 17:51:24'),
+(59, 9, 'uploads/workers/9/worker9_work6.avif', '2025-10-27 17:51:24'),
+(60, 10, 'uploads/workers/10/worker10_work1.avif', '2025-10-27 17:51:28'),
+(61, 10, 'uploads/workers/10/worker10_work2.avif', '2025-10-27 17:51:28'),
+(62, 10, 'uploads/workers/10/worker10_work3.avif', '2025-10-27 17:51:28'),
+(63, 10, 'uploads/workers/10/worker10_work4.avif', '2025-10-27 17:51:28'),
+(64, 10, 'uploads/workers/10/worker10_work5.avif', '2025-10-27 17:51:28'),
+(65, 10, 'uploads/workers/10/worker10_work6.avif', '2025-10-27 17:51:28'),
+(66, 10, 'uploads/workers/10/worker10_work7.avif', '2025-10-27 17:51:28'),
+(67, 10, 'uploads/workers/10/worker10_work8.avif', '2025-10-27 17:51:28'),
+(68, 11, 'uploads/workers/11/worker11_work1.avif', '2025-10-27 17:51:32'),
+(69, 11, 'uploads/workers/11/worker11_work2.avif', '2025-10-27 17:51:32'),
+(70, 11, 'uploads/workers/11/worker11_work3.avif', '2025-10-27 17:51:32'),
+(71, 11, 'uploads/workers/11/worker11_work4.avif', '2025-10-27 17:51:32'),
+(72, 11, 'uploads/workers/11/worker11_work5.avif', '2025-10-27 17:51:32'),
+(73, 11, 'uploads/workers/11/worker11_work6.avif', '2025-10-27 17:51:32'),
+(74, 11, 'uploads/workers/11/worker11_work7.avif', '2025-10-27 17:51:32'),
+(76, 12, 'uploads/workers/12/worker12_work2.avif', '2025-10-27 17:51:35'),
+(77, 12, 'uploads/workers/12/worker12_work3.avif', '2025-10-27 17:51:35'),
+(78, 12, 'uploads/workers/12/worker12_work4.avif', '2025-10-27 17:51:35'),
+(80, 12, 'uploads/workers/12/worker12_work6.avif', '2025-10-27 17:51:35'),
+(82, 12, 'uploads/workers/12/worker12_work8.avif', '2025-10-27 17:51:35'),
+(83, 12, 'uploads/workers/12/worker12_work_1761622181_08968b1a97e63b80.avif', '2025-10-28 03:29:41'),
+(85, 12, 'uploads/workers/12/worker12_work_1761622443_b623ea7ed589bcd1.avif', '2025-10-28 03:34:03'),
+(87, 12, 'uploads/workers/12/worker12_work_1761622810_9bc834c93434d109.avif', '2025-10-28 03:40:10'),
+(88, 13, 'uploads/workers/13/worker13_work1.avif', '2025-10-28 10:38:28'),
+(89, 13, 'uploads/workers/13/worker13_work2.avif', '2025-10-28 10:38:28'),
+(90, 13, 'uploads/workers/13/worker13_work3.avif', '2025-10-28 10:38:28'),
+(91, 13, 'uploads/workers/13/worker13_work4.avif', '2025-10-28 10:38:28'),
+(92, 13, 'uploads/workers/13/worker13_work5.avif', '2025-10-28 10:38:28'),
+(93, 13, 'uploads/workers/13/worker13_work6.avif', '2025-10-28 10:38:28'),
+(94, 14, 'uploads/workers/14/worker14_work1.avif', '2025-10-28 10:38:33'),
+(95, 14, 'uploads/workers/14/worker14_work2.avif', '2025-10-28 10:38:33'),
+(96, 14, 'uploads/workers/14/worker14_work3.avif', '2025-10-28 10:38:33'),
+(97, 14, 'uploads/workers/14/worker14_work4.avif', '2025-10-28 10:38:33'),
+(98, 14, 'uploads/workers/14/worker14_work5.avif', '2025-10-28 10:38:33'),
+(99, 16, 'uploads/workers/16/worker16_work1.avif', '2025-10-28 10:38:46'),
+(100, 16, 'uploads/workers/16/worker16_work2.avif', '2025-10-28 10:38:46'),
+(101, 16, 'uploads/workers/16/worker16_work3.avif', '2025-10-28 10:38:46'),
+(102, 16, 'uploads/workers/16/worker16_work4.avif', '2025-10-28 10:38:46'),
+(103, 16, 'uploads/workers/16/worker16_work5.avif', '2025-10-28 10:38:46'),
+(104, 17, 'uploads/workers/17/worker17_work1.avif', '2025-10-28 10:49:38'),
+(105, 17, 'uploads/workers/17/worker17_work2.avif', '2025-10-28 10:49:38'),
+(106, 17, 'uploads/workers/17/worker17_work3.avif', '2025-10-28 10:49:38'),
+(107, 17, 'uploads/workers/17/worker17_work4.avif', '2025-10-28 10:49:38'),
+(108, 17, 'uploads/workers/17/worker17_work5.avif', '2025-10-28 10:49:38'),
+(109, 18, 'uploads/workers/18/worker18_work1.avif', '2025-10-28 10:49:41'),
+(110, 18, 'uploads/workers/18/worker18_work2.avif', '2025-10-28 10:49:41'),
+(111, 18, 'uploads/workers/18/worker18_work3.avif', '2025-10-28 10:49:41'),
+(112, 18, 'uploads/workers/18/worker18_work4.avif', '2025-10-28 10:49:41'),
+(113, 18, 'uploads/workers/18/worker18_work5.avif', '2025-10-28 10:49:41'),
+(114, 18, 'uploads/workers/18/worker18_work6.avif', '2025-10-28 10:49:41'),
+(115, 18, 'uploads/workers/18/worker18_work7.avif', '2025-10-28 10:49:41'),
+(116, 20, 'uploads/workers/20/worker20_work1.avif', '2025-10-28 10:49:49'),
+(117, 20, 'uploads/workers/20/worker20_work2.avif', '2025-10-28 10:49:49'),
+(118, 20, 'uploads/workers/20/worker20_work3.avif', '2025-10-28 10:49:49'),
+(119, 20, 'uploads/workers/20/worker20_work4.avif', '2025-10-28 10:49:49'),
+(120, 20, 'uploads/workers/20/worker20_work5.avif', '2025-10-28 10:49:49'),
+(121, 20, 'uploads/workers/20/worker20_work6.avif', '2025-10-28 10:49:49'),
+(122, 21, 'uploads/workers/21/worker21_work1.avif', '2025-10-28 10:49:52'),
+(123, 21, 'uploads/workers/21/worker21_work2.avif', '2025-10-28 10:49:52'),
+(124, 21, 'uploads/workers/21/worker21_work3.avif', '2025-10-28 10:49:52'),
+(125, 21, 'uploads/workers/21/worker21_work4.avif', '2025-10-28 10:49:52'),
+(126, 21, 'uploads/workers/21/worker21_work5.avif', '2025-10-28 10:49:52'),
+(127, 22, 'uploads/workers/22/worker22_work1.avif', '2025-10-28 10:55:12'),
+(128, 22, 'uploads/workers/22/worker22_work2.avif', '2025-10-28 10:55:12'),
+(129, 22, 'uploads/workers/22/worker22_work3.avif', '2025-10-28 10:55:12'),
+(130, 22, 'uploads/workers/22/worker22_work4.avif', '2025-10-28 10:55:12'),
+(131, 22, 'uploads/workers/22/worker22_work5.avif', '2025-10-28 10:55:12'),
+(132, 22, 'uploads/workers/22/worker22_work6.avif', '2025-10-28 10:55:12'),
+(134, 23, 'uploads/workers/23/worker23_work2.avif', '2025-10-28 12:01:03'),
+(135, 23, 'uploads/workers/23/worker23_work3.avif', '2025-10-28 12:01:03'),
+(136, 23, 'uploads/workers/23/worker23_work4.avif', '2025-10-28 12:01:03'),
+(137, 23, 'uploads/workers/23/worker23_work5.avif', '2025-10-28 12:01:03'),
+(138, 23, 'uploads/workers/23/worker23_work_1761653243_c49e7e1c206443d3.avif', '2025-10-28 12:07:23'),
+(139, 23, 'uploads/workers/23/worker23_work_1761667371_0e77085acaa1de71.avif', '2025-10-28 16:02:51');
 
 --
 -- Indexes for dumped tables
@@ -715,25 +1025,25 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT for table `ai_temp_bookings`
 --
 ALTER TABLE `ai_temp_bookings`
-  MODIFY `temp_booking_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `temp_booking_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `application`
 --
 ALTER TABLE `application`
-  MODIFY `application_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `application_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
 
 --
 -- AUTO_INCREMENT for table `application_resume`
 --
 ALTER TABLE `application_resume`
-  MODIFY `resume_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `resume_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
 
 --
 -- AUTO_INCREMENT for table `application_works`
 --
 ALTER TABLE `application_works`
-  MODIFY `work_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=79;
+  MODIFY `work_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=191;
 
 --
 -- AUTO_INCREMENT for table `booking_modifications`
@@ -745,25 +1055,25 @@ ALTER TABLE `booking_modifications`
 -- AUTO_INCREMENT for table `conversations`
 --
 ALTER TABLE `conversations`
-  MODIFY `conversation_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `conversation_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `messages`
 --
 ALTER TABLE `messages`
-  MODIFY `message_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `message_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
 
 --
 -- AUTO_INCREMENT for table `packages`
 --
 ALTER TABLE `packages`
-  MODIFY `package_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `package_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `ratings`
 --
 ALTER TABLE `ratings`
-  MODIFY `rating_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `rating_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `user`
@@ -775,7 +1085,7 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT for table `workers`
 --
 ALTER TABLE `workers`
-  MODIFY `worker_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `worker_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `worker_availability`
@@ -793,7 +1103,7 @@ ALTER TABLE `worker_settings`
 -- AUTO_INCREMENT for table `worker_works`
 --
 ALTER TABLE `worker_works`
-  MODIFY `work_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
+  MODIFY `work_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=140;
 
 --
 -- Constraints for dumped tables

@@ -1,4 +1,11 @@
-/* Bookings Page */
+/* ========================================
+   BOOKINGS CSS - BOOKING MANAGEMENT PAGE
+   Main stylesheet for booking management and display
+   ======================================== */
+
+/* ========================================
+   MAIN CONTAINER
+   ======================================== */
 .bookings-container {
     max-width: 1400px;
     margin: 60px auto;
@@ -7,7 +14,9 @@
     background: #0a0a0a;
 }
 
-/* Page Header - Glassmorphism Style */
+/* ========================================
+   PAGE HEADER - GLASSMORPHISM STYLE
+   ======================================== */
 .page-header {
     background: linear-gradient(135deg, rgba(255, 107, 0, 0.1) 0%, rgba(255, 133, 51, 0.05) 100%);
     backdrop-filter: blur(20px);
@@ -25,17 +34,7 @@
     overflow: hidden;
 }
 
-@keyframes pulse {
-
-    0%,
-    100% {
-        opacity: 0.7;
-    }
-
-    50% {
-        opacity: 1;
-    }
-}
+/* Pulse animation removed - was unused */
 
 .header-content {
     position: relative;
@@ -833,13 +832,17 @@
    RESPONSIVE DESIGN
    ======================================== */
 
+/* Desktop Large - 1200px and below */
 @media (max-width: 1200px) {
     .bookings-wrapper {
         grid-template-columns: 1fr 340px;
     }
 }
 
+/* Tablet - 992px and below */
 @media (max-width: 992px) {
+
+    /* Layout Changes */
     .bookings-wrapper {
         grid-template-columns: 1fr;
     }
@@ -848,6 +851,7 @@
         order: -1;
     }
 
+    /* Summary Card Grid */
     .summary-card {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
@@ -871,11 +875,15 @@
     }
 }
 
+/* Mobile - 768px and below */
 @media (max-width: 768px) {
+
+    /* Container */
     .bookings-container {
         padding: 25px 15px;
     }
 
+    /* Page Header */
     .page-header {
         flex-direction: column;
         align-items: flex-start;
@@ -891,6 +899,7 @@
         justify-content: space-around;
     }
 
+    /* Booking Cards */
     .booking-header {
         flex-direction: column;
         align-items: flex-start;
@@ -908,11 +917,13 @@
         align-items: flex-start;
     }
 
+    /* Booking Actions */
     .booking-actions {
         width: 100%;
         flex-direction: column;
         align-items: stretch;
         gap: 15px;
+        flex-wrap: wrap;
     }
 
     .booking-actions .action-buttons {
@@ -926,26 +937,17 @@
         min-width: 120px;
     }
 
+    /* Summary Card */
     .summary-card {
         grid-template-columns: 1fr;
     }
 
-    /* Modal responsive */
+    /* Modal */
     .booking-details-modal .detail-grid {
         grid-template-columns: 1fr;
     }
 
-    .booking-actions {
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-
-    .btn-action {
-        flex: 1;
-        min-width: 120px;
-        justify-content: center;
-    }
-
+    /* Notifications */
     .notification {
         right: 10px;
         left: 10px;
@@ -956,7 +958,7 @@
         transform: translateY(0);
     }
 
-    /* Proposal section responsive */
+    /* Proposal Section */
     .proposal-content {
         grid-template-columns: 1fr;
     }
@@ -966,11 +968,15 @@
     }
 }
 
+/* Small Mobile - 480px and below */
 @media (max-width: 480px) {
+
+    /* Header Content */
     .header-content h1 {
         font-size: 26px;
     }
 
+    /* Statistics */
     .stat-number {
         font-size: 28px;
     }
@@ -979,6 +985,7 @@
         font-size: 10px;
     }
 
+    /* Filter Tabs */
     .filter-tabs {
         gap: 8px;
     }
@@ -988,6 +995,7 @@
         font-size: 12px;
     }
 
+    /* Booking Cards */
     .booking-card {
         padding: 20px;
     }
@@ -1006,6 +1014,7 @@
         font-size: 26px;
     }
 
+    /* Empty State */
     .empty-state {
         padding: 50px 20px;
     }
@@ -1018,6 +1027,7 @@
         font-size: 22px;
     }
 
+    /* Booking Actions */
     .booking-actions {
         flex-direction: column;
         gap: 15px;
