@@ -256,11 +256,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 👨‍💻 Authors & Acknowledgments
-
-### **Development Team**
-- **Lead Developer**: [Your Name](https://github.com/yourusername)
-- **UI/UX Design**: [Designer Name](https://github.com/designerusername)
+## Acknowledgments
 
 ### **Special Thanks**
 - Font Awesome for the beautiful icons
