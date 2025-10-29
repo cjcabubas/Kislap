@@ -58,14 +58,14 @@ $errorMessage = $errorMessage ?? null;
 
                 <div class="form-group">
                     <label for="identifier">
-                        Phone Number or Application ID
+                        Phone Number
                     </label>
                     <div class="input-wrapper">
-                        <i class="fas fa-id-card"></i>
+                        <i class="fas fa-phone"></i>
                         <input type="text"
                                id="identifier"
                                name="identifier"
-                               placeholder="e.g., 09123456789 or APP-001234">
+                               placeholder="e.g., 09123456789">
                     </div>
                     <div class="helper-text">Optional: Helps verify your identity</div>
                 </div>

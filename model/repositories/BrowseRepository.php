@@ -22,11 +22,10 @@ class BrowseRepository extends BaseRepository
         return match ($sort) {
             'rating' => " ORDER BY w.average_rating DESC",
             'reviews' => " ORDER BY w.total_ratings DESC",
-            'price_low' => " ORDER BY w.total_earnings ASC",
-            'price_high' => " ORDER BY w.total_earnings DESC",
+            'price_low' => " ORDER BY COALESCE((SELECT MIN(p.price) FROM packages p WHERE p.worker_id = w.worker_id AND p.status = 'active'), 999999) ASC, w.average_rating DESC",
+            'price_high' => " ORDER BY COALESCE((SELECT MAX(p.price) FROM packages p WHERE p.worker_id = w.worker_id AND p.status = 'active'), 0) DESC, w.average_rating DESC",
             'newest' => " ORDER BY w.created_at DESC",
-            'featured' => " ORDER BY w.total_bookings DESC, w.average_rating DESC", // Featured: most bookings + high rating
-            default => " ORDER BY w.total_bookings DESC, w.average_rating DESC",
+            default => " ORDER BY w.average_rating DESC, w.total_bookings DESC",
         };
     }
 
@@ -34,7 +33,7 @@ class BrowseRepository extends BaseRepository
     // WORKER BROWSING
     // ========================================
     
-    public function getWorkersWithPortfolio(int $limit, int $offset, string $search = '', string $category = 'all', string $sort = 'featured'): array
+    public function getWorkersWithPortfolio(int $limit, int $offset, string $search = '', string $category = 'all', string $sort = 'rating'): array
     {
         $sql = "
             SELECT DISTINCT w.worker_id

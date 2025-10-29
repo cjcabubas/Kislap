@@ -519,31 +519,160 @@ body {
     .empty-state i {
         font-size: 48px;
     }
-}/* ======
-==================================
+}/* ========================================
    REJECTION REASON STYLING
    ======================================== */
 
 .rejection-reason {
-    border-top: 1px solid rgba(255, 107, 107, 0.2);
-    margin-top: 15px;
-    padding-top: 15px;
+    grid-column: 1 / -1; /* Span full width of the grid */
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.08), rgba(255, 71, 87, 0.05));
+    border: 1px solid rgba(220, 53, 69, 0.25);
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.rejection-reason::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(to bottom, #dc3545, #ff4757);
+}
+
+.rejection-reason i {
+    color: #ff4757;
+    font-size: 18px;
+    margin-right: 12px;
 }
 
 .rejection-reason .label {
-    color: #ff6b6b;
-    font-weight: 600;
+    color: #ff4757;
+    font-weight: 700;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rejection-reason .label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, rgba(255, 71, 87, 0.3), transparent);
 }
 
 .rejection-text {
-    background: rgba(255, 107, 107, 0.1);
-    border: 1px solid rgba(255, 107, 107, 0.3);
-    border-radius: 6px;
-    padding: 12px;
-    color: #ff9999;
+    background: rgba(40, 40, 40, 0.6);
+    border: 1px solid rgba(255, 71, 87, 0.2);
+    border-radius: 8px;
+    padding: 16px;
+    color: #ffcccc;
     font-size: 14px;
-    line-height: 1.5;
+    line-height: 1.6;
     white-space: pre-line;
+    position: relative;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.rejection-text::before {
+    content: '"';
+    position: absolute;
+    top: -5px;
+    left: 8px;
+    font-size: 32px;
+    color: rgba(255, 71, 87, 0.3);
+    font-family: serif;
+    line-height: 1;
+}
+
+/* Rejection Reason Section */
+.rejection-reason-section {
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.08), rgba(255, 71, 87, 0.05));
+    border: 1px solid rgba(220, 53, 69, 0.25);
+    border-radius: 12px;
+    margin: 25px 0;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.1);
+}
+
+.rejection-reason-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(to bottom, #dc3545, #ff4757);
+}
+
+.rejection-header {
+    background: rgba(220, 53, 69, 0.1);
+    padding: 15px 20px;
+    border-bottom: 1px solid rgba(220, 53, 69, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.rejection-header i {
+    color: #ff4757;
+    font-size: 16px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+.rejection-label {
+    color: #ff4757;
+    font-weight: 700;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+
+.rejection-content {
+    padding: 20px;
+    background: rgba(40, 40, 40, 0.3);
+    color: #ffcccc;
+    font-size: 14px;
+    line-height: 1.7;
+    white-space: pre-line;
+    position: relative;
+    border-radius: 0 0 12px 12px;
+}
+
+.rejection-content::before {
+    content: '"';
+    position: absolute;
+    top: -8px;
+    left: 15px;
+    font-size: 40px;
+    color: rgba(255, 71, 87, 0.2);
+    font-family: 'Times New Roman', serif;
+    line-height: 1;
+}
+
+.rejection-content::after {
+    content: '"';
+    position: absolute;
+    bottom: -15px;
+    right: 15px;
+    font-size: 40px;
+    color: rgba(255, 71, 87, 0.2);
+    font-family: 'Times New Roman', serif;
+    line-height: 1;
 }
 
 /* Modal Styles for Rejection */

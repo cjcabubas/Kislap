@@ -116,35 +116,11 @@ class Validator
             return ['valid' => false, 'message' => 'Password is required'];
         }
         
-        if (strlen($password) < 8) {
-            return ['valid' => false, 'message' => 'Password must be at least 8 characters long'];
+        if (strlen($password) < 6) {
+            return ['valid' => false, 'message' => 'Password must be at least 6 characters long'];
         }
         
-        if (strlen($password) > 128) {
-            return ['valid' => false, 'message' => 'Password must not exceed 128 characters'];
-        }
-        
-        // Require uppercase letter
-        if (!preg_match('/[A-Z]/', $password)) {
-            return ['valid' => false, 'message' => 'Password must contain at least one uppercase letter'];
-        }
-        
-        // Require lowercase letter
-        if (!preg_match('/[a-z]/', $password)) {
-            return ['valid' => false, 'message' => 'Password must contain at least one lowercase letter'];
-        }
-        
-        // Require number
-        if (!preg_match('/[0-9]/', $password)) {
-            return ['valid' => false, 'message' => 'Password must contain at least one number'];
-        }
-        
-        // Require special character
-        if (!preg_match('/[!@#$%^&*()_+\-=\[\]{};\':"\\|,.<>\/?]/', $password)) {
-            return ['valid' => false, 'message' => 'Password must contain at least one special character (!@#$%^&*()_+-=[]{}|;:,.<>?)'];
-        }
-        
-        return ['valid' => true, 'message' => 'Strong password'];
+        return ['valid' => true, 'message' => 'Password is valid'];
     }
     
     // ========================================

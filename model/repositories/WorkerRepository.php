@@ -448,4 +448,46 @@ class WorkerRepository extends BaseRepository
             ];
         }
     }
+
+    // ========================================
+    // SUSPENSION MANAGEMENT
+    // ========================================
+
+    public function reactivateWorker(int $workerId): bool
+    {
+        try {
+            $stmt = $this->conn->prepare("
+                UPDATE workers 
+                SET status = 'active', 
+                    suspended_until = NULL, 
+                    suspension_reason = NULL,
+                    suspended_by = NULL,
+                    suspended_at = NULL
+                WHERE worker_id = ?
+            ");
+            return $stmt->execute([$workerId]);
+        } catch (Exception $e) {
+            error_log("Error reactivating worker: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function suspendWorker(int $workerId, string $reason, ?string $suspendedUntil = null, int $suspendedBy = null): bool
+    {
+        try {
+            $stmt = $this->conn->prepare("
+                UPDATE workers 
+                SET status = 'suspended',
+                    suspension_reason = ?,
+                    suspended_until = ?,
+                    suspended_by = ?,
+                    suspended_at = NOW()
+                WHERE worker_id = ?
+            ");
+            return $stmt->execute([$reason, $suspendedUntil, $suspendedBy, $workerId]);
+        } catch (Exception $e) {
+            error_log("Error suspending worker: " . $e->getMessage());
+            return false;
+        }
+    }
 }

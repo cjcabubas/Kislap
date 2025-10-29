@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 28, 2025 at 05:28 PM
+-- Generation Time: Oct 29, 2025 at 12:29 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -42,7 +42,8 @@ CREATE TABLE `admin` (
 --
 
 INSERT INTO `admin` (`admin_id`, `username`, `lastName`, `firstName`, `middleName`, `password`, `created_at`) VALUES
-(1, 'admin', 'Administrator', 'System', NULL, '$2y$10$WaDhSPKA4EUkRN1kN1od/ONlIHMLNkAmgrPnL8QnG.JUiGShelHp6', '2025-10-22 12:04:45');
+(1, 'admin', 'Administrator', 'System', NULL, '$2y$10$WaDhSPKA4EUkRN1kN1od/ONlIHMLNkAmgrPnL8QnG.JUiGShelHp6', '2025-10-22 12:04:45'),
+(2, 'cjcabubas', 'Cabubas', 'Cj', '', '$2y$10$/f8Ppl3MDVIYnWucqasTIu/5i.YSCdf6vXbC9jkYLhumXJmE4NBZS', '2025-10-29 07:56:45');
 
 -- --------------------------------------------------------
 
@@ -79,16 +80,6 @@ CREATE TABLE `ai_temp_bookings` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `ai_temp_bookings`
---
-
-INSERT INTO `ai_temp_bookings` (`temp_booking_id`, `conversation_id`, `worker_id`, `package_id`, `package_selection`, `event_type`, `event_date`, `event_time`, `event_location`, `budget`, `worker_proposed_price`, `final_price`, `special_requests`, `worker_proposed_date`, `worker_proposed_time`, `worker_notes`, `deposit_amount`, `deposit_paid`, `deposit_paid_at`, `full_payment_paid`, `full_payment_paid_at`, `completed_at`, `rated_at`, `cancellation_reason`, `cancelled_by`, `created_at`, `updated_at`) VALUES
-(1, 1, 8, NULL, NULL, 'Wedding', '2025-12-25', NULL, 'Manila', 3000.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, 0, NULL, NULL, NULL, NULL, NULL, '2025-10-28 06:00:34', '2025-10-28 06:01:01'),
-(2, 2, 5, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, 0, NULL, NULL, NULL, NULL, NULL, '2025-10-28 06:05:22', '2025-10-28 06:05:22'),
-(3, 3, 23, 6, 1, 'Graduation', '2024-12-25', '02:00:00', 'Dagupan, Pangasinan', 3000.00, 3000.00, 3000.00, NULL, NULL, NULL, 'ito boss presyong hindi barat', 1500.00, 1, '2025-10-28 12:17:06', 1, '2025-10-28 12:19:48', '2025-10-28 12:19:48', '2025-10-28 12:20:34', NULL, NULL, '2025-10-28 12:10:58', '2025-10-28 12:20:34'),
-(4, 4, 23, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, 0, NULL, NULL, NULL, NULL, NULL, '2025-10-28 12:22:42', '2025-10-28 12:22:42');
 
 --
 -- Triggers `ai_temp_bookings`
@@ -157,16 +148,16 @@ INSERT INTO `application` (`application_id`, `lastName`, `firstName`, `middleNam
 (19, 'Lozano', 'Edwin', 'Ramos', 'edwin.lozano@mail.com', '09191234573', '$2y$10$8nxwDLsbCKq.KT6WJrpSje4zg.eUFvUJf720QGMsntV..HZglDOBa', '9 Camia St., Brgy. San Miguel, Dumaguete City, Negros Oriental', 'accepted', NULL, '2025-10-28 10:49:22', '2025-10-28 10:49:38'),
 (20, 'Salazar', 'Faye', 'Navarro', 'faye.salazar@outlook.com', '09291234574', '$2y$10$f/ooOupmflo4slCzns.YA.NTMKLukuuxBEzuOQoyB8HlFQvGonI/.', '9 Camia St., Brgy. San Miguel, Dumaguete City, Negros Oriental', 'accepted', NULL, '2025-10-28 10:54:53', '2025-10-28 10:55:12'),
 (21, 'Pascual', 'Ruben', 'Morales', 'ruben.pascual@gmail.com', '09391234575', '$2y$10$HeAUVXpbC3BgA6iwrD0bIeZLO0Wawdr.fYRyjvjttcSGz8Ha8zMFe', '150 Maharlika Rd., Brgy. Poblacion, Butuan City, Agusan del Norte', 'pending', NULL, '2025-10-28 11:19:00', '2025-10-28 11:19:00'),
-(22, 'Almeda', 'Sonia', 'dela Cruz', 'sonia.almeda@yahoo.com', '09171234576', '$2y$10$HpVMq3ymca56XUY/GUis0ukiKa0j0B3Xi1svF1x1YRUjXrC7W0RfK', '27 Sampaloc Ave., Brgy. Mabini, Calapan, Oriental Mindoro', 'rejected', 'Incomplete portfolio - needs more samples\n\nAdditional Notes: i need more samples', '2025-10-28 11:21:11', '2025-10-28 12:24:58'),
 (23, 'Quiroz', 'Kelvin', 'Lacerna', 'kelvin.quiroz@gmail.com', '09281234577', '$2y$10$uaUtguYXixLSiM3yw3Ac.On3EegSpGqnS5kT1Ownma4f5CoBoRasi', '310 Baybayon St., Brgy. Poblacion, Legazpi City, Albay', 'pending', NULL, '2025-10-28 11:23:09', '2025-10-28 11:23:09'),
 (24, 'Borja', 'Ma Teresa', 'Salonga', 'teresa.borja@zoho.com', '09371234578', '$2y$10$UfigzXtTPBOfqnsejSG/x.aakgXSoc4tNa7JIh19ZCYjsT2aNqxPO', '4 Sampaguita Rd., Brgy. Centro, Tuguegarao City, Cagayan', 'pending', NULL, '2025-10-28 11:27:35', '2025-10-28 11:27:35'),
-(25, 'Lomboy', 'Arlene', 'Quinto', 'arlene.lomboy@icloud.com', '09191234579', '$2y$10$W11miF/ThJTH86LBkZwHOeVW00neeyVllxTmH7GnXrY3/nIuxTl1a', '88 Coconut Ln., Brgy. Baybay, Calbayog City, Samar', 'pending', NULL, '2025-10-28 11:28:50', '2025-10-28 11:28:50'),
-(26, 'Dela Cruz', 'Luis', 'Mendoza', 'luis.delacruz@gmail.com', '09281234580', '$2y$10$Gq2JDdYBZkA9TKH/JeGZOePfPc3xe4udK71E8OHBcW8qQudPSFBeO', '234 Palmera St., Brgy. Victoria, San Fernando, Pampanga', 'pending', NULL, '2025-10-28 11:29:43', '2025-10-28 11:29:43'),
-(27, 'Torres', 'Hannah', 'Perez', 'hannah.torres@outlook.com', '09371234581', '$2y$10$VUzS6HoYyvZAAnl8ll.yAOVIlHHqvyEfcdZqnv1yQiad3vNLI82W6', '57 Mango Blvd., Brgy. Panghulo, Malolos City, Bulacan', 'pending', NULL, '2025-10-28 11:32:43', '2025-10-28 11:32:43'),
-(28, 'Sison', 'Jerome', 'Reyes', 'jerome.sison@aol.com', '09171234582', '$2y$10$jd8KjIMlSZWLtMu7bDArfemy/xl4mmxTJZ/P.qlecEa9Nxl4Gg2hW', '400 Maharlika Rd., Brgy. San Juan, Laoag City, Ilocos Norte', 'pending', NULL, '2025-10-28 11:40:45', '2025-10-28 11:40:45'),
-(29, 'Aguilar', 'Rafael', 'Salcedo', 'rafael.aguilar@gmail.com', '09291234583', '$2y$10$j4e3ANeharlTRpKezc.IW.B/DIAp4G7bPo5anGP7eOhFocN4MfxTq', '182 Laurel St., Brgy. San Isidro, Batangas City, Batangas', 'pending', NULL, '2025-10-28 11:42:31', '2025-10-28 11:42:31'),
-(30, 'Delos Reyes', 'Cynthia', 'Aquino', 'cynthia.delosreyes@zoho.com', '09391234584', '$2y$10$4C6q7H5G2hfIeuEPZu/L6.Jhlg.hGH5PcqyHgwRzlzEkZ22GBFbgy', '118 Palm St., Brgy. Bagumbayan, Davao City, Davao del Sur', 'pending', NULL, '2025-10-28 11:45:12', '2025-10-28 11:45:12'),
-(31, 'Cruz', 'Marlon', 'Gomez', 'marlon.cruz@gmail.com', '09181234585', '$2y$10$qHOcaxQ4axoxD7H29OvgL.UpjiOqh9cDSKxjPOdoCtKhtxxztI5/C', '123 Juniper St., Brgy. Malanday, Valenzuela City, Metro Manila', 'accepted', NULL, '2025-10-28 11:59:12', '2025-10-28 12:01:03');
+(25, 'Lomboy', 'Arlene', 'Quinto', 'arlene.lomboy@icloud.com', '09191234579', '$2y$10$W11miF/ThJTH86LBkZwHOeVW00neeyVllxTmH7GnXrY3/nIuxTl1a', '88 Coconut Ln., Brgy. Baybay, Calbayog City, Samar', 'accepted', NULL, '2025-10-28 11:28:50', '2025-10-29 01:33:34'),
+(26, 'Dela Cruz', 'Luis', 'Mendoza', 'luis.delacruz@gmail.com', '09281234580', '$2y$10$Gq2JDdYBZkA9TKH/JeGZOePfPc3xe4udK71E8OHBcW8qQudPSFBeO', '234 Palmera St., Brgy. Victoria, San Fernando, Pampanga', 'pending', NULL, '2025-10-28 11:29:43', '2025-10-29 06:09:20'),
+(27, 'Torres', 'Hannah', 'Perez', 'hannah.torres@outlook.com', '09371234581', '$2y$10$VUzS6HoYyvZAAnl8ll.yAOVIlHHqvyEfcdZqnv1yQiad3vNLI82W6', '57 Mango Blvd., Brgy. Panghulo, Malolos City, Bulacan', 'pending', NULL, '2025-10-28 11:32:43', '2025-10-29 06:09:05'),
+(28, 'Sison', 'Jerome', 'Reyes', 'jerome.sison@aol.com', '09171234582', '$2y$10$jd8KjIMlSZWLtMu7bDArfemy/xl4mmxTJZ/P.qlecEa9Nxl4Gg2hW', '400 Maharlika Rd., Brgy. San Juan, Laoag City, Ilocos Norte', 'pending', NULL, '2025-10-28 11:40:45', '2025-10-29 06:08:14'),
+(29, 'Aguilar', 'Rafael', 'Salcedo', 'rafael.aguilar@gmail.com', '09291234583', '$2y$10$j4e3ANeharlTRpKezc.IW.B/DIAp4G7bPo5anGP7eOhFocN4MfxTq', '182 Laurel St., Brgy. San Isidro, Batangas City, Batangas', 'rejected', 'Unprofessional presentation\n\nAdditional Notes: quality not up to platform standards', '2025-10-28 11:42:31', '2025-10-29 08:09:54'),
+(30, 'Delos Reyes', 'Cynthia', 'Aquino', 'cynthia.delosreyes@zoho.com', '09391234584', '$2y$10$4C6q7H5G2hfIeuEPZu/L6.Jhlg.hGH5PcqyHgwRzlzEkZ22GBFbgy', '118 Palm St., Brgy. Bagumbayan, Davao City, Davao del Sur', 'accepted', NULL, '2025-10-28 11:45:12', '2025-10-29 08:05:27'),
+(31, 'Cruz', 'Marlon', 'Gomez', 'marlon.cruz@gmail.com', '09181234585', '$2y$10$qHOcaxQ4axoxD7H29OvgL.UpjiOqh9cDSKxjPOdoCtKhtxxztI5/C', '123 Juniper St., Brgy. Malanday, Valenzuela City, Metro Manila', 'accepted', NULL, '2025-10-28 11:59:12', '2025-10-28 12:01:03'),
+(32, 'Alano', 'Kim', NULL, 'miko@gmail.com', '09123467891', '$2y$10$3OfUBloF4kKkonkLPS70ieHMXV8P4t0rbZ83GcyviA8L08k5yc9vG', '123 Malued, Mindanao', 'accepted', NULL, '2025-10-29 01:14:56', '2025-10-29 01:34:38');
 
 -- --------------------------------------------------------
 
@@ -207,7 +198,6 @@ INSERT INTO `application_resume` (`resume_id`, `application_id`, `resumeFilePath
 (19, 19, 'uploads/application/resumes/resume_app_19_1761648562_c87725bfa5c2a27c.pdf', '2025-10-28 10:49:22'),
 (20, 20, 'uploads/application/resumes/resume_app_20_1761648893_f31eeec81c684c2a.pdf', '2025-10-28 10:54:53'),
 (21, 21, 'uploads/application/resumes/resume_app_21_1761650340_93390ede40bddead.pdf', '2025-10-28 11:19:00'),
-(22, 22, 'uploads/application/resumes/resume_app_22_1761650471_2b43bb2c0d5ed878.pdf', '2025-10-28 11:21:11'),
 (23, 23, 'uploads/application/resumes/resume_app_23_1761650589_04b1ecb0ec9addc0.pdf', '2025-10-28 11:23:09'),
 (24, 24, 'uploads/application/resumes/resume_app_24_1761650855_a7284ba45e4ea599.pdf', '2025-10-28 11:27:35'),
 (25, 25, 'uploads/application/resumes/resume_app_25_1761650930_10b4390dfbef49a8.pdf', '2025-10-28 11:28:50'),
@@ -216,7 +206,8 @@ INSERT INTO `application_resume` (`resume_id`, `application_id`, `resumeFilePath
 (28, 28, 'uploads/application/resumes/resume_app_28_1761651645_711d15754b483432.pdf', '2025-10-28 11:40:45'),
 (29, 29, 'uploads/application/resumes/resume_app_29_1761651751_84800726922cc463.pdf', '2025-10-28 11:42:31'),
 (30, 30, 'uploads/application/resumes/resume_app_30_1761651912_80bf0bf7d439d8d3.pdf', '2025-10-28 11:45:12'),
-(31, 31, 'uploads/application/resumes/resume_app_31_1761652752_2add487c447ebfdd.pdf', '2025-10-28 11:59:12');
+(31, 31, 'uploads/application/resumes/resume_app_31_1761652752_2add487c447ebfdd.pdf', '2025-10-28 11:59:12'),
+(32, 32, 'uploads/application/resumes/resume_app_32_1761700496_7f80351e6af238a6.pdf', '2025-10-29 01:14:56');
 
 -- --------------------------------------------------------
 
@@ -365,11 +356,6 @@ INSERT INTO `application_works` (`work_id`, `application_id`, `worksFilePath`, `
 (127, 21, 'uploads/application/works/work_3_app_21_1761650340_3dbf8e895ac400fd.avif', '2025-10-28 11:19:00'),
 (128, 21, 'uploads/application/works/work_4_app_21_1761650340_4abb2d71a8cace02.avif', '2025-10-28 11:19:00'),
 (129, 21, 'uploads/application/works/work_5_app_21_1761650340_56a57d60ec5a67d1.avif', '2025-10-28 11:19:00'),
-(130, 22, 'uploads/application/works/work_0_app_22_1761650471_6ccc6d43f7b8e21a.avif', '2025-10-28 11:21:11'),
-(131, 22, 'uploads/application/works/work_1_app_22_1761650471_32230c85b817833c.avif', '2025-10-28 11:21:11'),
-(132, 22, 'uploads/application/works/work_2_app_22_1761650471_960186e046a3cc2d.avif', '2025-10-28 11:21:11'),
-(133, 22, 'uploads/application/works/work_3_app_22_1761650471_6faca46b4176cb85.avif', '2025-10-28 11:21:11'),
-(134, 22, 'uploads/application/works/work_4_app_22_1761650471_b88fe63b4c4ed3eb.avif', '2025-10-28 11:21:11'),
 (135, 23, 'uploads/application/works/work_0_app_23_1761650589_04485559534eb34a.avif', '2025-10-28 11:23:09'),
 (136, 23, 'uploads/application/works/work_1_app_23_1761650589_7417582d2f954a1b.avif', '2025-10-28 11:23:09'),
 (137, 23, 'uploads/application/works/work_2_app_23_1761650589_f8a000b12d7a5a7d.avif', '2025-10-28 11:23:09'),
@@ -425,24 +411,11 @@ INSERT INTO `application_works` (`work_id`, `application_id`, `worksFilePath`, `
 (187, 31, 'uploads/application/works/work_1_app_31_1761652752_f05fd8232d159ba2.avif', '2025-10-28 11:59:12'),
 (188, 31, 'uploads/application/works/work_2_app_31_1761652752_e36d37d1a103af0c.avif', '2025-10-28 11:59:12'),
 (189, 31, 'uploads/application/works/work_3_app_31_1761652752_b796ae6aa01bf6b3.avif', '2025-10-28 11:59:12'),
-(190, 31, 'uploads/application/works/work_4_app_31_1761652752_1267b4ddd5d0a994.avif', '2025-10-28 11:59:12');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `booking_modifications`
---
-
-CREATE TABLE `booking_modifications` (
-  `modification_id` int(11) NOT NULL,
-  `conversation_id` int(11) NOT NULL,
-  `modified_by` enum('user','worker') NOT NULL,
-  `modification_type` enum('price_change','date_change','time_change','package_change','location_change','status_change','notes_added') NOT NULL,
-  `old_value` text DEFAULT NULL,
-  `new_value` text DEFAULT NULL,
-  `reason` text DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+(190, 31, 'uploads/application/works/work_4_app_31_1761652752_1267b4ddd5d0a994.avif', '2025-10-28 11:59:12'),
+(191, 32, 'uploads/application/works/work_0_app_32_1761700496_097db009c11363d9.jpg', '2025-10-29 01:14:56'),
+(192, 32, 'uploads/application/works/work_1_app_32_1761700496_cdad44fdfec92e8c.jpg', '2025-10-29 01:14:56'),
+(193, 32, 'uploads/application/works/work_2_app_32_1761700496_94ca0719126d0e52.jpg', '2025-10-29 01:14:56'),
+(194, 32, 'uploads/application/works/work_3_app_32_1761700496_4c20e1ea0f72600e.jpg', '2025-10-29 01:14:56');
 
 -- --------------------------------------------------------
 
@@ -460,16 +433,6 @@ CREATE TABLE `conversations` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Dumping data for table `conversations`
---
-
-INSERT INTO `conversations` (`conversation_id`, `user_id`, `worker_id`, `type`, `booking_status`, `created_at`, `updated_at`) VALUES
-(1, 8, 8, 'direct', 'pending_worker', '2025-10-28 06:00:34', '2025-10-28 06:01:09'),
-(2, 8, 5, 'direct', 'pending_worker', '2025-10-28 06:05:22', '2025-10-28 06:06:00'),
-(3, 2, 23, 'direct', 'completed', '2025-10-28 12:10:58', '2025-10-28 12:19:48'),
-(4, 2, 23, 'ai', '', '2025-10-28 12:22:42', '2025-10-28 12:22:42');
-
 -- --------------------------------------------------------
 
 --
@@ -485,53 +448,6 @@ CREATE TABLE `messages` (
   `is_read` tinyint(1) DEFAULT 0,
   `sent_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `messages`
---
-
-INSERT INTO `messages` (`message_id`, `conversation_id`, `sender_id`, `sender_type`, `message_text`, `is_read`, `sent_at`) VALUES
-(1, 1, 0, '', 'Hi! I\'m here to help you book a photographer. 📸\n\nWhat type of event are you planning?\n(e.g., Wedding, Birthday, Portrait, Corporate)', 0, '2025-10-28 06:00:34'),
-(2, 1, 8, 'user', 'Wedding', 0, '2025-10-28 06:00:42'),
-(3, 1, 0, '', 'Great! When is your **Wedding** scheduled?\n(e.g., December 25, 2024 or 12/25/2024)', 0, '2025-10-28 06:00:42'),
-(4, 1, 8, 'user', 'December 25', 0, '2025-10-28 06:00:54'),
-(5, 1, 0, '', 'Perfect! Where will the event take place?\n(e.g., Manila, Quezon City, or specific venue)', 0, '2025-10-28 06:00:54'),
-(6, 1, 8, 'user', 'Manila', 0, '2025-10-28 06:00:58'),
-(7, 1, 0, '', 'Almost done! What\'s your budget for photography?\n(e.g., 10000 or 15000)', 0, '2025-10-28 06:00:58'),
-(8, 1, 8, 'user', '3000', 0, '2025-10-28 06:01:01'),
-(9, 1, 0, '', 'Great! I have all the details:\n\n📸 Event: Wedding\n📅 Date: December 25, 2025\n📍 Location: Manila\n💰 Budget: ₱3,000.00\n\nUnfortunately, there are no available packages at the moment. Would you like to speak with the photographer directly?', 0, '2025-10-28 06:01:01'),
-(10, 1, 8, 'user', 'no', 0, '2025-10-28 06:01:06'),
-(11, 1, 0, '', 'Great! I have all the details:\n\n📸 Event: Wedding\n📅 Date: December 25, 2025\n📍 Location: Manila\n💰 Budget: ₱3,000.00\n\nUnfortunately, there are no available packages at the moment. Would you like to speak with the photographer directly?', 0, '2025-10-28 06:01:06'),
-(12, 1, 8, 'user', 'yes', 0, '2025-10-28 06:01:09'),
-(13, 1, 0, '', 'Perfect! I\'m redirecting you to the photographer now. They\'ll be able to discuss custom options with you directly. 📸✨', 0, '2025-10-28 06:01:09'),
-(14, 2, 0, '', 'Hi! I\'m here to help you book a photographer. 📸\n\nWhat type of event are you planning?\n(e.g., Wedding, Birthday, Portrait, Corporate)', 0, '2025-10-28 06:05:22'),
-(15, 2, 8, 'user', 'I would like to talk to a human agent', 0, '2025-10-28 06:06:00'),
-(16, 2, 0, '', 'I\'ll connect you with the photographer now. They\'ll respond to you shortly! 👋', 0, '2025-10-28 06:06:00'),
-(17, 3, 0, '', 'Hi! I\'m here to help you book a photographer. 📸\n\nWhat type of event are you planning?\n(e.g., Wedding, Birthday, Portrait, Corporate)', 0, '2025-10-28 12:10:58'),
-(18, 3, 2, 'user', 'College graduation photoshoot', 0, '2025-10-28 12:11:33'),
-(19, 3, 0, '', 'Great! When is your **Graduation** scheduled?\n(e.g., December 25, 2024 or 12/25/2024)', 0, '2025-10-28 12:11:33'),
-(20, 3, 2, 'user', 'December 25', 0, '2025-10-28 12:11:49'),
-(21, 3, 0, '', 'Perfect! Where will the event take place?\n(e.g., Manila, Quezon City, or specific venue)', 0, '2025-10-28 12:11:49'),
-(22, 3, 2, 'user', 'Dagupan, Pangasinan', 0, '2025-10-28 12:12:00'),
-(23, 3, 0, '', 'Almost done! What\'s your budget for photography?\n(e.g., 10000 or 15000)', 0, '2025-10-28 12:12:00'),
-(24, 3, 2, 'user', '1000', 0, '2025-10-28 12:12:13'),
-(25, 3, 0, '', 'Perfect! Here\'s a summary of your event:\n\n📸 Event: Graduation\n📅 Date: December 25, 2025\n📍 Location: Dagupan, Pangasinan\n💰 Budget: ₱1,000.00\n\nHere are the recommended packages below. **Type the package number (1, 2, or 3)** to select one:', 0, '2025-10-28 12:12:13'),
-(26, 3, 2, 'user', '1', 0, '2025-10-28 12:12:32'),
-(27, 3, 0, '', 'Perfect choice! 🎉\n\nYour booking request has been sent to the photographer.\n\n📋 **Booking Summary:**\n📸 Event: Graduation\n📅 Date: December 25, 2025\n📍 Location: Dagupan, Pangasinan\n💰 Budget: ₱1,000.00\n📦 Package: Basic Portrait Session\n\nThe photographer will review your request and respond here. You can now chat with them directly!', 0, '2025-10-28 12:12:32'),
-(28, 3, 2, 'user', '1', 0, '2025-10-28 12:12:32'),
-(29, 3, 23, 'worker', 'Hello Lester', 0, '2025-10-28 12:12:55'),
-(30, 3, 2, 'user', 'boss pwede pobang 30 photos?', 0, '2025-10-28 12:13:50'),
-(31, 3, 23, 'worker', 'grabe ka naman boss isang libo lang prinopose mong bayad', 0, '2025-10-28 12:14:06'),
-(32, 3, 23, 'worker', 'sige ito nalang', 0, '2025-10-28 12:14:12'),
-(33, 3, 23, 'worker', 'I\'ve reviewed your booking request. I\'d like to propose a price of ₱3,000.00\n\nNote: ito boss presyong hindi barat', 0, '2025-10-28 12:14:46'),
-(34, 3, 2, 'user', 'okay na ako sa presyo nayan', 0, '2025-10-28 12:15:18'),
-(35, 3, 2, 'user', 'I accept your proposal! Let\'s proceed with the booking.', 0, '2025-10-28 12:15:22'),
-(36, 3, 2, 'user', 'should i pay now?', 0, '2025-10-28 12:16:17'),
-(37, 3, 23, 'worker', 'yes boss', 0, '2025-10-28 12:16:28'),
-(38, 3, 2, 'user', '✅ Down payment of ₱1,500.00 has been processed successfully! The photographer has been notified.', 0, '2025-10-28 12:17:06'),
-(39, 3, 2, 'user', '🎉 Final payment of ₱1,500.00 has been processed. Thank you for using our service! Please rate your experience.', 0, '2025-10-28 12:19:48'),
-(40, 3, 2, 'user', '⭐ I\'ve rated this service 5/5 stars. Review: 10/10 Marlon made me comfortable during the photo session', 0, '2025-10-28 12:20:35'),
-(41, 4, 0, '', 'Hi! I\'m here to help you book a photographer. 📸\n\nWhat type of event are you planning?\n(e.g., Wedding, Birthday, Portrait, Corporate)', 0, '2025-10-28 12:22:42');
 
 -- --------------------------------------------------------
 
@@ -570,6 +486,22 @@ INSERT INTO `packages` (`package_id`, `worker_id`, `name`, `description`, `price
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `password_reset_otps`
+--
+
+CREATE TABLE `password_reset_otps` (
+  `id` int(11) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `otp_code` varchar(6) NOT NULL,
+  `user_type` enum('user','worker') NOT NULL DEFAULT 'user',
+  `expires_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `is_used` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `ratings`
 --
 
@@ -582,13 +514,6 @@ CREATE TABLE `ratings` (
   `review` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `ratings`
---
-
-INSERT INTO `ratings` (`rating_id`, `conversation_id`, `user_id`, `worker_id`, `rating`, `review`, `created_at`) VALUES
-(1, 3, 2, 23, 5, '10/10 Marlon made me comfortable during the photo session', '2025-10-28 12:20:34');
 
 -- --------------------------------------------------------
 
@@ -614,7 +539,7 @@ CREATE TABLE `user` (
 --
 
 INSERT INTO `user` (`user_id`, `lastName`, `firstName`, `middleName`, `email`, `phoneNumber`, `password`, `address`, `profilePhotoUrl`, `createdAt`) VALUES
-(1, 'Cabubas', 'Christian Joseph', 'Caguiat', 'cjplaysgames83@gmail.com', '09193695376', '$2y$10$I8HIODc2IOB8N4CGEJfEweBZZ3nG/wz/yQRq8.GUNxzz/HxtUoszm', '231, Tapuac District, Dagupan City, Pangasinan', '/Kislap/uploads/user/profile_photos/profile_1_1761641689_d5833d03b5824a54.avif', '2025-10-26 15:59:38'),
+(1, 'Cabubas', 'Christian', 'Caguiat', 'cjplaysgames83@gmail.com', '09193695376', '$2y$10$okQI9RoOghP5fc.HE7HK9.pzokVB6npq.CDWPogECPqyywH7EGUxu', '231, Tapuac District, Dagupan City, Pangasinan', '/Kislap/uploads/user/profile_photos/profile_1_1761731660_eb8cb9c3aad0b381.avif', '2025-10-26 15:59:38'),
 (2, 'Ari', 'Lester', '', 'lesterari@outlook.com', '09991234343', '$2y$10$3TBUAIDI8tc3Qc24c.tk1e3hcrARFuX0yHMatKTfwuY2/UpmJMKTS', '445, Las Vegas Street, Binmaley, Pangasinan', NULL, '2025-10-27 09:51:31'),
 (3, 'Balonzo', 'Mildred', 'Torio', 'balonzomildred@gmail.com', '09291113534', '$2y$10$iRrdRV2pRDgwx8hemgU4K.V5CRHmZrSxxMDypooHH9F7/p2nVWt02', '424 Fiesta Communities, Mexico, Pampanga', NULL, '2025-10-27 09:55:02'),
 (4, 'Morales', 'Antonio', 'Villanueva', 'antonio.morales@live.com', '09371234567', '$2y$10$y4Nch5rbjrE2Ha3nkz0uVuSEmdCvg2BLTbAvDbowjVVtRaMjKxnbi', '7816 Batangas St., Barangay San Isidro, Batangas City, Batangas', NULL, '2025-10-27 10:17:48'),
@@ -624,7 +549,9 @@ INSERT INTO `user` (`user_id`, `lastName`, `firstName`, `middleName`, `email`, `
 (8, 'Esteban', 'Julia', 'Solis', 'julia.esteban@gmail.com', '09251823456', '$2y$10$P7Fp8rJxLBpyRAorK75Xuulx73L0NFuuuVmP0y.0aEC8P1gw4.NL2', '5432 Sampaguita Rd., Barangay Kauswagan, Cagayan de Oro, Misamis Oriental', NULL, '2025-10-27 10:20:40'),
 (9, 'Bautista', 'Raul', 'Perez', 'raul.bautista@hotmail.com', '09231123456', '$2y$10$055.5M8toGGANGNHkjYqiO21h5tT7ILJwrPpcl4jkdFebhYDjTrNi', '1134 Rosas Ave., Barangay Panacan, Davao City, Davao del Sur', NULL, '2025-10-27 10:21:29'),
 (10, 'Alonzo', 'Hazel', 'Martinez', 'hazel.alonzo@aol.com', '09191456789', '$2y$10$4J0jTrEMtj5Z.pRunpT6cO0uPd5TbHlNn/om7i6SPPGAbCDgJpAmK', '8973 Zinnia St., Barangay Banilad, Cebu City, Cebu', NULL, '2025-10-27 10:22:03'),
-(11, 'Cruz', 'Isabel', 'Del Rosario', 'isabel.cruz@gmail.com', '09361122334', '$2y$10$rZPRXnnHh8Ju0NrwzfQhge80sbZUgBf/QeD8wjv5ALjZNS7g9.XZW', '6785 Jasmine St., Barangay Talamban, Cebu City, Cebu', NULL, '2025-10-27 10:22:45');
+(11, 'Cruz', 'Isabel', 'Del Rosario', 'isabel.cruz@gmail.com', '09361122334', '$2y$10$rZPRXnnHh8Ju0NrwzfQhge80sbZUgBf/QeD8wjv5ALjZNS7g9.XZW', '6785 Jasmine St., Barangay Talamban, Cebu City, Cebu', NULL, '2025-10-27 10:22:45'),
+(12, 'Gonzales', 'Mikaella', NULL, 'mikaella@gmail.com', '09224569081', '$2y$10$MBYYVd8kguS8ChCVAMsyi.BrKA7IEvEv6m71YSFpkJzuKd30J9YQa', '231 Herrero Street, Dagupan, Pangasinan', NULL, '2025-10-29 08:02:55'),
+(13, 'Martinez', 'Crystal James', 'Fernandez', 'crystal@gmail.com', '09442223434', '$2y$10$I2Z6Nr0.uw8UaCtSzxU9jeKweWHKEZCg8KP.gIF50OmCAqo8k.ziq', '231, Mayombo Dist., Dagupan, Pangasinan', NULL, '2025-10-29 09:29:05');
 
 -- --------------------------------------------------------
 
@@ -636,6 +563,10 @@ CREATE TABLE `workers` (
   `worker_id` int(11) NOT NULL,
   `application_id` int(11) DEFAULT NULL,
   `status` enum('active','suspended','banned') NOT NULL DEFAULT 'active',
+  `suspended_until` timestamp NULL DEFAULT NULL,
+  `suspension_reason` text DEFAULT NULL,
+  `suspended_by` int(11) DEFAULT NULL,
+  `suspended_at` timestamp NULL DEFAULT NULL,
   `lastName` varchar(100) NOT NULL,
   `firstName` varchar(100) NOT NULL,
   `middleName` varchar(100) DEFAULT NULL,
@@ -659,28 +590,31 @@ CREATE TABLE `workers` (
 -- Dumping data for table `workers`
 --
 
-INSERT INTO `workers` (`worker_id`, `application_id`, `status`, `lastName`, `firstName`, `middleName`, `email`, `phoneNumber`, `password`, `address`, `specialty`, `experience_years`, `bio`, `profile_photo`, `total_ratings`, `total_bookings`, `total_earnings`, `created_at`, `updated_at`, `average_rating`) VALUES
-(1, 11, 'active', 'Reyes', 'Carlo', 'Alonzo', 'carlo.reyes@gmail.com', '09281234565', '$2y$10$7oefTFOYDubZ./S5lALSLueTYTt9jTocYMYL0sj/YgVt/b0kHdrIS', '88 Bago Blvd., Brgy. Banilad, Cebu City, Cebu', 'creative', 12, 'I am a creative/conceptual artist', 'uploads/workers/1/worker1_profile_1761586848_30e34ac39faf32c4.avif', 0, 0, 0.00, '2025-10-27 14:12:46', '2025-10-28 08:53:48', 0.00),
-(2, 12, 'active', 'Gonzaga', 'Melinda', 'Santos', 'melinda.gonzaga@mail.com', '09371234566', '$2y$10$F2hpK8VIR.jlGuzH/k8sbO7/PDwAyR.X2H6JtmqmVAj3Oj.qyzfHa', '14 Lapu-Lapu St., Brgy. Durano, Mandaue City, Cebu', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-27 14:12:53', '2025-10-27 14:12:53', 0.00),
-(3, 10, 'active', 'Ortega', 'Nelia', 'Ramos', 'nelia.ortega@zoho.com', '09171234564', '$2y$10$H/J3coqb7KKdjZ4UwmDBQu5XNfkPgW0fuJUwLq4mRy0ZzLsTd8kY6', '56 Sampaguita Ln., Brgy. Divisoria, Tarlac City, Tarlac', 'event', 0, 'AAA', NULL, 0, 0, 0.00, '2025-10-27 14:12:57', '2025-10-27 15:14:19', 0.00),
-(4, 9, 'active', 'Santos', 'Marco', 'Perez', 'marco.santos@ymail.com', '09391234563', '$2y$10$StezBCsrjo/f1dF4iiaXGO8Aam665PxmSXyeVtYVXSD2T24lBBSpq', '150 Bamboo St., Brgy. San Vicente, Puerto Princesa, Palawan', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-27 14:13:01', '2025-10-27 14:13:01', 0.00),
-(5, 8, 'active', 'Aquino', 'Liza', 'dela Cruz', 'liza.aquino@icloud.com', '09291234562', '$2y$10$7ogiDcSrkZQ.gseekxlYFu7KGu3nQ1PJFzR48VVTJUZxOUAKxzTjS', '7 Coconut Rd., Brgy. San Antonio, Laoag City, Ilocos Norte', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-27 14:13:19', '2025-10-27 14:13:19', 0.00),
-(6, 7, 'active', 'Pineda', 'Arnel', 'Bautista', 'arnel.pineda@yahoo.com', '09191234561', '$2y$10$wVYNjkkONA69HvN33Qpc/ePovUvcsU/hEXevW7RGd4vMVKEXDYBXy', '33 Acacia Dr., Brgy. San Roque, Naga City, Camarines Sur', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-27 14:13:24', '2025-10-27 14:13:24', 0.00),
-(7, 6, 'active', 'Valdez', 'Camille', '', 'camille.valdez@gmail.com', '09371234560', '$2y$10$SWMs88YwEDYF3heLzEI0AOID21d0qcZnRs/2u4HgOhcc2bjtXSEsO', '222 Mango St., Brgy. Pasonanca, Zamboanga City, Zamboanga del Sur', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-27 17:51:13', '2025-10-27 17:51:13', 0.00),
-(8, 5, 'active', 'Ilagan', 'Rafael', 'Torres', 'rafael.ilagan@protonmail.com', '09271234901', '$2y$10$XscyCKLI3t9TSSwhrYKpmeDnJdS98LYPrx1E4S/UZSXS7hgKLtZ6u', '9 Laurel Lane, Brgy. San Isidro, Cagayan de Oro, Misamis Oriental', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-27 17:51:19', '2025-10-28 06:29:30', 0.00),
-(9, 4, 'active', 'Mercado', 'Beatrice', 'Gomez', 'bea.mercado@mail.com', '09181234890', '$2y$10$rsJIq5UikdexzEnCtEVfJOj2w0lH0czsaVk06Khaomm.djsKziDX.', '101 San Miguel St., Brgy. Burgos, Batangas City, Batangas', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-27 17:51:24', '2025-10-27 17:51:24', 0.00),
-(10, 3, 'active', 'Cruz', 'Diego', 'Ramos', 'diego.cruz@outlook.com', '09391234789', '$2y$10$OWgqbgTuqN.LqPTb7Y3zlu3PvSuEGeJ.zGCi5Ov4NyBUvauyb0z5.', '78 Magsaysay Rd., Brgy. Centro, Tagbilaran, Bohol', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-27 17:51:28', '2025-10-27 17:51:28', 0.00),
-(11, 2, 'active', 'Flores', 'Anna', '', 'anna.flores@yahoo.com', '09281234678', '$2y$10$yM7CO8CRnXz0dw3tvXp7xufRNsxvDw17DxbcjGUePXEDymaWvj2EC', '45 Mabini Ave., Brgy. Poblacion, Iloilo City, Iloilo', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-27 17:51:32', '2025-10-27 17:51:32', 0.00),
-(12, 1, 'active', 'Navarro', 'Miguel', 'Santos', 'miguel.navarro@gmail.com', '09171234567', '$2y$10$WfQwbX19RhDSNmUxV0FIKeFkNUJs6iy9berhaoGS5vvqBGlpNO5eO', '12 Rizal St., Brgy. San Jose, Lucena City, Quezon', 'portrait', 4, 'Hi, I’m Miguel, a photographer who captures genuine moments and emotions through my lens. I focus on creating clean, natural, and creative shots that tell real stories — whether it’s portraits, events, or everyday life', 'uploads/workers/12/worker12_profile_1761622494_f4c87e8d9f984259.avif', 0, 0, 0.00, '2025-10-27 17:51:35', '2025-10-28 03:34:54', 0.00),
-(13, 15, 'active', 'De Guzman', 'Victor', 'Navarro', 'victor.dguzman@protonmail.com', '09391234569', '$2y$10$Iz8szcEQujNaHbO98mv3WukiI5Xxiq9kCKU1miKn7VtZSevomqfCO', '77 Sampaloc St., Brgy. Divisoria, Tarlac City, Tarlac', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-28 10:38:28', '2025-10-28 10:38:28', 0.00),
-(14, 14, 'active', 'Tan', 'Elaine', 'Yu', 'elaine.tan@gmail.com', '09291234568', '$2y$10$3YtzPYMiUS7asEXy6A.OK.cehDvTc3/RGOEe0BOYe91Xl/QqjMHIC', '19 Orchid Way, Brgy. Bagong Silang, Baguio City, Benguet', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-28 10:38:33', '2025-10-28 10:38:33', 0.00),
-(16, 13, 'active', 'Herrera', 'Jason', 'Villanueva', 'j.herrera@outlook.com', '09191234567', '$2y$10$p.9qOxMe6pxhjQbi6k8aJOnlATnhs9oMKNgZs0aHtk.HJrZEMezk.', '300 Pine Rd., Brgy. Malvar, Angeles City, Pampanga', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-28 10:38:46', '2025-10-28 10:38:46', 0.00),
-(17, 19, 'active', 'Lozano', 'Edwin', 'Ramos', 'edwin.lozano@mail.com', '09191234573', '$2y$10$8nxwDLsbCKq.KT6WJrpSje4zg.eUFvUJf720QGMsntV..HZglDOBa', '9 Camia St., Brgy. San Miguel, Dumaguete City, Negros Oriental', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-28 10:49:38', '2025-10-28 10:49:38', 0.00),
-(18, 18, 'active', 'Catindig', 'Maribel', 'Aquino', 'maribel.catindig@aol.com', '09371234572', '$2y$10$YGcmmzn4pzHFi16ZETaTBeyQm5FVD34C.Rlz6UOFlsFhW0ylsaBgO', '21 Tulip Ln., Brgy. San Jose, Lucena City, Quezon', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-28 10:49:41', '2025-10-28 10:49:41', 0.00),
-(20, 17, 'active', 'Fabillar', 'Jonah', 'Cruz', 'jonah.fabillar@gmail.com', '09281234571', '$2y$10$FYgbNr3.CCeodrcHctf6z.jwCF7DesRiJhAoy5kgMgfpFmYdk7TYC', '402 Pearl St., Brgy. Baybay, Legazpi City, Albay', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-28 10:49:49', '2025-10-28 10:49:49', 0.00),
-(21, 16, 'active', 'Manalo', 'Rica', 'Santos', 'rica.manalo@yahoo.com', '09171234570', '$2y$10$K0euKLQpferIzA3REa27buMkszXiH9uxBxq87trzQCOF1g1RELwUW', '5 Palm Grove, Brgy. Poblacion, Roxas City, Capiz', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-28 10:49:52', '2025-10-28 10:49:52', 0.00),
-(22, 20, 'active', 'Salazar', 'Faye', 'Navarro', 'faye.salazar@outlook.com', '09291234574', '$2y$10$f/ooOupmflo4slCzns.YA.NTMKLukuuxBEzuOQoyB8HlFQvGonI/.', '9 Camia St., Brgy. San Miguel, Dumaguete City, Negros Oriental', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-28 10:55:12', '2025-10-28 10:55:12', 0.00),
-(23, 31, 'active', 'Cruz', 'Marlon', 'Gomez', 'marlon.cruz@gmail.com', '09181234585', '$2y$10$qHOcaxQ4axoxD7H29OvgL.UpjiOqh9cDSKxjPOdoCtKhtxxztI5/C', '123 Juniper St., Brgy. Malanday, Valenzuela City, Metro Manila', 'portrait', 15, 'Hi, I’m Marlon – a portrait photographer passionate about capturing the real you. I believe in creating images that tell a story, whether it\'s in the studio or on location. My goal is to make you feel at ease so your true personality shines through.\r\n\r\nWith every shoot, I focus on the details that bring out your best self – the moments, expressions, and light that make each portrait unique. Whether it\'s a professional headshot or a personal portrait, I’m here to help you look and feel your best.\r\n\r\nLet’s connect and create something memorable.', 'uploads/workers/23/worker23_profile_1761667371_2b197d86a648001f.avif', 1, 2, 5000.00, '2025-10-28 12:01:03', '2025-10-28 16:02:51', 4.50);
+INSERT INTO `workers` (`worker_id`, `application_id`, `status`, `suspended_until`, `suspension_reason`, `suspended_by`, `suspended_at`, `lastName`, `firstName`, `middleName`, `email`, `phoneNumber`, `password`, `address`, `specialty`, `experience_years`, `bio`, `profile_photo`, `total_ratings`, `total_bookings`, `total_earnings`, `created_at`, `updated_at`, `average_rating`) VALUES
+(1, 11, 'active', NULL, NULL, NULL, NULL, 'Reyes', 'Carlo', 'Alonzo', 'carlo.reyes@gmail.com', '09281234565', '$2y$10$7oefTFOYDubZ./S5lALSLueTYTt9jTocYMYL0sj/YgVt/b0kHdrIS', '88 Bago Blvd., Brgy. Banilad, Cebu City, Cebu', 'creative', 12, 'I am a creative/conceptual artist', 'uploads/workers/1/worker1_profile_1761586848_30e34ac39faf32c4.avif', 0, 0, 0.00, '2025-10-27 14:12:46', '2025-10-28 08:53:48', 0.00),
+(2, 12, 'active', NULL, NULL, NULL, NULL, 'Gonzaga', 'Melinda', 'Santos', 'melinda.gonzaga@mail.com', '09371234566', '$2y$10$F2hpK8VIR.jlGuzH/k8sbO7/PDwAyR.X2H6JtmqmVAj3Oj.qyzfHa', '14 Lapu-Lapu St., Brgy. Durano, Mandaue City, Cebu', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-27 14:12:53', '2025-10-27 14:12:53', 0.00),
+(3, 10, 'active', NULL, NULL, NULL, NULL, 'Ortega', 'Nelia', 'Ramos', 'nelia.ortega@zoho.com', '09171234564', '$2y$10$H/J3coqb7KKdjZ4UwmDBQu5XNfkPgW0fuJUwLq4mRy0ZzLsTd8kY6', '56 Sampaguita Ln., Brgy. Divisoria, Tarlac City, Tarlac', 'event', 0, 'AAA', NULL, 0, 0, 0.00, '2025-10-27 14:12:57', '2025-10-27 15:14:19', 0.00),
+(4, 9, 'active', NULL, NULL, NULL, NULL, 'Santos', 'Marco', 'Perez', 'marco.santos@ymail.com', '09391234563', '$2y$10$StezBCsrjo/f1dF4iiaXGO8Aam665PxmSXyeVtYVXSD2T24lBBSpq', '150 Bamboo St., Brgy. San Vicente, Puerto Princesa, Palawan', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-27 14:13:01', '2025-10-27 14:13:01', 0.00),
+(5, 8, 'active', NULL, NULL, NULL, NULL, 'Aquino', 'Liza', 'dela Cruz', 'liza.aquino@icloud.com', '09291234562', '$2y$10$7ogiDcSrkZQ.gseekxlYFu7KGu3nQ1PJFzR48VVTJUZxOUAKxzTjS', '7 Coconut Rd., Brgy. San Antonio, Laoag City, Ilocos Norte', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-27 14:13:19', '2025-10-27 14:13:19', 0.00),
+(6, 7, 'active', NULL, NULL, NULL, NULL, 'Pineda', 'Arnel', 'Bautista', 'arnel.pineda@yahoo.com', '09191234561', '$2y$10$wVYNjkkONA69HvN33Qpc/ePovUvcsU/hEXevW7RGd4vMVKEXDYBXy', '33 Acacia Dr., Brgy. San Roque, Naga City, Camarines Sur', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-27 14:13:24', '2025-10-27 14:13:24', 0.00),
+(7, 6, 'active', NULL, NULL, NULL, NULL, 'Valdez', 'Camille', '', 'camille.valdez@gmail.com', '09371234560', '$2y$10$SWMs88YwEDYF3heLzEI0AOID21d0qcZnRs/2u4HgOhcc2bjtXSEsO', '222 Mango St., Brgy. Pasonanca, Zamboanga City, Zamboanga del Sur', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-27 17:51:13', '2025-10-27 17:51:13', 0.00),
+(8, 5, 'active', NULL, NULL, NULL, NULL, 'Ilagan', 'Rafael', 'Torres', 'rafael.ilagan@protonmail.com', '09271234901', '$2y$10$XscyCKLI3t9TSSwhrYKpmeDnJdS98LYPrx1E4S/UZSXS7hgKLtZ6u', '9 Laurel Lane, Brgy. San Isidro, Cagayan de Oro, Misamis Oriental', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-27 17:51:19', '2025-10-28 06:29:30', 0.00),
+(9, 4, 'active', NULL, NULL, NULL, NULL, 'Mercado', 'Beatrice', 'Gomez', 'bea.mercado@mail.com', '09181234890', '$2y$10$rsJIq5UikdexzEnCtEVfJOj2w0lH0czsaVk06Khaomm.djsKziDX.', '101 San Miguel St., Brgy. Burgos, Batangas City, Batangas', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-27 17:51:24', '2025-10-27 17:51:24', 0.00),
+(10, 3, 'active', NULL, NULL, NULL, NULL, 'Cruz', 'Diego', 'Ramos', 'diego.cruz@outlook.com', '09391234789', '$2y$10$OWgqbgTuqN.LqPTb7Y3zlu3PvSuEGeJ.zGCi5Ov4NyBUvauyb0z5.', '78 Magsaysay Rd., Brgy. Centro, Tagbilaran, Bohol', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-27 17:51:28', '2025-10-27 17:51:28', 0.00),
+(11, 2, 'active', NULL, NULL, NULL, NULL, 'Flores', 'Anna', '', 'anna.flores@yahoo.com', '09281234678', '$2y$10$yM7CO8CRnXz0dw3tvXp7xufRNsxvDw17DxbcjGUePXEDymaWvj2EC', '45 Mabini Ave., Brgy. Poblacion, Iloilo City, Iloilo', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-27 17:51:32', '2025-10-27 17:51:32', 0.00),
+(12, 1, 'active', NULL, NULL, NULL, NULL, 'Navarro', 'Miguel', 'Santos', 'miguel.navarro@gmail.com', '09171234567', '$2y$10$WfQwbX19RhDSNmUxV0FIKeFkNUJs6iy9berhaoGS5vvqBGlpNO5eO', '12 Rizal St., Brgy. San Jose, Lucena City, Quezon', 'portrait', 4, 'Hi, I’m Miguel, a photographer who captures genuine moments and emotions through my lens. I focus on creating clean, natural, and creative shots that tell real stories — whether it’s portraits, events, or everyday life', 'uploads/workers/12/worker12_profile_1761622494_f4c87e8d9f984259.avif', 0, 0, 0.00, '2025-10-27 17:51:35', '2025-10-29 11:20:16', 0.00),
+(13, 15, 'active', NULL, NULL, NULL, NULL, 'De Guzman', 'Victor', 'Navarro', 'victor.dguzman@protonmail.com', '09391234569', '$2y$10$Iz8szcEQujNaHbO98mv3WukiI5Xxiq9kCKU1miKn7VtZSevomqfCO', '77 Sampaloc St., Brgy. Divisoria, Tarlac City, Tarlac', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-28 10:38:28', '2025-10-28 10:38:28', 0.00),
+(14, 14, 'active', NULL, NULL, NULL, NULL, 'Tan', 'Elaine', 'Yu', 'elaine.tan@gmail.com', '09291234568', '$2y$10$3YtzPYMiUS7asEXy6A.OK.cehDvTc3/RGOEe0BOYe91Xl/QqjMHIC', '19 Orchid Way, Brgy. Bagong Silang, Baguio City, Benguet', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-28 10:38:33', '2025-10-28 10:38:33', 0.00),
+(16, 13, 'active', NULL, NULL, NULL, NULL, 'Herrera', 'Jason', 'Villanueva', 'j.herrera@outlook.com', '09191234567', '$2y$10$p.9qOxMe6pxhjQbi6k8aJOnlATnhs9oMKNgZs0aHtk.HJrZEMezk.', '300 Pine Rd., Brgy. Malvar, Angeles City, Pampanga', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-28 10:38:46', '2025-10-28 10:38:46', 0.00),
+(17, 19, 'active', NULL, NULL, NULL, NULL, 'Lozano', 'Edwin', 'Ramos', 'edwin.lozano@mail.com', '09191234573', '$2y$10$8nxwDLsbCKq.KT6WJrpSje4zg.eUFvUJf720QGMsntV..HZglDOBa', '9 Camia St., Brgy. San Miguel, Dumaguete City, Negros Oriental', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-28 10:49:38', '2025-10-28 10:49:38', 0.00),
+(18, 18, 'active', NULL, NULL, NULL, NULL, 'Catindig', 'Maribel', 'Aquino', 'maribel.catindig@aol.com', '09371234572', '$2y$10$YGcmmzn4pzHFi16ZETaTBeyQm5FVD34C.Rlz6UOFlsFhW0ylsaBgO', '21 Tulip Ln., Brgy. San Jose, Lucena City, Quezon', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-28 10:49:41', '2025-10-28 10:49:41', 0.00),
+(20, 17, 'active', NULL, NULL, NULL, NULL, 'Fabillar', 'Jonah', 'Cruz', 'jonah.fabillar@gmail.com', '09281234571', '$2y$10$FYgbNr3.CCeodrcHctf6z.jwCF7DesRiJhAoy5kgMgfpFmYdk7TYC', '402 Pearl St., Brgy. Baybay, Legazpi City, Albay', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-28 10:49:49', '2025-10-28 10:49:49', 0.00),
+(21, 16, 'active', NULL, NULL, NULL, NULL, 'Manalo', 'Rica', 'Santos', 'rica.manalo@yahoo.com', '09171234570', '$2y$10$K0euKLQpferIzA3REa27buMkszXiH9uxBxq87trzQCOF1g1RELwUW', '5 Palm Grove, Brgy. Poblacion, Roxas City, Capiz', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-28 10:49:52', '2025-10-28 10:49:52', 0.00),
+(22, 20, 'active', NULL, NULL, NULL, NULL, 'Salazar', 'Faye', 'Navarro', 'faye.salazar@outlook.com', '09291234574', '$2y$10$f/ooOupmflo4slCzns.YA.NTMKLukuuxBEzuOQoyB8HlFQvGonI/.', '9 Camia St., Brgy. San Miguel, Dumaguete City, Negros Oriental', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-28 10:55:12', '2025-10-28 16:30:07', 0.00),
+(23, 31, 'active', NULL, NULL, NULL, NULL, 'Cruz', 'Marlon', 'Gomez', 'marlon.cruz@gmail.com', '09181234585', '$2y$10$qHOcaxQ4axoxD7H29OvgL.UpjiOqh9cDSKxjPOdoCtKhtxxztI5/C', '123 Juniper St., Brgy. Malanday, Valenzuela City, Metro Manila', 'portrait', 17, 'Hi, I’m Marlon – a portrait photographer passionate about capturing the real you. I believe in creating images that tell a story, whether it\'s in the studio or on location. My goal is to make you feel at ease so your true personality shines through.\r\n\r\nWith every shoot, I focus on the details that bring out your best self – the moments, expressions, and light that make each portrait unique. Whether it\'s a professional headshot or a personal portrait, I’m here to help you look and feel your best.\r\n\r\nLet’s connect and create something memorable.', 'uploads/workers/23/worker23_profile_1761735470_54ff2d47e13aca75.avif', 0, 0, 0.00, '2025-10-28 12:01:03', '2025-10-29 11:20:16', 0.00),
+(24, 25, 'active', NULL, NULL, NULL, NULL, 'Lomboy', 'Arlene', 'Quinto', 'arlene.lomboy@icloud.com', '09191234579', '$2y$10$W11miF/ThJTH86LBkZwHOeVW00neeyVllxTmH7GnXrY3/nIuxTl1a', '88 Coconut Ln., Brgy. Baybay, Calbayog City, Samar', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-29 01:33:34', '2025-10-29 09:19:38', 0.00),
+(25, 32, 'active', NULL, NULL, NULL, NULL, 'Alano', 'Kim', '', 'miko@gmail.com', '09123467891', '$2y$10$nUdt8Tt6CIXUzFMuNFO51uJqOaE15xRM3.GGTPXNgh9frekjxgwLe', '123 Malued, Mindanao', 'photobooth', 3, 'Professional Bitch', 'uploads/workers/25/worker25_profile_1761702028_3834d27f799bdb30.png', 0, 0, 0.00, '2025-10-29 01:34:38', '2025-10-29 09:18:37', 0.00),
+(26, 30, 'active', NULL, NULL, NULL, NULL, 'Delos Reyes', 'Cynthia', 'Aquino', 'cynthia.delosreyes@zoho.com', '09391234584', '$2y$10$4C6q7H5G2hfIeuEPZu/L6.Jhlg.hGH5PcqyHgwRzlzEkZ22GBFbgy', '118 Palm St., Brgy. Bagumbayan, Davao City, Davao del Sur', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-29 08:05:27', '2025-10-29 09:19:47', 0.00);
 
 -- --------------------------------------------------------
 
@@ -698,29 +632,6 @@ CREATE TABLE `worker_availability` (
   `max_bookings` int(11) DEFAULT 1,
   `current_bookings` int(11) DEFAULT 0,
   `notes` varchar(255) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `worker_settings`
---
-
-CREATE TABLE `worker_settings` (
-  `setting_id` int(11) NOT NULL,
-  `worker_id` int(11) NOT NULL,
-  `auto_accept_bookings` tinyint(1) DEFAULT 0,
-  `require_deposit` tinyint(1) DEFAULT 1,
-  `deposit_percentage` decimal(5,2) DEFAULT 30.00,
-  `min_notice_days` int(11) DEFAULT 7,
-  `max_advance_booking_days` int(11) DEFAULT 365,
-  `cancellation_policy` text DEFAULT NULL,
-  `terms_and_conditions` text DEFAULT NULL,
-  `working_hours_start` time DEFAULT '09:00:00',
-  `working_hours_end` time DEFAULT '18:00:00',
-  `working_days` varchar(50) DEFAULT 'Mon,Tue,Wed,Thu,Fri,Sat,Sun',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -872,9 +783,24 @@ INSERT INTO `worker_works` (`work_id`, `worker_id`, `image_path`, `uploaded_at`)
 (134, 23, 'uploads/workers/23/worker23_work2.avif', '2025-10-28 12:01:03'),
 (135, 23, 'uploads/workers/23/worker23_work3.avif', '2025-10-28 12:01:03'),
 (136, 23, 'uploads/workers/23/worker23_work4.avif', '2025-10-28 12:01:03'),
-(137, 23, 'uploads/workers/23/worker23_work5.avif', '2025-10-28 12:01:03'),
 (138, 23, 'uploads/workers/23/worker23_work_1761653243_c49e7e1c206443d3.avif', '2025-10-28 12:07:23'),
-(139, 23, 'uploads/workers/23/worker23_work_1761667371_0e77085acaa1de71.avif', '2025-10-28 16:02:51');
+(139, 23, 'uploads/workers/23/worker23_work_1761667371_0e77085acaa1de71.avif', '2025-10-28 16:02:51'),
+(140, 24, 'uploads/workers/24/worker24_work1.avif', '2025-10-29 01:33:34'),
+(141, 24, 'uploads/workers/24/worker24_work2.avif', '2025-10-29 01:33:34'),
+(142, 24, 'uploads/workers/24/worker24_work3.avif', '2025-10-29 01:33:34'),
+(143, 24, 'uploads/workers/24/worker24_work4.avif', '2025-10-29 01:33:34'),
+(144, 24, 'uploads/workers/24/worker24_work5.avif', '2025-10-29 01:33:34'),
+(145, 24, 'uploads/workers/24/worker24_work6.avif', '2025-10-29 01:33:34'),
+(146, 25, 'uploads/workers/25/worker25_work1.jpg', '2025-10-29 01:34:38'),
+(147, 25, 'uploads/workers/25/worker25_work2.jpg', '2025-10-29 01:34:38'),
+(148, 25, 'uploads/workers/25/worker25_work3.jpg', '2025-10-29 01:34:38'),
+(149, 25, 'uploads/workers/25/worker25_work4.jpg', '2025-10-29 01:34:38'),
+(150, 26, 'uploads/workers/26/worker26_work1.avif', '2025-10-29 08:05:27'),
+(151, 26, 'uploads/workers/26/worker26_work2.avif', '2025-10-29 08:05:27'),
+(152, 26, 'uploads/workers/26/worker26_work3.avif', '2025-10-29 08:05:27'),
+(153, 26, 'uploads/workers/26/worker26_work4.avif', '2025-10-29 08:05:27'),
+(154, 26, 'uploads/workers/26/worker26_work5.avif', '2025-10-29 08:05:27'),
+(155, 26, 'uploads/workers/26/worker26_work6.avif', '2025-10-29 08:05:27');
 
 --
 -- Indexes for dumped tables
@@ -923,14 +849,6 @@ ALTER TABLE `application_works`
   ADD KEY `idx_application` (`application_id`);
 
 --
--- Indexes for table `booking_modifications`
---
-ALTER TABLE `booking_modifications`
-  ADD PRIMARY KEY (`modification_id`),
-  ADD KEY `idx_conversation` (`conversation_id`),
-  ADD KEY `idx_created_at` (`created_at`);
-
---
 -- Indexes for table `conversations`
 --
 ALTER TABLE `conversations`
@@ -956,6 +874,14 @@ ALTER TABLE `packages`
   ADD PRIMARY KEY (`package_id`),
   ADD KEY `idx_worker` (`worker_id`),
   ADD KEY `idx_status` (`status`);
+
+--
+-- Indexes for table `password_reset_otps`
+--
+ALTER TABLE `password_reset_otps`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_email_otp` (`email`,`otp_code`),
+  ADD KEY `idx_expires_at` (`expires_at`);
 
 --
 -- Indexes for table `ratings`
@@ -986,7 +912,10 @@ ALTER TABLE `workers`
   ADD KEY `application_id` (`application_id`),
   ADD KEY `idx_email` (`email`),
   ADD KEY `idx_phone` (`phoneNumber`),
-  ADD KEY `idx_specialty` (`specialty`);
+  ADD KEY `idx_specialty` (`specialty`),
+  ADD KEY `fk_workers_suspended_by` (`suspended_by`),
+  ADD KEY `idx_suspended_until` (`suspended_until`),
+  ADD KEY `idx_status_suspended_until` (`status`,`suspended_until`);
 
 --
 -- Indexes for table `worker_availability`
@@ -996,13 +925,6 @@ ALTER TABLE `worker_availability`
   ADD UNIQUE KEY `unique_worker_date` (`worker_id`,`date`),
   ADD KEY `idx_worker_date` (`worker_id`,`date`),
   ADD KEY `idx_date` (`date`);
-
---
--- Indexes for table `worker_settings`
---
-ALTER TABLE `worker_settings`
-  ADD PRIMARY KEY (`setting_id`),
-  ADD UNIQUE KEY `unique_worker_settings` (`worker_id`);
 
 --
 -- Indexes for table `worker_works`
@@ -1019,49 +941,43 @@ ALTER TABLE `worker_works`
 -- AUTO_INCREMENT for table `admin`
 --
 ALTER TABLE `admin`
-  MODIFY `admin_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `admin_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `ai_temp_bookings`
 --
 ALTER TABLE `ai_temp_bookings`
-  MODIFY `temp_booking_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `temp_booking_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `application`
 --
 ALTER TABLE `application`
-  MODIFY `application_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
+  MODIFY `application_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT for table `application_resume`
 --
 ALTER TABLE `application_resume`
-  MODIFY `resume_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
+  MODIFY `resume_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT for table `application_works`
 --
 ALTER TABLE `application_works`
-  MODIFY `work_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=191;
-
---
--- AUTO_INCREMENT for table `booking_modifications`
---
-ALTER TABLE `booking_modifications`
-  MODIFY `modification_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `work_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=195;
 
 --
 -- AUTO_INCREMENT for table `conversations`
 --
 ALTER TABLE `conversations`
-  MODIFY `conversation_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `conversation_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `messages`
 --
 ALTER TABLE `messages`
-  MODIFY `message_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
+  MODIFY `message_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `packages`
@@ -1070,22 +986,28 @@ ALTER TABLE `packages`
   MODIFY `package_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
+-- AUTO_INCREMENT for table `password_reset_otps`
+--
+ALTER TABLE `password_reset_otps`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `ratings`
 --
 ALTER TABLE `ratings`
-  MODIFY `rating_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `rating_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `workers`
 --
 ALTER TABLE `workers`
-  MODIFY `worker_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `worker_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT for table `worker_availability`
@@ -1094,16 +1016,10 @@ ALTER TABLE `worker_availability`
   MODIFY `availability_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `worker_settings`
---
-ALTER TABLE `worker_settings`
-  MODIFY `setting_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `worker_works`
 --
 ALTER TABLE `worker_works`
-  MODIFY `work_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=140;
+  MODIFY `work_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=156;
 
 --
 -- Constraints for dumped tables
@@ -1128,12 +1044,6 @@ ALTER TABLE `application_resume`
 --
 ALTER TABLE `application_works`
   ADD CONSTRAINT `application_works_ibfk_1` FOREIGN KEY (`application_id`) REFERENCES `application` (`application_id`) ON DELETE CASCADE;
-
---
--- Constraints for table `booking_modifications`
---
-ALTER TABLE `booking_modifications`
-  ADD CONSTRAINT `booking_modifications_ibfk_1` FOREIGN KEY (`conversation_id`) REFERENCES `conversations` (`conversation_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `conversations`
@@ -1166,6 +1076,7 @@ ALTER TABLE `ratings`
 -- Constraints for table `workers`
 --
 ALTER TABLE `workers`
+  ADD CONSTRAINT `fk_workers_suspended_by` FOREIGN KEY (`suspended_by`) REFERENCES `admin` (`admin_id`) ON DELETE SET NULL,
   ADD CONSTRAINT `workers_ibfk_1` FOREIGN KEY (`application_id`) REFERENCES `application` (`application_id`) ON DELETE SET NULL;
 
 --
@@ -1173,12 +1084,6 @@ ALTER TABLE `workers`
 --
 ALTER TABLE `worker_availability`
   ADD CONSTRAINT `worker_availability_ibfk_1` FOREIGN KEY (`worker_id`) REFERENCES `workers` (`worker_id`) ON DELETE CASCADE;
-
---
--- Constraints for table `worker_settings`
---
-ALTER TABLE `worker_settings`
-  ADD CONSTRAINT `worker_settings_ibfk_1` FOREIGN KEY (`worker_id`) REFERENCES `workers` (`worker_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `worker_works`

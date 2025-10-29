@@ -106,7 +106,8 @@ body {
 .form input[type="email"],
 .form input[type="tel"],
 .form input[type="password"],
-.form input[type="file"] {
+.form input[type="file"],
+.form select {
     padding: 14px;
     border-radius: 8px;
     border: 1px solid rgba(255, 107, 0, 0.15);
@@ -122,11 +123,36 @@ body {
 .form input[type="email"]:focus,
 .form input[type="tel"]:focus,
 .form input[type="password"]:focus,
-.form input[type="file"]:focus {
+.form input[type="file"]:focus,
+.form select:focus {
     outline: none;
     border-color: #ff6b00;
     background: rgba(35, 35, 35, 0.9);
     box-shadow: 0 0 0 2px rgba(255, 107, 0, 0.2);
+}
+
+/* Select dropdown specific styling */
+.form select {
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ff6b00' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+    padding-right: 40px;
+}
+
+.form select option {
+    background: rgba(30, 30, 30, 0.95);
+    color: #fff;
+    padding: 10px;
+    border: none;
+}
+
+.form select:hover {
+    border-color: rgba(255, 107, 0, 0.3);
 }
 
 input::placeholder {

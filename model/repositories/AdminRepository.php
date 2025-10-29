@@ -70,7 +70,7 @@ class AdminRepository extends BaseRepository
     public function getRejectedApplications(int $limit, int $offset, string $search = ''): array
     {
         // Step 1: Fetch main rejected applications
-        $sql = "SELECT application_id, firstName, middleName, lastName, email, phoneNumber, address, status, created_at, updated_at
+        $sql = "SELECT application_id, firstName, middleName, lastName, email, phoneNumber, address, status, rejection_reason, created_at, updated_at
             FROM application
             WHERE status = 'rejected'";
         $params = [];
@@ -237,11 +237,11 @@ class AdminRepository extends BaseRepository
         try {
             $sql = "INSERT INTO workers (
             application_id, lastName, firstName, middleName, email, phoneNumber, password,
-            address, specialty, experience_years, bio, profile_photo, rating_average,
+            address, specialty, experience_years, bio, profile_photo,
             total_ratings, total_bookings, total_earnings, status, created_at
         ) VALUES (
             :application_id, :lastName, :firstName, :middleName, :email, :phoneNumber, :password,
-            :address, :specialty, 0, NULL, NULL, 0.00, 0, 0, 0.00, 'active', NOW()
+            :address, :specialty, 0, NULL, NULL, 0, 0, 0.00, 'active', NOW()
         )";
 
             $stmt = $this->conn->prepare($sql);

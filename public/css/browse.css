@@ -191,22 +191,7 @@
     border-color: #ff6b00;
 }
 
-.featured-badge {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    padding: 8px 14px;
-    background: linear-gradient(135deg, #ffa500, #ff8533);
-    color: #000;
-    font-size: 12px;
-    font-weight: 700;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    z-index: 10;
-    box-shadow: 0 4px 15px rgba(255, 165, 0, 0.4);
-}
+/* Featured badge removed as requested */
 
 /* Portfolio Preview */
 .portfolio-preview {

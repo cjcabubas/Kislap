@@ -101,14 +101,13 @@ if (!$admin) {
                         <div class="password-input">
                             <input type="password" id="password" name="password" required 
                                    placeholder="Enter secure password" 
-                                   minlength="8" maxlength="128"
-                                   pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':&quot;\\|,.<>\/?]).{8,}$"
-                                   title="Password must be at least 8 characters with uppercase, lowercase, number, and special character">
+                                   minlength="6"
+                                   title="Password must be at least 6 characters long">
                             <button type="button" class="toggle-password" onclick="togglePassword('password')">
                                 <i class="fas fa-eye"></i>
                             </button>
                         </div>
-                        <small class="form-help">Password must contain: uppercase, lowercase, number, and special character (min 8 chars)</small>
+                        <small class="form-help">Password must be at least 6 characters long</small>
                     </div>
 
                     <div class="form-group">
@@ -116,7 +115,7 @@ if (!$admin) {
                         <div class="password-input">
                             <input type="password" id="confirmPassword" name="confirmPassword" required 
                                    placeholder="Confirm password" 
-                                   minlength="8" maxlength="128"
+                                   minlength="6"
                                    title="Re-enter the same password">
                             <button type="button" class="toggle-password" onclick="togglePassword('confirmPassword')">
                                 <i class="fas fa-eye"></i>

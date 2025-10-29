@@ -88,7 +88,10 @@ $search = $search ?? '';
                         <td><?php echo date('M d, Y', strtotime($worker['created_at'])); ?></td>
                         <td class="action-btns">
                             <?php if ($worker['account_status'] === 'active'): ?>
-                                <button class="btn btn-suspend" onclick="handleWorkerAction(<?php echo $worker['worker_id']; ?>, 'suspend')">Suspend</button>
+                                <button class="btn btn-suspend" onclick="openSuspensionModal(<?php echo $worker['worker_id']; ?>, '<?php echo htmlspecialchars($worker['firstName'] . ' ' . $worker['lastName']); ?>')">Suspend</button>
+                                <button class="btn btn-ban" onclick="handleWorkerAction(<?php echo $worker['worker_id']; ?>, 'ban')">Ban</button>
+                            <?php elseif ($worker['account_status'] === 'suspended'): ?>
+                                <button class="btn btn-activate" onclick="handleWorkerAction(<?php echo $worker['worker_id']; ?>, 'activate')">Unsuspend</button>
                                 <button class="btn btn-ban" onclick="handleWorkerAction(<?php echo $worker['worker_id']; ?>, 'ban')">Ban</button>
                             <?php else: ?>
                                 <button class="btn btn-activate" onclick="handleWorkerAction(<?php echo $worker['worker_id']; ?>, 'activate')">Activate</button>
@@ -113,12 +116,107 @@ $search = $search ?? '';
     </div>
 </div>
 
+<!-- Suspension Modal -->
+<div id="suspensionModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-ban"></i> Suspend Worker</h3>
+            <button type="button" class="modal-close" onclick="closeSuspensionModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form id="suspensionForm">
+            <div class="modal-body">
+                <p class="worker-info">
+                    <strong>Worker:</strong> <span id="workerName"></span>
+                </p>
+                
+                <div class="form-group">
+                    <label for="suspensionReason">Reason for Suspension <span class="required">*</span></label>
+                    <textarea id="suspensionReason" name="reason" rows="4" 
+                              placeholder="Enter the reason for suspension..." required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="durationType">Suspension Duration</label>
+                    <select id="durationType" name="duration_type" onchange="toggleDurationInput()">
+                        <option value="hours">Hours</option>
+                        <option value="days" selected>Days</option>
+                        <option value="weeks">Weeks</option>
+                        <option value="permanent">Permanent</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="durationGroup">
+                    <label for="duration">Duration Amount</label>
+                    <input type="number" id="duration" name="duration" min="1" value="7" required>
+                </div>
+                
+                <div class="suspension-preview">
+                    <strong>Preview:</strong>
+                    <span id="suspensionPreview">Worker will be suspended for 7 days</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-cancel" onclick="closeSuspensionModal()">Cancel</button>
+                <button type="submit" class="btn btn-suspend">
+                    <i class="fas fa-ban"></i> Suspend Worker
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
+    let currentWorkerId = null;
+
+    function openSuspensionModal(workerId, workerName) {
+        currentWorkerId = workerId;
+        document.getElementById('workerName').textContent = workerName;
+        document.getElementById('suspensionModal').style.display = 'block';
+        document.body.style.overflow = 'hidden';
+        updateSuspensionPreview();
+    }
+
+    function closeSuspensionModal() {
+        document.getElementById('suspensionModal').style.display = 'none';
+        document.body.style.overflow = '';
+        document.getElementById('suspensionForm').reset();
+        currentWorkerId = null;
+    }
+
+    function toggleDurationInput() {
+        const durationType = document.getElementById('durationType').value;
+        const durationGroup = document.getElementById('durationGroup');
+        const durationInput = document.getElementById('duration');
+        
+        if (durationType === 'permanent') {
+            durationGroup.style.display = 'none';
+            durationInput.required = false;
+        } else {
+            durationGroup.style.display = 'block';
+            durationInput.required = true;
+        }
+        updateSuspensionPreview();
+    }
+
+    function updateSuspensionPreview() {
+        const durationType = document.getElementById('durationType').value;
+        const duration = document.getElementById('duration').value;
+        const preview = document.getElementById('suspensionPreview');
+        
+        if (durationType === 'permanent') {
+            preview.textContent = 'Worker will be permanently suspended';
+            preview.style.color = '#dc3545';
+        } else {
+            preview.textContent = `Worker will be suspended for ${duration} ${durationType}`;
+            preview.style.color = '#ffc107';
+        }
+    }
+
     function handleWorkerAction(id, action) {
         let message;
-        if (action === 'suspend') {
-            message = 'Are you sure you want to SUSPEND this worker? They will not be able to take bookings.';
-        } else if (action === 'ban') {
+        if (action === 'ban') {
             message = 'Are you sure you want to BAN this worker? This action is usually permanent.';
         } else if (action === 'activate') {
             message = 'Are you sure you want to ACTIVATE this worker?';
@@ -126,10 +224,13 @@ $search = $search ?? '';
 
         if (!confirm(message)) return;
 
-        fetch(`/Kislap/index.php?controller=Admin&action=handleWorkerAction`, {
+        const endpoint = action === 'activate' ? 'unsuspendWorker' : 'handleWorkerAction';
+        const payload = action === 'activate' ? { worker_id: id } : { worker_id: id, action: action };
+
+        fetch(`/Kislap/index.php?controller=Admin&action=${endpoint}`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ worker_id: id, action: action })
+            body: JSON.stringify(payload)
         })
             .then(response => response.json())
             .then(data => {
@@ -144,6 +245,69 @@ $search = $search ?? '';
                 console.error(err);
                 alert('Request failed. Check console for details.');
             });
+    }
+
+    // Handle suspension form submission
+    document.getElementById('suspensionForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (!currentWorkerId) return;
+        
+        const formData = new FormData(this);
+        const reason = formData.get('reason').trim();
+        const durationType = formData.get('duration_type');
+        const duration = durationType === 'permanent' ? null : parseInt(formData.get('duration'));
+        
+        if (!reason) {
+            alert('Please enter a reason for suspension');
+            return;
+        }
+        
+        if (durationType !== 'permanent' && (!duration || duration < 1)) {
+            alert('Please enter a valid duration');
+            return;
+        }
+        
+        const payload = {
+            worker_id: currentWorkerId,
+            reason: reason,
+            duration_type: durationType
+        };
+        
+        if (durationType !== 'permanent') {
+            payload.duration = duration;
+        }
+        
+        fetch('/Kislap/index.php?controller=Admin&action=suspendWorker', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                closeSuspensionModal();
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Request failed. Check console for details.');
+        });
+    });
+
+    // Update preview when duration changes
+    document.getElementById('duration').addEventListener('input', updateSuspensionPreview);
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('suspensionModal');
+        if (event.target === modal) {
+            closeSuspensionModal();
+        }
     }
 
     // Search functionality

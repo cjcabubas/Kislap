@@ -32,12 +32,12 @@ class BrowseController
         // Filters and Sorting
         $search = trim($_GET['search'] ?? '');
         $category = trim($_GET['category'] ?? 'all');
-        $sort = $_GET['sort'] ?? 'featured';
+        $sort = $_GET['sort'] ?? 'rating';
 
         // Validate sort parameter
-        $validSorts = ['featured', 'rating', 'reviews', 'price_low', 'price_high', 'newest'];
+        $validSorts = ['rating', 'reviews', 'price_low', 'price_high', 'newest'];
         if (!in_array($sort, $validSorts)) {
-            $sort = 'featured';
+            $sort = 'rating';
         }
 
         // Fetch data

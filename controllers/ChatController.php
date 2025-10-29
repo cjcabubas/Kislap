@@ -191,6 +191,14 @@ class ChatController
     
     private function processAiMessage(int $conversationId, string $userMessage, array $conversation): array
     {
+        // Check if conversation is cancelled - don't process AI responses
+        if ($conversation['booking_status'] === 'cancelled') {
+            return [
+                'botMessage' => null,
+                'packages' => []
+            ];
+        }
+        
         $tempBooking = $this->chatRepo->getTempBooking($conversationId);
 
         if ($this->wantsHumanAgent($userMessage)) {

@@ -53,7 +53,6 @@ class WorkerController
                     exit;
                 }
 
-
                 if (!password_verify($password, $worker['password'])) {
                     $_SESSION['notification'] = [
                         'type' => 'error',
@@ -63,9 +62,29 @@ class WorkerController
                     exit;
                 }
 
+                // Check if worker is suspended BEFORE logging them in
+                if ($worker['status'] === 'suspended') {
+                    $suspensionInfo = $this->checkSuspensionStatus($worker);
+                    if ($suspensionInfo['is_suspended']) {
+                        $_SESSION['suspension_info'] = $suspensionInfo;
+                        header("Location: index.php?controller=Worker&action=suspended");
+                        exit;
+                    }
+                }
+
+                // Check if worker is banned BEFORE logging them in
+                if ($worker['status'] === 'banned') {
+                    $_SESSION['notification'] = [
+                        'type' => 'error',
+                        'message' => 'Your account has been permanently banned. Contact support for more information.'
+                    ];
+                    header("Location: index.php?controller=Worker&action=login");
+                    exit;
+                }
+
                 unset($worker['password']);
 
-                // Just store the complete worker data (minus password)
+                // Store the complete worker data (minus password) - only for active workers
                 $_SESSION['worker'] = $worker;
                 $_SESSION['worker']['role'] = 'worker';
                 header("Location: index.php?controller=Worker&action=dashboard");
@@ -93,6 +112,102 @@ class WorkerController
     }
 
     // ========================================
+    // SUSPENSION MANAGEMENT
+    // ========================================
+
+    public function suspended(): void
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $suspensionInfo = $_SESSION['suspension_info'] ?? null;
+        if (!$suspensionInfo) {
+            header("Location: index.php?controller=Worker&action=login");
+            exit;
+        }
+
+        require "views/worker/suspended.php";
+    }
+
+
+
+    private function checkSuspensionStatus(array $worker): array
+    {
+        $currentTime = new DateTime();
+        $suspendedUntil = $worker['suspended_until'] ? new DateTime($worker['suspended_until']) : null;
+
+        // If no suspension end date, it's permanent suspension
+        if (!$suspendedUntil) {
+            return [
+                'is_suspended' => true,
+                'is_permanent' => true,
+                'reason' => $worker['suspension_reason'] ?? 'No reason provided',
+                'suspended_at' => $worker['suspended_at'] ?? null,
+                'time_remaining' => null,
+                'worker_id' => $worker['worker_id'],
+                'worker_name' => trim(($worker['firstName'] ?? '') . ' ' . ($worker['lastName'] ?? '')),
+                'worker_email' => $worker['email'] ?? ''
+            ];
+        }
+
+        // Check if suspension has expired
+        if ($currentTime >= $suspendedUntil) {
+            // Suspension expired, reactivate worker
+            $this->repo->reactivateWorker($worker['worker_id']);
+            return ['is_suspended' => false];
+        }
+
+        // Calculate time remaining
+        $interval = $currentTime->diff($suspendedUntil);
+        $timeRemaining = $this->formatTimeRemaining($interval);
+
+        return [
+            'is_suspended' => true,
+            'is_permanent' => false,
+            'reason' => $worker['suspension_reason'] ?? 'No reason provided',
+            'suspended_at' => $worker['suspended_at'] ?? null,
+            'suspended_until' => $worker['suspended_until'],
+            'time_remaining' => $timeRemaining,
+            'worker_id' => $worker['worker_id'],
+            'worker_name' => trim(($worker['firstName'] ?? '') . ' ' . ($worker['lastName'] ?? '')),
+            'worker_email' => $worker['email'] ?? ''
+        ];
+    }
+
+    private function formatTimeRemaining(DateInterval $interval): string
+    {
+        $parts = [];
+        
+        if ($interval->d > 0) {
+            $parts[] = $interval->d . ' day' . ($interval->d > 1 ? 's' : '');
+        }
+        if ($interval->h > 0) {
+            $parts[] = $interval->h . ' hour' . ($interval->h > 1 ? 's' : '');
+        }
+        if ($interval->i > 0 && $interval->d == 0) {
+            $parts[] = $interval->i . ' minute' . ($interval->i > 1 ? 's' : '');
+        }
+
+        return empty($parts) ? 'Less than a minute' : implode(', ', $parts);
+    }
+
+    private function isWorkerSuspended(array $worker): bool
+    {
+        if ($worker['status'] !== 'suspended') {
+            return false;
+        }
+
+        $suspensionInfo = $this->checkSuspensionStatus($worker);
+        if ($suspensionInfo['is_suspended']) {
+            $_SESSION['suspension_info'] = $suspensionInfo;
+            return true;
+        }
+
+        return false;
+    }
+
+    // ========================================
     // DASHBOARD
     // ========================================
     
@@ -108,6 +223,12 @@ class WorkerController
             exit;
         }
 
+        // Check suspension status
+        if ($this->isWorkerSuspended($worker)) {
+            header("Location: index.php?controller=Worker&action=login");
+            exit;
+        }
+
         require_once __DIR__ . '/../model/repositories/ChatRepository.php';
         $chatRepo = new ChatRepository();
         
@@ -115,7 +236,19 @@ class WorkerController
         
         $stats = $chatRepo->getWorkerBookingStats($workerId);
         $recentBookings = $chatRepo->getWorkerBookings($workerId, null, 5);
-        $earningsData = $this->repo->getWorkerEarnings($workerId);
+        
+        // Calculate worker's revenue share (90% after 10% platform fee)
+        $stats['total_revenue'] = ($stats['total_revenue'] ?? 0) * 0.9;
+        $stats['avg_booking_value'] = ($stats['avg_booking_value'] ?? 0) * 0.9;
+        
+        // Calculate earnings from completed bookings only (minus 30% platform fee)
+        $completedEarnings = $this->getCompletedBookingsEarnings($workerId);
+        
+        $earningsData = [
+            'total_earnings' => $completedEarnings,
+            'rating_average' => $worker['average_rating'] ?? 0,
+            'total_ratings' => $worker['total_ratings'] ?? 0
+        ];
         
         require __DIR__ . '/../views/worker/dashboard.php';
     }
@@ -132,6 +265,12 @@ class WorkerController
 
         $worker = $_SESSION['worker'] ?? null;
         if (!$worker) {
+            header("Location: index.php?controller=Worker&action=login");
+            exit;
+        }
+
+        // Check suspension status
+        if ($this->isWorkerSuspended($worker)) {
             header("Location: index.php?controller=Worker&action=login");
             exit;
         }
@@ -946,4 +1085,814 @@ class WorkerController
         }
         exit;
     }
+
+    // ========================================
+    // APPEALS SYSTEM
+    // ========================================
+
+    public function submitAppeal(): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header("Location: index.php?controller=Worker&action=login");
+            exit;
+        }
+
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $suspensionInfo = $_SESSION['suspension_info'] ?? null;
+        if (!$suspensionInfo) {
+            header("Location: index.php?controller=Worker&action=login");
+            exit;
+        }
+
+        $subject = trim($_POST['subject'] ?? '');
+        $message = trim($_POST['message'] ?? '');
+        $contactEmail = trim($_POST['contact_email'] ?? '');
+
+        if (empty($subject) || empty($message)) {
+            $_SESSION['notification'] = [
+                'type' => 'error',
+                'message' => 'Appeal not sent - Please fill in all required fields (subject and message).'
+            ];
+            header("Location: index.php?controller=Worker&action=suspended");
+            exit;
+        }
+
+        if (strlen($message) < 20) {
+            $_SESSION['notification'] = [
+                'type' => 'error',
+                'message' => 'Appeal not sent - Please provide a more detailed explanation (at least 20 characters).'
+            ];
+            header("Location: index.php?controller=Worker&action=suspended");
+            exit;
+        }
+
+        try {
+            $success = $this->sendAppealEmail($subject, $message, $contactEmail, $suspensionInfo);
+
+            if ($success) {
+                $_SESSION['notification'] = [
+                    'type' => 'success',
+                    'message' => 'Appeal submitted'
+                ];
+            } else {
+                $_SESSION['notification'] = [
+                    'type' => 'error',
+                    'message' => 'Appeal was not submitted'
+                ];
+            }
+        } catch (Exception $e) {
+            $_SESSION['notification'] = [
+                'type' => 'error',
+                'message' => 'Appeal was not submitted'
+            ];
+        }
+
+        header("Location: index.php?controller=Worker&action=suspended");
+        exit;
+    }
+
+
+
+    private function sendAppealEmail(string $subject, string $message, string $contactEmail, array $suspensionInfo): bool
+    {
+        $helpdeskEmail = 'kislaphelpdesk@gmail.com'; // Send to helpdesk (itself)
+        $fromEmail = 'kislaphelpdesk@gmail.com';
+        $fromName = 'Kislap Appeals System';
+
+        // Get worker info from suspension info (since worker is not logged in)
+        $workerName = $suspensionInfo['worker_name'] ?? 'Unknown Worker';
+        $workerEmail = $suspensionInfo['worker_email'] ?? 'Unknown Email';
+        $workerId = $suspensionInfo['worker_id'] ?? 'Unknown ID';
+
+        $emailSubject = "Suspension Appeal: $subject - Worker ID: $workerId";
+        
+        $emailBody = $this->getAppealEmailTemplate(
+            $subject,
+            $message,
+            $contactEmail,
+            $suspensionInfo,
+            $workerName,
+            $workerEmail,
+            $workerId
+        );
+
+        // Use Gmail SMTP settings
+        $smtpHost = 'smtp.gmail.com';
+        $smtpPort = 587;
+        $smtpUsername = 'kislaphelpdesk@gmail.com';
+        $smtpPassword = 'vbvp uokz yyfa hfnf';
+
+        $headers = "MIME-Version: 1.0\r\n";
+        $headers .= "Content-type: text/html; charset=UTF-8\r\n";
+        $headers .= "From: {$fromName} <{$smtpUsername}>\r\n";
+        $headers .= "Reply-To: " . ($contactEmail ?: $workerEmail) . "\r\n";
+
+
+
+        // Use the exact same email sending approach as AuthController
+        return $this->sendAppealEmailSimple($helpdeskEmail, $emailSubject, $emailBody);
+    }
+
+    private function getAppealEmailTemplate(string $subject, string $message, string $contactEmail, array $suspensionInfo, string $workerName, string $workerEmail, string $workerId): string
+    {
+        $suspensionType = $suspensionInfo['is_permanent'] ? 'Permanent' : 'Temporary';
+        $suspensionReason = htmlspecialchars($suspensionInfo['reason']);
+        $suspendedAt = $suspensionInfo['suspended_at'] ?? 'Unknown';
+        $suspendedUntil = $suspensionInfo['suspended_until'] ?? 'N/A';
+        $timeRemaining = $suspensionInfo['time_remaining'] ?? 'N/A';
+
+        return "
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset='UTF-8'>
+            <title>Suspension Appeal</title>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                .container { max-width: 700px; margin: 0 auto; padding: 20px; }
+                .header { background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }
+                .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+                .info-section { background: #fff; border: 1px solid #ddd; padding: 20px; margin: 20px 0; border-radius: 8px; }
+                .appeal-message { background: #e8f5e8; border: 1px solid #28a745; padding: 20px; border-radius: 8px; margin: 20px 0; }
+                .suspension-details { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 20px 0; }
+                .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+                .label { font-weight: bold; color: #555; }
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <div class='header'>
+                    <h1>⚖️ Suspension Appeal Submitted</h1>
+                    <p>Kislap Photography Platform</p>
+                </div>
+                <div class='content'>
+                    <div class='info-section'>
+                        <h3>Worker Information</h3>
+                        <p><span class='label'>Name:</span> $workerName</p>
+                        <p><span class='label'>Worker ID:</span> $workerId</p>
+                        <p><span class='label'>Email:</span> $workerEmail</p>
+                        <p><span class='label'>Contact Email:</span> " . ($contactEmail ?: 'Same as worker email') . "</p>
+                    </div>
+                    
+                    <div class='suspension-details'>
+                        <h3>Current Suspension Details</h3>
+                        <p><span class='label'>Type:</span> $suspensionType Suspension</p>
+                        <p><span class='label'>Reason:</span> $suspensionReason</p>
+                        <p><span class='label'>Suspended At:</span> $suspendedAt</p>
+                        " . (!$suspensionInfo['is_permanent'] ? "<p><span class='label'>Suspended Until:</span> $suspendedUntil</p><p><span class='label'>Time Remaining:</span> $timeRemaining</p>" : "") . "
+                    </div>
+                    
+                    <div class='appeal-message'>
+                        <h3>Appeal Details</h3>
+                        <p><span class='label'>Appeal Type:</span> " . ucwords(str_replace('_', ' ', $subject)) . "</p>
+                        <p><span class='label'>Worker's Statement:</span></p>
+                        <div style='background: white; padding: 15px; border-radius: 5px; margin-top: 10px;'>
+                            " . nl2br(htmlspecialchars($message)) . "
+                        </div>
+                    </div>
+                    
+                    <div class='info-section'>
+                        <h3>Next Steps</h3>
+                        <ul>
+                            <li>Review the appeal within 24-48 hours</li>
+                            <li>Investigate the original suspension reason</li>
+                            <li>Contact the worker if additional information is needed</li>
+                            <li>Make a decision and notify the worker</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class='footer'>
+                    <p>© 2025 Kislap Photography Platform - Appeals System</p>
+                    <p>This appeal was submitted on " . date('F j, Y \a\t g:i A') . "</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        ";
+    }
+
+
+
+    /**
+     * Send email using Gmail SMTP (same implementation as AuthController)
+     */
+    private function sendWithGmailSMTP(string $to, string $subject, string $message, string $fromName): bool
+    {
+        try {
+            // Gmail SMTP settings
+            $smtpHost = 'smtp.gmail.com';
+            $smtpPort = 587;
+            $smtpUsername = 'kislaphelpdesk@gmail.com'; // Gmail address
+            $smtpPassword = 'vbvp uokz yyfa hfnf';      // Gmail App Password
+            
+            // Create socket connection to Gmail SMTP
+            $socket = fsockopen($smtpHost, $smtpPort, $errno, $errstr, 30);
+            if (!$socket) {
+                error_log("SMTP connection failed: $errstr ($errno)");
+                return false;
+            }
+            
+            // Read initial response
+            $response = fgets($socket, 515);
+            if (substr($response, 0, 3) != '220') {
+                error_log("SMTP initial response failed: $response");
+                fclose($socket);
+                return false;
+            }
+            
+            // Send EHLO command
+            fputs($socket, "EHLO localhost\r\n");
+            $response = fgets($socket, 515);
+            
+            // Start TLS encryption
+            fputs($socket, "STARTTLS\r\n");
+            $response = fgets($socket, 515);
+            if (substr($response, 0, 3) != '220') {
+                error_log("STARTTLS failed: $response");
+                fclose($socket);
+                return false;
+            }
+            
+            // Enable crypto
+            if (!stream_socket_enable_crypto($socket, true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) {
+                error_log("Failed to enable TLS encryption");
+                fclose($socket);
+                return false;
+            }
+            
+            // Send EHLO again after TLS
+            fputs($socket, "EHLO localhost\r\n");
+            $response = fgets($socket, 515);
+            
+            // Authenticate
+            fputs($socket, "AUTH LOGIN\r\n");
+            $response = fgets($socket, 515);
+            if (substr($response, 0, 3) != '334') {
+                error_log("AUTH LOGIN failed: $response");
+                fclose($socket);
+                return false;
+            }
+            
+            // Send username (base64 encoded)
+            fputs($socket, base64_encode($smtpUsername) . "\r\n");
+            $response = fgets($socket, 515);
+            if (substr($response, 0, 3) != '334') {
+                error_log("Username authentication failed: $response");
+                fclose($socket);
+                return false;
+            }
+            
+            // Send password (base64 encoded)
+            fputs($socket, base64_encode($smtpPassword) . "\r\n");
+            $response = fgets($socket, 515);
+            if (substr($response, 0, 3) != '235') {
+                error_log("Password authentication failed: $response");
+                fclose($socket);
+                return false;
+            }
+            
+            // Send MAIL FROM
+            fputs($socket, "MAIL FROM: <$smtpUsername>\r\n");
+            $response = fgets($socket, 515);
+            if (substr($response, 0, 3) != '250') {
+                error_log("MAIL FROM failed: $response");
+                fclose($socket);
+                return false;
+            }
+            
+            // Send RCPT TO
+            fputs($socket, "RCPT TO: <$to>\r\n");
+            $response = fgets($socket, 515);
+            if (substr($response, 0, 3) != '250') {
+                error_log("RCPT TO failed: $response");
+                fclose($socket);
+                return false;
+            }
+            
+            // Send DATA command
+            fputs($socket, "DATA\r\n");
+            $response = fgets($socket, 515);
+            if (substr($response, 0, 3) != '354') {
+                error_log("DATA command failed: $response");
+                fclose($socket);
+                return false;
+            }
+            
+            // Send email headers and body
+            $headers = "MIME-Version: 1.0\r\n";
+            $headers .= "Content-type: text/html; charset=UTF-8\r\n";
+            $headers .= "From: {$fromName} <{$smtpUsername}>\r\n";
+            $headers .= "To: <{$to}>\r\n";
+            $headers .= "Subject: {$subject}\r\n";
+            $headers .= "Date: " . date('r') . "\r\n";
+            $headers .= "\r\n";
+            
+            fputs($socket, $headers . $message . "\r\n.\r\n");
+            $response = fgets($socket, 515);
+            if (substr($response, 0, 3) != '250') {
+                error_log("Email sending failed: $response");
+                fclose($socket);
+                return false;
+            }
+            
+            // Send QUIT
+            fputs($socket, "QUIT\r\n");
+            fclose($socket);
+            
+            // Log successful email
+            error_log("Appeal email sent successfully to: $to");
+            
+            return true;
+            
+        } catch (Exception $e) {
+            error_log("Gmail SMTP error in WorkerController: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Send email using the exact same method as AuthController
+     */
+    private function sendEmailLikeAuthController(string $to, string $subject, string $message, string $appealSubject = '', string $appealMessage = '', array $suspensionInfo = []): bool
+    {
+        // Production email settings (same as AuthController)
+        $fromEmail = 'kislaphelpdesk@gmail.com';
+        $fromName = 'Kislap Photography Platform';
+        
+        // Log email attempt with more details
+        error_log("=== EMAIL SENDING DEBUG START ===");
+        error_log("To: $to");
+        error_log("Subject: $subject");
+        error_log("From: $fromName <$fromEmail>");
+        error_log("Message length: " . strlen($message) . " characters");
+        
+        // Try a very simple email first
+        error_log("Trying simple text email...");
+        
+        $simpleSubject = "Test Appeal - Worker Suspension";
+        $simpleMessage = "This is a test appeal email from the Kislap system.\n\nWorker: " . ($suspensionInfo['worker_name'] ?? 'Unknown') . "\nReason: " . $appealSubject . "\nMessage: " . substr($appealMessage, 0, 100) . "...";
+        
+        $simpleHeaders = "From: kislaphelpdesk@gmail.com\r\n";
+        $simpleHeaders .= "Reply-To: kislaphelpdesk@gmail.com\r\n";
+        
+        $result = mail($to, $simpleSubject, $simpleMessage, $simpleHeaders);
+        
+        if ($result) {
+            error_log("=== SIMPLE EMAIL SUCCESS ===");
+            error_log("Simple appeal email sent to: $to");
+        } else {
+            error_log("=== SIMPLE EMAIL FAILED ===");
+            error_log("Even simple mail() failed for: $to");
+            
+            // Try Gmail SMTP as backup
+            error_log("Trying Gmail SMTP as backup...");
+            $result = $this->sendWithGmailSMTPLikeAuth($to, $subject, $message, $fromEmail, $fromName);
+            
+            if ($result) {
+                error_log("=== Gmail SMTP SUCCESS ===");
+            } else {
+                error_log("=== Gmail SMTP ALSO FAILED ===");
+            }
+        }
+        
+        error_log("=== EMAIL SENDING DEBUG END ===");
+        
+        return $result;
+    }
+
+    /**
+     * Exact copy of AuthController's Gmail SMTP method
+     */
+    private function sendWithGmailSMTPLikeAuth(string $to, string $subject, string $message, string $fromEmail, string $fromName): bool
+    {
+        try {
+            // Gmail SMTP settings
+            $smtpHost = 'smtp.gmail.com';
+            $smtpPort = 587;
+            $smtpUsername = 'kislaphelpdesk@gmail.com'; // Gmail address
+            $smtpPassword = 'vbvp uokz yyfa hfnf';      // Gmail App Password
+            
+            // Create socket connection to Gmail SMTP
+            $socket = fsockopen($smtpHost, $smtpPort, $errno, $errstr, 30);
+            if (!$socket) {
+                error_log("SMTP connection failed: $errstr ($errno)");
+                return false;
+            }
+            
+            // Read initial response
+            $response = fgets($socket, 515);
+            if (substr($response, 0, 3) != '220') {
+                error_log("SMTP initial response failed: $response");
+                fclose($socket);
+                return false;
+            }
+            
+            // Send EHLO command
+            fputs($socket, "EHLO localhost\r\n");
+            $response = fgets($socket, 515);
+            
+            // Start TLS encryption
+            fputs($socket, "STARTTLS\r\n");
+            $response = fgets($socket, 515);
+            if (substr($response, 0, 3) != '220') {
+                error_log("STARTTLS failed: $response");
+                fclose($socket);
+                return false;
+            }
+            
+            // Enable crypto
+            if (!stream_socket_enable_crypto($socket, true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) {
+                error_log("Failed to enable TLS encryption");
+                fclose($socket);
+                return false;
+            }
+            
+            // Send EHLO again after TLS
+            fputs($socket, "EHLO localhost\r\n");
+            $response = fgets($socket, 515);
+            
+            // Authenticate
+            fputs($socket, "AUTH LOGIN\r\n");
+            $response = fgets($socket, 515);
+            if (substr($response, 0, 3) != '334') {
+                error_log("AUTH LOGIN failed: $response");
+                fclose($socket);
+                return false;
+            }
+            
+            // Send username (base64 encoded)
+            fputs($socket, base64_encode($smtpUsername) . "\r\n");
+            $response = fgets($socket, 515);
+            if (substr($response, 0, 3) != '334') {
+                error_log("Username authentication failed: $response");
+                fclose($socket);
+                return false;
+            }
+            
+            // Send password (base64 encoded)
+            fputs($socket, base64_encode($smtpPassword) . "\r\n");
+            $response = fgets($socket, 515);
+            if (substr($response, 0, 3) != '235') {
+                error_log("Password authentication failed: $response");
+                fclose($socket);
+                return false;
+            }
+            
+            // Send MAIL FROM
+            fputs($socket, "MAIL FROM: <$smtpUsername>\r\n");
+            $response = fgets($socket, 515);
+            if (substr($response, 0, 3) != '250') {
+                error_log("MAIL FROM failed: $response");
+                fclose($socket);
+                return false;
+            }
+            
+            // Send RCPT TO
+            fputs($socket, "RCPT TO: <$to>\r\n");
+            $response = fgets($socket, 515);
+            if (substr($response, 0, 3) != '250') {
+                error_log("RCPT TO failed: $response");
+                fclose($socket);
+                return false;
+            }
+            
+            // Send DATA command
+            fputs($socket, "DATA\r\n");
+            $response = fgets($socket, 515);
+            if (substr($response, 0, 3) != '354') {
+                error_log("DATA command failed: $response");
+                fclose($socket);
+                return false;
+            }
+            
+            // Send email headers and body
+            $headers = "MIME-Version: 1.0\r\n";
+            $headers .= "Content-type: text/html; charset=UTF-8\r\n";
+            $headers .= "From: {$fromName} <{$smtpUsername}>\r\n";
+            $headers .= "To: <{$to}>\r\n";
+            $headers .= "Subject: {$subject}\r\n";
+            $headers .= "Date: " . date('r') . "\r\n";
+            $headers .= "\r\n";
+            
+            fputs($socket, $headers . $message . "\r\n.\r\n");
+            $response = fgets($socket, 515);
+            if (substr($response, 0, 3) != '250') {
+                error_log("Email sending failed: $response");
+                fclose($socket);
+                return false;
+            }
+            
+            // Send QUIT
+            fputs($socket, "QUIT\r\n");
+            fclose($socket);
+            
+            return true;
+            
+        } catch (Exception $e) {
+            error_log("Gmail SMTP error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+
+
+    /**
+     * Get debug information for email sending issues
+     */
+    private function getEmailDebugInfo(): string
+    {
+        $debugInfo = [];
+        
+        // Check if fsockopen is available
+        if (!function_exists('fsockopen')) {
+            $debugInfo[] = "fsockopen() function not available";
+        }
+        
+        // Check if we can connect to Gmail SMTP
+        $socket = @fsockopen('smtp.gmail.com', 587, $errno, $errstr, 5);
+        if (!$socket) {
+            $debugInfo[] = "Cannot connect to Gmail SMTP (Error: $errno - $errstr)";
+        } else {
+            $debugInfo[] = "Gmail SMTP connection OK";
+            fclose($socket);
+        }
+        
+        // Check if TLS is supported
+        if (!function_exists('stream_socket_enable_crypto')) {
+            $debugInfo[] = "TLS encryption not supported";
+        } else {
+            $debugInfo[] = "TLS encryption supported";
+        }
+        
+        // Check if mail() function is available
+        if (!function_exists('mail')) {
+            $debugInfo[] = "mail() function not available";
+        } else {
+            $debugInfo[] = "mail() function available";
+        }
+        
+        return implode(', ', $debugInfo);
+    }
+
+    /**
+     * Log appeal for manual review when email sending fails
+     */
+    private function logAppealForReview(string $subject, string $message, string $contactEmail, array $suspensionInfo): bool
+    {
+        $workerName = $suspensionInfo['worker_name'] ?? 'Unknown Worker';
+        $workerEmail = $suspensionInfo['worker_email'] ?? 'Unknown Email';
+        $workerId = $suspensionInfo['worker_id'] ?? 'Unknown ID';
+        
+        $appealData = [
+            'timestamp' => date('Y-m-d H:i:s'),
+            'type' => 'APPEAL_FOR_REVIEW',
+            'worker_id' => $workerId,
+            'worker_name' => $workerName,
+            'worker_email' => $workerEmail,
+            'contact_email' => $contactEmail ?: $workerEmail,
+            'appeal_subject' => $subject,
+            'appeal_message' => $message,
+            'suspension_reason' => $suspensionInfo['reason'] ?? 'Unknown',
+            'suspension_type' => $suspensionInfo['is_permanent'] ? 'Permanent' : 'Temporary',
+            'suspended_until' => $suspensionInfo['suspended_until'] ?? 'N/A',
+            'suspended_at' => $suspensionInfo['suspended_at'] ?? 'Unknown'
+        ];
+        
+        $logFile = __DIR__ . '/../logs/appeals_for_review.log';
+        $logDir = dirname($logFile);
+        
+        if (!is_dir($logDir)) {
+            mkdir($logDir, 0755, true);
+        }
+        
+        // Log in a readable format
+        $readableEntry = "\n" . str_repeat("=", 80) . "\n";
+        $readableEntry .= "APPEAL SUBMITTED: " . date('Y-m-d H:i:s') . "\n";
+        $readableEntry .= str_repeat("=", 80) . "\n";
+        $readableEntry .= "Worker ID: " . $workerId . "\n";
+        $readableEntry .= "Worker Name: " . $workerName . "\n";
+        $readableEntry .= "Worker Email: " . $workerEmail . "\n";
+        $readableEntry .= "Contact Email: " . ($contactEmail ?: $workerEmail) . "\n";
+        $readableEntry .= "Appeal Type: " . $subject . "\n";
+        $readableEntry .= "Suspension Reason: " . ($suspensionInfo['reason'] ?? 'Unknown') . "\n";
+        $readableEntry .= "Suspension Type: " . ($suspensionInfo['is_permanent'] ? 'Permanent' : 'Temporary') . "\n";
+        if (!$suspensionInfo['is_permanent']) {
+            $readableEntry .= "Suspended Until: " . ($suspensionInfo['suspended_until'] ?? 'N/A') . "\n";
+        }
+        $readableEntry .= "\nAPPEAL MESSAGE:\n";
+        $readableEntry .= str_repeat("-", 40) . "\n";
+        $readableEntry .= $message . "\n";
+        $readableEntry .= str_repeat("-", 40) . "\n";
+        
+        // Also log as JSON for programmatic access
+        file_put_contents($logFile, json_encode($appealData) . "\n", FILE_APPEND | LOCK_EX);
+        
+        // Log readable version to a separate file
+        $readableLogFile = __DIR__ . '/../logs/appeals_readable.log';
+        file_put_contents($readableLogFile, $readableEntry, FILE_APPEND | LOCK_EX);
+        
+        error_log("Appeal logged for manual review - Worker: $workerName (ID: $workerId)");
+        
+        return true;
+    }
+
+    /**
+     * Send appeal email
+     */
+    private function sendAppealEmailSimple(string $to, string $subject, string $message): bool
+    {
+        try {
+            $fromEmail = 'kislaphelpdesk@gmail.com';
+            $fromName = 'Kislap Photography Platform';
+            
+            return $this->sendWithGmailSMTPSimple($to, $subject, $message, $fromEmail, $fromName);
+            
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Send email using Gmail SMTP
+     */
+    private function sendWithGmailSMTPSimple(string $to, string $subject, string $message, string $fromEmail, string $fromName): bool
+    {
+        try {
+            // Gmail SMTP settings
+            $smtpHost = 'smtp.gmail.com';
+            $smtpPort = 587;
+            $smtpUsername = 'kislaphelpdesk@gmail.com';
+            $smtpPassword = 'vbvp uokz yyfa hfnf';
+            
+            // Create socket connection to Gmail SMTP
+            $socket = fsockopen($smtpHost, $smtpPort, $errno, $errstr, 30);
+            if (!$socket) {
+                return false;
+            }
+            
+            // Read initial response
+            $response = fgets($socket, 515);
+            if (substr($response, 0, 3) != '220') {
+                fclose($socket);
+                return false;
+            }
+            
+            // Send EHLO command and read all response lines
+            fputs($socket, "EHLO localhost\r\n");
+            do {
+                $response = fgets($socket, 515);
+            } while (substr($response, 0, 4) === '250-');
+            
+            // Start TLS encryption
+            fputs($socket, "STARTTLS\r\n");
+            $response = fgets($socket, 515);
+            if (substr($response, 0, 3) != '220') {
+                fclose($socket);
+                return false;
+            }
+            
+            // Enable crypto
+            if (!stream_socket_enable_crypto($socket, true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) {
+                fclose($socket);
+                return false;
+            }
+            
+            // Send EHLO again after TLS and read all response lines
+            fputs($socket, "EHLO localhost\r\n");
+            do {
+                $response = fgets($socket, 515);
+            } while (substr($response, 0, 4) === '250-');
+            
+            // Authenticate
+            fputs($socket, "AUTH LOGIN\r\n");
+            $response = fgets($socket, 515);
+            if (substr($response, 0, 3) != '334') {
+                fclose($socket);
+                return false;
+            }
+            
+            // Send username (base64 encoded)
+            fputs($socket, base64_encode($smtpUsername) . "\r\n");
+            $response = fgets($socket, 515);
+            if (substr($response, 0, 3) != '334') {
+                fclose($socket);
+                return false;
+            }
+            
+            // Send password (base64 encoded)
+            fputs($socket, base64_encode($smtpPassword) . "\r\n");
+            $response = fgets($socket, 515);
+            if (substr($response, 0, 3) != '235') {
+                fclose($socket);
+                return false;
+            }
+            
+            // Send MAIL FROM
+            fputs($socket, "MAIL FROM: <$smtpUsername>\r\n");
+            $response = fgets($socket, 515);
+            if (substr($response, 0, 3) != '250') {
+                fclose($socket);
+                return false;
+            }
+            
+            // Send RCPT TO
+            fputs($socket, "RCPT TO: <$to>\r\n");
+            $response = fgets($socket, 515);
+            if (substr($response, 0, 3) != '250') {
+                fclose($socket);
+                return false;
+            }
+            
+            // Send DATA command
+            fputs($socket, "DATA\r\n");
+            $response = fgets($socket, 515);
+            if (substr($response, 0, 3) != '354') {
+                fclose($socket);
+                return false;
+            }
+            
+            // Send email headers and body
+            $headers = "MIME-Version: 1.0\r\n";
+            $headers .= "Content-type: text/html; charset=UTF-8\r\n";
+            $headers .= "From: {$fromName} <{$smtpUsername}>\r\n";
+            $headers .= "To: <{$to}>\r\n";
+            $headers .= "Subject: {$subject}\r\n";
+            $headers .= "Date: " . date('r') . "\r\n";
+            $headers .= "\r\n";
+            
+            fputs($socket, $headers . $message . "\r\n.\r\n");
+            $response = fgets($socket, 515);
+            if (substr($response, 0, 3) != '250') {
+                fclose($socket);
+                return false;
+            }
+            
+            // Send QUIT
+            fputs($socket, "QUIT\r\n");
+            fclose($socket);
+            
+            return true;
+            
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Write debug information to custom log file
+     */
+    private function writeDebugLog(string $logFile, string $message): void
+    {
+        $timestamp = date('Y-m-d H:i:s');
+        $logEntry = "[$timestamp] $message\n";
+        
+        $logDir = dirname($logFile);
+        if (!is_dir($logDir)) {
+            mkdir($logDir, 0755, true);
+        }
+        
+        file_put_contents($logFile, $logEntry, FILE_APPEND | LOCK_EX);
+    }
+
+    /**
+     * Calculate earnings from completed bookings only (minus 30% platform fee)
+     */
+    private function getCompletedBookingsEarnings(int $workerId): float
+    {
+        try {
+            // Use the repository's connection
+            $conn = $this->repo->getConnection();
+            
+            $stmt = $conn->prepare("
+                SELECT SUM(COALESCE(atb.final_price, 0)) as total_completed_revenue
+                FROM conversations c
+                JOIN ai_temp_bookings atb ON c.conversation_id = atb.conversation_id
+                WHERE c.worker_id = ? 
+                AND c.booking_status = 'completed'
+                AND atb.final_price IS NOT NULL
+                AND atb.final_price > 0
+            ");
+            
+            $stmt->execute([$workerId]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            $totalRevenue = floatval($result['total_completed_revenue'] ?? 0);
+            
+            // Deduct 30% platform fee
+            $workerEarnings = $totalRevenue * 0.7;
+            
+            // Debug: Log detailed calculation
+            error_log("DEBUG EARNINGS: Total Revenue = $totalRevenue, Worker Earnings (70%) = $workerEarnings");
+            
+            return $workerEarnings;
+            
+        } catch (Exception $e) {
+            error_log("Error calculating completed bookings earnings: " . $e->getMessage());
+            return 0.0;
+        }
+    }
+
 }

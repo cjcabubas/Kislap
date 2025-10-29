@@ -426,6 +426,16 @@ body {
     max-width: 90%;
     max-height: 90%;
     border-radius: 10px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
+}
+
+.modal-close {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    font-size: 40px;
+    color: #dc3545;
+    cursor: pointer;
 }
 
 /* Reject Modal Styles */

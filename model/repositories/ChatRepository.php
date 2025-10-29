@@ -468,8 +468,8 @@ class ChatRepository extends BaseRepository
                         COUNT(CASE WHEN c.booking_status = 'completed' THEN 1 END) as completed_bookings,
                         COUNT(CASE WHEN c.booking_status = 'cancelled' THEN 1 END) as cancelled_bookings,
                         COUNT(CASE WHEN c.booking_status = 'pending_worker' THEN 1 END) as pending_bookings,
-                        SUM(COALESCE(atb.final_price, atb.budget, 0)) as total_revenue,
-                        AVG(COALESCE(atb.final_price, atb.budget, 0)) as avg_booking_value
+                        SUM(CASE WHEN c.booking_status = 'completed' THEN COALESCE(atb.final_price, 0) ELSE 0 END) as total_revenue,
+                        AVG(CASE WHEN c.booking_status = 'completed' THEN COALESCE(atb.final_price, 0) ELSE NULL END) as avg_booking_value
                     FROM conversations c
                     LEFT JOIN ai_temp_bookings atb ON c.conversation_id = atb.conversation_id
                     WHERE c.worker_id = ?";

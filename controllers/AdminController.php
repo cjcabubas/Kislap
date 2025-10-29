@@ -5,6 +5,7 @@ require_once __DIR__ . '/../model/repositories/AdminRepository.php';
 class AdminController
 {
     private AdminRepository $repo;
+    private PDO $conn;
 
     // ========================================
     // CONSTRUCTOR
@@ -13,6 +14,8 @@ class AdminController
     public function __construct()
     {
         $this->repo = new AdminRepository();
+        $this->conn = new PDO("mysql:host=localhost;dbname=kislap", "root", "");
+        $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
 
     // ========================================
@@ -111,7 +114,7 @@ class AdminController
         }
         session_unset();
         session_destroy();
-        header("Location: /Kislap/views/admin/login.php");
+        header("Location: /Kislap/index.php?controller=Admin&action=login");
         exit;
     }
 
@@ -132,7 +135,6 @@ class AdminController
         $activeBookings = $this->repo->getActiveBookingsCount();
         $completedToday = $this->repo->getCompletedBookingsTodayCount();
         $avgRating = $this->repo->getAverageRating();
-        $growthRate = $this->repo->getBookingGrowthRate();
         
         $totalEarnings = $this->repo->getTotalEarnings();
 
@@ -301,7 +303,7 @@ class AdminController
                             'phoneNumber'    => $application['phoneNumber'] ?? '',
                             'password'       => $application['password'] ?? null,
                             'address'        => $application['address'] ?? null,
-                            'specialty'      => $application['service_type'] ?? ''
+                            'specialty'      => '' // Set empty since application table doesn't have service_type
                         ];
 
                         $workerId = $this->repo->insertWorker($workerData);
@@ -582,6 +584,465 @@ class AdminController
         $bookings = $this->repo->getAllBookings($status);
         
         require 'views/admin/bookings.php';
+    }
+
+    // ========================================
+    // WORKER SUSPENSION MANAGEMENT
+    // ========================================
+
+    public function suspendWorker()
+    {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        if (!isset($_SESSION['admin'])) {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['success' => false, 'message' => 'Method not allowed']);
+            exit;
+        }
+
+        $data = json_decode(file_get_contents('php://input'), true);
+        $workerId = $data['worker_id'] ?? null;
+        $reason = trim($data['reason'] ?? '');
+        $duration = $data['duration'] ?? null; // in hours, null for permanent
+        $durationType = $data['duration_type'] ?? 'hours'; // hours, days, weeks, permanent
+
+        if (!$workerId || empty($reason)) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Worker ID and reason are required']);
+            exit;
+        }
+
+        try {
+            require_once __DIR__ . '/../model/repositories/WorkerRepository.php';
+            $workerRepo = new WorkerRepository();
+
+            $suspendedUntil = null;
+            if ($durationType !== 'permanent' && $duration > 0) {
+                $suspendedUntil = $this->calculateSuspensionEndTime($duration, $durationType);
+            }
+
+            $adminId = $_SESSION['admin']['admin_id'];
+            $success = $workerRepo->suspendWorker($workerId, $reason, $suspendedUntil, $adminId);
+
+            if ($success) {
+                // Force logout the suspended worker if they're currently logged in
+                $this->forceLogoutWorker($workerId);
+                
+                // Handle affected bookings
+                $affectedBookings = $this->handleWorkerSuspensionBookings($workerId, $reason, $suspendedUntil);
+                
+                echo json_encode([
+                    'success' => true, 
+                    'message' => 'Worker suspended successfully',
+                    'suspended_until' => $suspendedUntil,
+                    'affected_bookings' => $affectedBookings
+                ]);
+            } else {
+                http_response_code(500);
+                echo json_encode(['success' => false, 'message' => 'Failed to suspend worker']);
+            }
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
+        }
+    }
+
+    public function unsuspendWorker()
+    {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        if (!isset($_SESSION['admin'])) {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['success' => false, 'message' => 'Method not allowed']);
+            exit;
+        }
+
+        $data = json_decode(file_get_contents('php://input'), true);
+        $workerId = $data['worker_id'] ?? null;
+
+        if (!$workerId) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Worker ID is required']);
+            exit;
+        }
+
+        try {
+            require_once __DIR__ . '/../model/repositories/WorkerRepository.php';
+            $workerRepo = new WorkerRepository();
+
+            $success = $workerRepo->reactivateWorker($workerId);
+
+            if ($success) {
+                echo json_encode(['success' => true, 'message' => 'Worker unsuspended successfully']);
+            } else {
+                http_response_code(500);
+                echo json_encode(['success' => false, 'message' => 'Failed to unsuspend worker']);
+            }
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
+        }
+    }
+
+    private function calculateSuspensionEndTime(int $duration, string $durationType): string
+    {
+        $now = new DateTime();
+        
+        switch ($durationType) {
+            case 'hours':
+                $now->add(new DateInterval("PT{$duration}H"));
+                break;
+            case 'days':
+                $now->add(new DateInterval("P{$duration}D"));
+                break;
+            case 'weeks':
+                $days = $duration * 7;
+                $now->add(new DateInterval("P{$days}D"));
+                break;
+            default:
+                throw new InvalidArgumentException("Invalid duration type: $durationType");
+        }
+        
+        return $now->format('Y-m-d H:i:s');
+    }
+
+    private function handleWorkerSuspensionBookings(int $workerId, string $reason, ?string $suspendedUntil): array
+    {
+        try {
+            // Get all active bookings for this worker
+            $affectedBookings = $this->getActiveBookingsForWorker($workerId);
+            if (empty($affectedBookings)) {
+                return ['count' => 0, 'message' => 'No active bookings affected'];
+            }
+
+            $processedBookings = 0;
+            $totalRefunds = 0;
+
+            foreach ($affectedBookings as $booking) {
+                // Cancel the booking
+                $this->cancelBookingDueToSuspension($booking, $reason, $suspendedUntil);
+                
+                // Process refund if deposit was paid
+                $depositPaid = ($booking['deposit_paid'] == 1 || $booking['deposit_paid'] === '1' || $booking['deposit_paid'] === true);
+                $depositAmount = floatval($booking['deposit_amount'] ?? 0);
+                
+                if ($depositPaid && $depositAmount > 0) {
+                    $this->processDepositRefund($booking);
+                    $totalRefunds += $depositAmount;
+                }
+                
+                // Send AI message to chat
+                $this->sendSuspensionNotificationMessage($booking, $reason, $suspendedUntil);
+                
+                // Send email to client
+                $this->sendBookingCancellationEmail($booking, $reason, $suspendedUntil);
+                
+                $processedBookings++;
+            }
+
+            return [
+                'count' => $processedBookings,
+                'total_refunds' => $totalRefunds,
+                'message' => "Processed {$processedBookings} bookings, refunded $" . number_format($totalRefunds, 2)
+            ];
+
+        } catch (Exception $e) {
+            error_log("Error handling suspension bookings: " . $e->getMessage());
+            return ['count' => 0, 'error' => 'Failed to process affected bookings'];
+        }
+    }
+
+    private function getActiveBookingsForWorker(int $workerId): array
+    {
+        $stmt = $this->conn->prepare("
+            SELECT 
+                b.temp_booking_id,
+                b.conversation_id,
+                b.worker_id,
+                b.event_type,
+                b.event_date,
+                b.event_location,
+                b.final_price,
+                b.deposit_amount,
+                b.deposit_paid,
+                b.deposit_paid_at,
+                c.user_id,
+                c.booking_status,
+                u.firstName as user_firstName,
+                u.lastName as user_lastName,
+                u.email as user_email,
+                w.firstName as worker_firstName,
+                w.lastName as worker_lastName
+            FROM ai_temp_bookings b
+            JOIN conversations c ON b.conversation_id = c.conversation_id
+            JOIN user u ON c.user_id = u.user_id
+            JOIN workers w ON b.worker_id = w.worker_id
+            WHERE b.worker_id = ? 
+            AND (c.booking_status IN ('pending_ai', 'pending_worker', 'pending_confirmation', 'negotiating', 'confirmed', 'awaiting_deposit', 'deposit_paid', 'in_progress', 'awaiting_final_payment', 'requires_info') 
+                 OR c.booking_status = '' 
+                 OR c.booking_status IS NULL)
+            AND b.completed_at IS NULL
+            AND b.cancelled_by IS NULL
+        ");
+        
+        $stmt->execute([$workerId]);
+        $bookings = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+
+        
+        return $bookings;
+    }
+
+    private function cancelBookingDueToSuspension(array $booking, string $reason, ?string $suspendedUntil): void
+    {
+        // Update booking status to cancelled
+        $stmt = $this->conn->prepare("
+            UPDATE ai_temp_bookings 
+            SET cancellation_reason = ?, 
+                cancelled_by = 'system',
+                updated_at = NOW()
+            WHERE temp_booking_id = ?
+        ");
+        
+        $cancellationReason = "Booking cancelled due to photographer suspension. Reason: " . $reason;
+        $stmt->execute([$cancellationReason, $booking['temp_booking_id']]);
+
+        // Update conversation status
+        $stmt = $this->conn->prepare("
+            UPDATE conversations 
+            SET booking_status = 'cancelled',
+                updated_at = NOW()
+            WHERE conversation_id = ?
+        ");
+        $stmt->execute([$booking['conversation_id']]);
+    }
+
+    private function processDepositRefund(array $booking): void
+    {
+        // In a real system, this would integrate with payment processor
+        // For now, we'll log the refund and update the booking
+        
+        $stmt = $this->conn->prepare("
+            UPDATE ai_temp_bookings 
+            SET deposit_paid = 0,
+                deposit_paid_at = NULL,
+                updated_at = NOW()
+            WHERE temp_booking_id = ?
+        ");
+        $stmt->execute([$booking['temp_booking_id']]);
+
+        // Log the refund for accounting
+        error_log("REFUND PROCESSED: Booking ID {$booking['temp_booking_id']}, Amount: {$booking['deposit_amount']}, User: {$booking['user_email']}");
+    }
+
+    private function sendSuspensionNotificationMessage(array $booking, string $reason, ?string $suspendedUntil): void
+    {
+
+        
+        require_once __DIR__ . '/../model/repositories/ChatRepository.php';
+        $chatRepo = new ChatRepository();
+
+        $suspensionType = $suspendedUntil ? 'temporarily suspended' : 'suspended';
+        $timeInfo = $suspendedUntil ? " until " . date('F j, Y', strtotime($suspendedUntil)) : '';
+        
+        $message = "🚨 **BOOKING CANCELLATION NOTICE** 🚨\n\n";
+        $message .= "I regret to inform you that your photographer has been {$suspensionType}{$timeInfo} by our platform administration.\n\n";
+        $message .= "**What this means for your booking:**\n";
+        $message .= "• Your booking has been automatically cancelled\n";
+        
+        $message .= "• Any deposits paid will be refunded within 3-5 business days\n";
+        
+        $message .= "• You can book with other photographers on our platform\n";
+        $message .= "• Our support team is available to help you find alternatives\n\n";
+        $message .= "**Next Steps:**\n";
+        $message .= "1. Check your email for detailed cancellation information\n";
+        $message .= "2. Browse other photographers for your " . ($booking['event_type'] ?: 'event') . "\n";
+        $message .= "3. Contact support if you need assistance: kislaphelpdesk@gmail.com\n\n";
+        $message .= "We sincerely apologize for any inconvenience caused.";
+
+        $chatRepo->saveMessage(
+            $booking['conversation_id'],
+            0, // System message (sender_id = 0)
+            'system',
+            $message
+        );
+    }
+
+    private function sendBookingCancellationEmail(array $booking, string $reason, ?string $suspendedUntil): void
+    {
+        $userEmail = $booking['user_email'];
+        $userName = trim($booking['user_firstName'] . ' ' . $booking['user_lastName']);
+        $workerName = trim($booking['worker_firstName'] . ' ' . $booking['worker_lastName']);
+        
+        $subject = "Booking Cancellation - Photographer Suspended";
+        $emailBody = $this->getBookingCancellationEmailTemplate($booking, $userName, $workerName, $reason, $suspendedUntil);
+        
+        $fromEmail = 'kislaphelpdesk@gmail.com';
+        $fromName = 'Kislap Support Team';
+        
+        $headers = "MIME-Version: 1.0\r\n";
+        $headers .= "Content-type: text/html; charset=UTF-8\r\n";
+        $headers .= "From: {$fromName} <{$fromEmail}>\r\n";
+        $headers .= "Reply-To: {$fromEmail}\r\n";
+
+        // Send email (or log in test mode)
+        if ($this->isEmailTestMode()) {
+            $this->logCancellationEmail($userEmail, $subject, $emailBody);
+        } else {
+            mail($userEmail, $subject, $emailBody, $headers);
+        }
+    }
+
+    private function getBookingCancellationEmailTemplate(array $booking, string $userName, string $workerName, string $reason, ?string $suspendedUntil): string
+    {
+        $suspensionType = $suspendedUntil ? 'temporarily suspended' : 'suspended';
+        $timeInfo = $suspendedUntil ? ' until ' . date('F j, Y \a\t g:i A', strtotime($suspendedUntil)) : '';
+        $refundInfo = '';
+        
+        if ($booking['deposit_paid'] && $booking['deposit_amount'] > 0) {
+            $refundInfo = "
+            <div class='refund-section'>
+                <h3>💰 Deposit Refund</h3>
+                <p><strong>Refund Amount:</strong> $" . number_format($booking['deposit_amount'], 2) . "</p>
+                <p><strong>Processing Time:</strong> 3-5 business days</p>
+                <p><strong>Refund Method:</strong> Original payment method</p>
+            </div>";
+        }
+
+        return "
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset='UTF-8'>
+            <title>Booking Cancellation Notice</title>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                .header { background: linear-gradient(135deg, #dc3545, #c82333); color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }
+                .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+                .booking-details { background: #fff; border: 1px solid #ddd; padding: 20px; margin: 20px 0; border-radius: 8px; }
+                .refund-section { background: #e8f5e8; border: 1px solid #28a745; padding: 20px; border-radius: 8px; margin: 20px 0; }
+                .next-steps { background: #fff3cd; border: 1px solid #ffeaa7; padding: 20px; border-radius: 8px; margin: 20px 0; }
+                .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+                .label { font-weight: bold; color: #555; }
+                .urgent { color: #dc3545; font-weight: bold; }
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <div class='header'>
+                    <h1>🚨 Booking Cancellation Notice</h1>
+                    <p>Kislap Photography Platform</p>
+                </div>
+                <div class='content'>
+                    <p>Dear {$userName},</p>
+                    
+                    <p>We regret to inform you that your photography booking has been cancelled due to your photographer being {$suspensionType} by our platform administration{$timeInfo}.</p>
+                    
+                    <div class='booking-details'>
+                        <h3>📋 Booking Details</h3>
+                        <p><span class='label'>Photographer:</span> {$workerName}</p>
+                        <p><span class='label'>Event Type:</span> " . ($booking['event_type'] ?: 'Not specified') . "</p>
+                        <p><span class='label'>Event Date:</span> " . ($booking['event_date'] ? date('F j, Y', strtotime($booking['event_date'])) : 'Not set') . "</p>
+                        <p><span class='label'>Location:</span> " . ($booking['event_location'] ?: 'Not specified') . "</p>
+                        <p><span class='label'>Booking Status:</span> <span class='urgent'>CANCELLED</span></p>
+                    </div>
+                    
+                    {$refundInfo}
+                    
+                    <div class='next-steps'>
+                        <h3>🔄 What Happens Next</h3>
+                        <ul>
+                            <li><strong>Immediate:</strong> Your booking is cancelled and you'll receive a chat notification</li>
+                            " . ($booking['deposit_paid'] ? "<li><strong>3-5 Business Days:</strong> Deposit refund will be processed</li>" : "") . "
+                            <li><strong>Now:</strong> You can browse and book other photographers on our platform</li>
+                            <li><strong>Support:</strong> Our team is ready to help you find alternative photographers</li>
+                        </ul>
+                    </div>
+                    
+                    <div class='booking-details'>
+                        <h3>🆘 Need Help?</h3>
+                        <p>We understand this cancellation may cause inconvenience, especially if your event is approaching. Our support team is here to help:</p>
+                        <ul>
+                            <li><strong>Email:</strong> kislaphelpdesk@gmail.com</li>
+                            <li><strong>Priority Support:</strong> Mention this cancellation for expedited assistance</li>
+                            <li><strong>Alternative Photographers:</strong> We can help match you with available photographers</li>
+                        </ul>
+                    </div>
+                    
+                    <p>We sincerely apologize for any inconvenience this may cause and appreciate your understanding. We're committed to helping you find a suitable alternative for your photography needs.</p>
+                </div>
+                <div class='footer'>
+                    <p>© 2025 Kislap Photography Platform - Support Team</p>
+                    <p>This cancellation was processed on " . date('F j, Y \a\t g:i A') . "</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        ";
+    }
+
+    private function isEmailTestMode(): bool
+    {
+        return true; // Set to false in production
+    }
+
+    private function logCancellationEmail(string $to, string $subject, string $message): void
+    {
+        $logEntry = [
+            'timestamp' => date('Y-m-d H:i:s'),
+            'type' => 'BOOKING_CANCELLATION',
+            'to' => $to,
+            'subject' => $subject,
+            'message' => strip_tags($message)
+        ];
+        
+        $logFile = __DIR__ . '/../logs/booking_cancellations.log';
+        $logDir = dirname($logFile);
+        
+        if (!is_dir($logDir)) {
+            mkdir($logDir, 0755, true);
+        }
+        
+        file_put_contents($logFile, json_encode($logEntry) . "\n", FILE_APPEND | LOCK_EX);
+    }
+
+    /**
+     * Force logout a worker by destroying their session
+     */
+    private function forceLogoutWorker(int $workerId): void
+    {
+        // Get the session save path
+        $sessionPath = session_save_path();
+        if (empty($sessionPath)) {
+            $sessionPath = sys_get_temp_dir();
+        }
+
+        // Look for session files
+        $sessionFiles = glob($sessionPath . '/sess_*');
+        
+        foreach ($sessionFiles as $sessionFile) {
+            $sessionData = file_get_contents($sessionFile);
+            
+            // Check if this session contains the worker we want to logout
+            if (strpos($sessionData, '"worker_id";i:' . $workerId . ';') !== false || 
+                strpos($sessionData, '"worker_id";s:' . strlen($workerId) . ':"' . $workerId . '";') !== false) {
+                
+                // Delete the session file to force logout
+                unlink($sessionFile);
+                break;
+            }
+        }
     }
 
 }

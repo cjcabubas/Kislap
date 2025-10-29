@@ -33,7 +33,7 @@ $totalPhotographers = $totalWorkers ?? count($photographers);
 
 $selectedCategory = $_GET['category'] ?? 'all';
 $searchQuery = $_GET['search'] ?? '';
-$sortBy = $_GET['sort'] ?? 'featured';
+$sortBy = $_GET['sort'] ?? 'rating';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -88,7 +88,6 @@ $sortBy = $_GET['sort'] ?? 'featured';
 
                 <div class="custom-select">
                     <select name="sort" onchange="this.form.submit()">
-                        <option value="featured" <?php echo $sortBy === 'featured' ? 'selected' : ''; ?>>Featured</option>
                         <option value="rating" <?php echo $sortBy === 'rating' ? 'selected' : ''; ?>>Top Rated</option>
                         <option value="reviews" <?php echo $sortBy === 'reviews' ? 'selected' : ''; ?>>Most Reviews</option>
                         <option value="price_low" <?php echo $sortBy === 'price_low' ? 'selected' : ''; ?>>Price: Low to High</option>
@@ -146,8 +145,7 @@ $sortBy = $_GET['sort'] ?? 'featured';
                 $categoryKey = $photographer['specialty'] ?? 'general';
                 $categoryLabel = $categories[$categoryKey] ?? ucwords(str_replace('_', ' ', $categoryKey));
 
-                // Featured status (based on bookings and ratings)
-                $isFeatured = ($totalBookings >= 10 && $rating >= 4.5);
+                // Remove featured status as it's no longer needed
 
                 // Price range based on packages or earnings
                 $priceRange = 'Contact for pricing';
@@ -192,12 +190,7 @@ $sortBy = $_GET['sort'] ?? 'featured';
                         : $description;
                 ?>
 
-                <div class="photographer-card" data-photographer-id="<?php echo $photogId; ?>">
-                    <?php if ($isFeatured): ?>
-                        <div class="featured-badge">
-                            <i class="fas fa-crown"></i> Featured
-                        </div>
-                    <?php endif; ?>
+                <div class="photographer-card" data-photographer-id="<?php echo $photogId; ?>"><?php // Removed featured badge as requested ?>
 
                     <!-- Portfolio Preview -->
                     <div class="portfolio-preview">

@@ -49,14 +49,14 @@ class ApplicationRepository extends BaseRepository
     public function findByEmailAndIdentifier($email, $identifier): ?array
     {
         $query = "SELECT status, firstName, lastName, email, phoneNumber, 
-                     application_id, created_at
+                     application_id, created_at, rejection_reason
               FROM application
               WHERE email = ?
-              AND (phoneNumber = ? OR application_id = ?) 
+              AND phoneNumber = ? 
               LIMIT 1";
 
         $stmt = $this->conn->prepare($query);
-        $stmt->execute([$email, $identifier, $identifier]);
+        $stmt->execute([$email, $identifier]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
         return $result ?: null;

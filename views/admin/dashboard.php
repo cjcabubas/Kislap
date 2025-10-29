@@ -156,15 +156,7 @@ $admin = $_SESSION['admin'];
             </div>
         </div>
 
-        <div class="quick-stat-item" style="--card-color: #28a745;">
-            <i class="fas fa-chart-line"></i>
-            <div class="quick-stat-info">
-                <h4>Growth Rate</h4>
-                <p>
-                    <?php echo ($growthRate >= 0 ? '+' : '') . number_format($growthRate ?? 0, 2) . '%'; ?>
-                </p>
-            </div>
-        </div>
+
 
         <div class="quick-stat-item" style="--card-color: #17a2b8;">
             <i class="fas fa-peso-sign"></i>
