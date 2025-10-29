@@ -12,6 +12,33 @@ class BrowseController
     }
 
     /**
+     * Update worker statistics (can be called via URL parameter)
+     */
+    private function updateAllWorkerStats(): void
+    {
+        require_once __DIR__ . '/../model/repositories/WorkerRepository.php';
+        $workerRepo = new WorkerRepository();
+        
+        // Get all active workers using the browse repository
+        $workers = $this->repo->getWorkersWithPortfolio(1000, 0, '', 'all', 'newest'); // Get all workers
+        
+        $updated = 0;
+        foreach ($workers as $worker) {
+            if ($workerRepo->updateWorkerStatistics($worker['worker_id'])) {
+                $updated++;
+            }
+        }
+        
+        error_log("Updated statistics for $updated workers");
+        
+        // Set a session message to show success
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        $_SESSION['success'] = "Worker statistics updated successfully! Updated $updated photographers.";
+    }
+
+    /**
      * Main browse action
      */
     public function browse(): void
@@ -19,6 +46,11 @@ class BrowseController
         // Start session to get user info
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
+        }
+
+        // Update worker stats if requested (for fixing the booking count issue)
+        if (isset($_GET['update_stats']) && $_GET['update_stats'] === '1') {
+            $this->updateAllWorkerStats();
         }
 
         // Get current user ID if logged in

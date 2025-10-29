@@ -527,7 +527,7 @@ class ChatRepository extends BaseRepository
         try {
             $sql = "SELECT c.conversation_id, c.booking_status, c.type, c.created_at, c.updated_at,
                            u.user_id, u.firstName as user_first, u.lastName as user_last, 
-                           u.email as user_email, u.phoneNumber as customer_phone,
+                           u.email as customer_email, u.phoneNumber as customer_phone,
                            u.profilePhotoUrl as customer_photo,
                            CONCAT(u.firstName, ' ', u.lastName) as customer_name,
                            atb.event_type, atb.event_date, atb.event_time, atb.event_location,
@@ -594,7 +594,7 @@ class ChatRepository extends BaseRepository
             
             $allowedFields = [
                 'event_date', 'event_time', 'event_location', 'final_price', 
-                'worker_notes', 'package_id', 'event_type'
+                'worker_notes', 'package_id', 'event_type', 'budget'
             ];
             
             foreach ($updates as $field => $value) {

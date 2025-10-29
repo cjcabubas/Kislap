@@ -329,6 +329,11 @@ foreach ($bookings as $booking) {
                                         </button>
                                     
                                     <?php elseif ($status === 'confirmed'): ?>
+                                        <?php if (!empty($booking['deposit_amount']) && empty($booking['deposit_paid'])): ?>
+                                            <button class="btn-action btn-pay" onclick="showDepositModal(<?php echo htmlspecialchars(json_encode($booking)); ?>)">
+                                                <i class="fas fa-credit-card"></i> Pay Deposit (₱<?php echo number_format($booking['deposit_amount'], 2); ?>)
+                                            </button>
+                                        <?php endif; ?>
                                         <button class="btn-action btn-message" onclick="openConversation(<?php echo $conversationId; ?>)">
                                             <i class="fas fa-comment"></i> Message
                                         </button>
@@ -366,6 +371,13 @@ foreach ($bookings as $booking) {
                             <span class="booking-id">Booking #<?php echo str_pad($conversationId, 6, '0', STR_PAD_LEFT); ?></span>
                             <span class="booking-created">Created: <?php echo $createdAt ? date('M d, Y', strtotime($createdAt)) : 'N/A'; ?></span>
                         </div>
+
+                        <?php if ($status !== 'completed' && $status !== 'rated'): ?>
+                            <div class="booking-notice">
+                                <i class="fas fa-info-circle"></i>
+                                <span>To proceed with payments, ratings, or other actions, please refer to the booking's message area.</span>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 <?php endforeach; ?>
             <?php endif; ?>
@@ -661,6 +673,92 @@ foreach ($bookings as $booking) {
                 modal.remove();
             }
         });
+    }
+
+    // Show deposit payment modal with booking details
+    function showDepositModal(booking) {
+        const modal = document.createElement('div');
+        modal.className = 'booking-details-modal deposit-modal';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-credit-card"></i> Pay Deposit</h3>
+                    <button class="close-btn" onclick="this.parentElement.parentElement.parentElement.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="deposit-info">
+                        <h4>Booking Summary</h4>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <span class="detail-label">Photographer:</span>
+                                <span class="detail-value">${booking.photographer_name}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Event Type:</span>
+                                <span class="detail-value">${booking.event_type}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Event Date:</span>
+                                <span class="detail-value">${new Date(booking.event_date).toLocaleDateString('en-US', { 
+                                    year: 'numeric', 
+                                    month: 'long', 
+                                    day: 'numeric' 
+                                })}</span>
+                            </div>
+                            ${booking.event_time ? `
+                            <div class="detail-item">
+                                <span class="detail-label">Event Time:</span>
+                                <span class="detail-value">${booking.event_time}</span>
+                            </div>
+                            ` : ''}
+                            <div class="detail-item">
+                                <span class="detail-label">Location:</span>
+                                <span class="detail-value">${booking.event_location}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Total Price:</span>
+                                <span class="detail-value">₱${parseFloat(booking.final_price || booking.budget || 0).toLocaleString()}</span>
+                            </div>
+                            <div class="detail-item deposit-highlight">
+                                <span class="detail-label">Deposit Required:</span>
+                                <span class="detail-value">₱${parseFloat(booking.deposit_amount).toLocaleString()}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="payment-notice">
+                        <i class="fas fa-info-circle"></i>
+                        <p>By paying this deposit, you confirm your booking. The remaining balance will be due on the event date.</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-action btn-cancel" onclick="this.parentElement.parentElement.parentElement.remove()">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button class="btn-action btn-pay" onclick="proceedToPayment(${booking.conversation_id})">
+                        <i class="fas fa-credit-card"></i> Proceed to Payment
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Close modal when clicking outside
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+    }
+
+    // Proceed to payment in chat
+    function proceedToPayment(conversationId) {
+        // Close modal
+        document.querySelector('.deposit-modal').remove();
+        // Redirect to chat for payment
+        window.location.href = `?controller=Chat&action=view&conversation_id=${conversationId}`;
     }
 
     // Notification system

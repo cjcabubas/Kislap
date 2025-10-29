@@ -1300,4 +1300,30 @@
     font-size: 18px;
     font-weight: 700;
     color: #9c27b0;
+}/* Bookin
+g Notice */
+.booking-notice {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, rgba(255, 107, 0, 0.1) 0%, rgba(255, 107, 0, 0.05) 100%);
+    border: 1px solid rgba(255, 107, 0, 0.2);
+    border-radius: 8px;
+    margin-top: 15px;
+    font-size: 13px;
+    color: #ccc;
+    position: relative;
+    z-index: 1;
+}
+
+.booking-notice i {
+    color: #ff6b00;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.booking-notice span {
+    line-height: 1.4;
+    font-weight: 500;
 }

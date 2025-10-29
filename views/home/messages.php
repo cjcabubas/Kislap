@@ -598,16 +598,17 @@ $tempBooking = $tempBooking ?? null;
 </div>
 
 <script>
+    // Global variables accessible to all functions
+    const activeConversationId = <?php echo $activeConversation['conversation_id'] ?? 'null'; ?>;
+    const currentUserId = <?php echo($user['user_id'] ?? $worker['worker_id'] ?? 'null'); ?>;
+    const currentUserType = <?php echo $user ? "'user'" : "'worker'"; ?>;
+    const recipientName = '<?php echo addslashes($recipientInfo['name'] ?? 'Recipient'); ?>';
+    const currentUserPhoto = '<?php echo addslashes($user['profilePhotoUrl'] ?? $worker['profile_photo'] ?? ''); ?>';
+    const recipientPhoto = '<?php echo addslashes($recipientInfo['profile_picture'] ?? ''); ?>';
+    const bookingData = <?php echo $tempBooking ? json_encode($tempBooking) : 'null'; ?>;
+
     document.addEventListener('DOMContentLoaded', function () {
-        // Get essential data from PHP
-        const activeConversationId = <?php echo $activeConversation['conversation_id'] ?? 'null'; ?>;
-        const currentUserId = <?php echo($user['user_id'] ?? $worker['worker_id'] ?? 'null'); ?>;
-        const currentUserType = <?php echo $user ? "'user'" : "'worker'"; ?>;
-        const recipientName = '<?php echo addslashes($recipientInfo['name'] ?? 'Recipient'); ?>';
-        
-        // Profile photo data
-        const currentUserPhoto = '<?php echo addslashes($user['profilePhotoUrl'] ?? $worker['profile_photo'] ?? ''); ?>';
-        const recipientPhoto = '<?php echo addslashes($recipientInfo['profile_picture'] ?? ''); ?>';
+        // Get essential data from PHP (now moved to global scope above)
 
         console.log('Chat initialized:', {
             conversationId: activeConversationId,
@@ -1162,15 +1163,135 @@ $tempBooking = $tempBooking ?? null;
     // ========================================
 
 
-    async function payDeposit(conversationId) {
-        const bubble = event.currentTarget;
+    function payDeposit(conversationId) {
+        console.log('payDeposit called with conversationId:', conversationId);
+        console.log('bookingData:', bookingData);
+        console.log('recipientName:', recipientName);
+        
+        if (!bookingData) {
+            console.error('No booking data available');
+            return;
+        }
 
+        console.log('Showing deposit payment modal');
+        showDepositPaymentModal(conversationId, bookingData);
+    }
+
+    function showDepositPaymentModal(conversationId, booking) {
+        console.log('showDepositPaymentModal called');
+        console.log('conversationId:', conversationId);
+        console.log('booking:', booking);
+        
+        const finalPrice = booking.final_price || booking.budget || 0;
+        const depositAmount = finalPrice * 0.5;
+        
+        console.log('finalPrice:', finalPrice);
+        console.log('depositAmount:', depositAmount);
+        
+        const modal = document.createElement('div');
+        modal.className = 'payment-modal-overlay';
+        modal.innerHTML = `
+            <div class="payment-modal">
+                <div class="modal-header">
+                    <h3><i class="fas fa-credit-card"></i> Deposit Payment</h3>
+                    <button class="close-btn" onclick="closePaymentModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="booking-summary">
+                        <h4>Booking Details</h4>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <span class="detail-label">Photographer:</span>
+                                <span class="detail-value">${recipientName}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Event Type:</span>
+                                <span class="detail-value">${booking.event_type || 'Photography Session'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Event Date:</span>
+                                <span class="detail-value">${booking.event_date ? new Date(booking.event_date).toLocaleDateString('en-US', { 
+                                    year: 'numeric', 
+                                    month: 'long', 
+                                    day: 'numeric' 
+                                }) : 'TBD'}</span>
+                            </div>
+                            ${booking.event_time ? `
+                            <div class="detail-item">
+                                <span class="detail-label">Event Time:</span>
+                                <span class="detail-value">${booking.event_time}</span>
+                            </div>
+                            ` : ''}
+                            <div class="detail-item">
+                                <span class="detail-label">Location:</span>
+                                <span class="detail-value">${booking.event_location || 'Not specified'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Total Price:</span>
+                                <span class="detail-value">₱${parseFloat(finalPrice).toLocaleString()}</span>
+                            </div>
+                            <div class="detail-item deposit-highlight">
+                                <span class="detail-label">Deposit Required:</span>
+                                <span class="detail-value">₱${parseFloat(depositAmount).toLocaleString()}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="payment-notice">
+                        <i class="fas fa-info-circle"></i>
+                        <p>By paying this deposit, you confirm your booking. The remaining balance will be due after the service is completed.</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-cancel" onclick="closePaymentModal()">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button class="btn-pay" onclick="processDepositPayment(${conversationId})">
+                        <i class="fas fa-credit-card"></i> Pay Now
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        console.log('Modal added to DOM:', modal);
+        console.log('Modal classes:', modal.className);
+        console.log('Modal style display:', modal.style.display);
+        
+        // Force display the modal
+        modal.style.display = 'flex';
+        modal.style.position = 'fixed';
+        modal.style.top = '0';
+        modal.style.left = '0';
+        modal.style.width = '100%';
+        modal.style.height = '100%';
+        modal.style.zIndex = '9999';
+        
+        console.log('Modal should now be visible');
+        
+        // Close modal when clicking outside
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closePaymentModal();
+            }
+        });
+    }
+
+    function closePaymentModal() {
+        const modal = document.querySelector('.payment-modal-overlay');
+        if (modal) {
+            modal.remove();
+        }
+    }
+
+    async function processDepositPayment(conversationId) {
+        const payBtn = document.querySelector('.btn-pay');
+        const originalText = payBtn.innerHTML;
+        
         // Visual feedback
-        bubble.style.pointerEvents = 'none';
-        bubble.style.opacity = '0.6';
-        const icon = bubble.querySelector('.bubble-icon i');
-        const originalIcon = icon.className;
-        icon.className = 'fas fa-spinner fa-spin';
+        payBtn.disabled = true;
+        payBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
 
         try {
             const response = await fetch('?controller=Payment&action=payDeposit', {
@@ -1182,8 +1303,8 @@ $tempBooking = $tempBooking ?? null;
             const result = await response.json();
 
             if (result.success) {
-                // Show success message
-                showNotification('success', `✅ Down payment of ₱${result.amount.toLocaleString()} processed!`);
+                closePaymentModal();
+                showNotification('success', `✅ Deposit payment of ₱${result.amount.toLocaleString()} processed successfully!`);
 
                 // Reload page to show updated status
                 setTimeout(() => {
@@ -1197,9 +1318,8 @@ $tempBooking = $tempBooking ?? null;
             showNotification('error', 'Payment failed. Please try again.');
 
             // Restore button
-            bubble.style.pointerEvents = '';
-            bubble.style.opacity = '';
-            icon.className = originalIcon;
+            payBtn.disabled = false;
+            payBtn.innerHTML = originalText;
         }
     }
 

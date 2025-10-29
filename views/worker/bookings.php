@@ -140,6 +140,7 @@ $bookings = $bookings ?? [];
                             </div>
                         </div>
                         
+                        <?php if ($booking['budget'] > 0): ?>
                         <div class="detail-item">
                             <i class="fas fa-money-bill-wave"></i>
                             <div>
@@ -147,6 +148,7 @@ $bookings = $bookings ?? [];
                                 <div><strong>₱<?php echo number_format($booking['budget'], 2); ?></strong></div>
                             </div>
                         </div>
+                        <?php endif; ?>
                         
                         <?php if ($booking['package_name']): ?>
                             <div class="detail-item">
@@ -266,7 +268,7 @@ function openChat(conversationId) {
 function showNegotiateModal(conversationId, booking) {
     const modal = document.getElementById('negotiateModal');
     document.getElementById('negotiateConversationId').value = conversationId;
-    document.getElementById('currentPrice').textContent = booking.budget ? '₱' + parseFloat(booking.budget).toLocaleString() : 'Not set';
+    document.getElementById('currentPrice').textContent = booking.budget > 0 ? '₱' + parseFloat(booking.budget).toLocaleString() : 'Not set';
     modal.style.display = 'block';
 }
 
@@ -281,6 +283,7 @@ function showRejectModal(conversationId) {
 function showEditModal(conversationId, booking) {
     const modal = document.getElementById('editModal');
     document.getElementById('editConversationId').value = conversationId;
+    document.getElementById('editEventType').value = booking.event_type || '';
     document.getElementById('editEventDate').value = booking.event_date || '';
     document.getElementById('editEventTime').value = booking.event_time || '';
     document.getElementById('editEventLocation').value = booking.event_location || '';
@@ -327,13 +330,13 @@ function showBookingDetails(booking) {
         <h3>Booking Details</h3>
         <div class="detail-grid">
             <div><strong>Customer:</strong> ${booking.customer_name}</div>
-            <div><strong>Email:</strong> ${booking.customer_email}</div>
+            <div><strong>Email:</strong> ${booking.customer_email || 'N/A'}</div>
             <div><strong>Phone:</strong> ${booking.customer_phone || 'N/A'}</div>
             <div><strong>Event Type:</strong> ${booking.event_type}</div>
             <div><strong>Event Date:</strong> ${booking.event_date}</div>
             <div><strong>Event Time:</strong> ${booking.event_time || 'Not specified'}</div>
             <div><strong>Location:</strong> ${booking.event_location}</div>
-            <div><strong>Budget:</strong> ₱${parseFloat(booking.budget || 0).toLocaleString()}</div>
+            ${booking.budget > 0 ? `<div><strong>Budget:</strong> ₱${parseFloat(booking.budget).toLocaleString()}</div>` : ''}
             ${booking.final_price ? `<div><strong>Final Price:</strong> ₱${parseFloat(booking.final_price).toLocaleString()}</div>` : ''}
             ${booking.deposit_amount ? `<div><strong>Deposit:</strong> ₱${parseFloat(booking.deposit_amount).toLocaleString()}</div>` : ''}
 
@@ -438,13 +441,14 @@ async function rejectWithReason() {
 // Update booking details
 async function updateBooking() {
     const conversationId = document.getElementById('editConversationId').value;
+    const eventType = document.getElementById('editEventType').value;
     const eventDate = document.getElementById('editEventDate').value;
     const eventTime = document.getElementById('editEventTime').value;
     const eventLocation = document.getElementById('editEventLocation').value;
     const finalPrice = document.getElementById('editFinalPrice').value;
     const priceField = document.getElementById('editFinalPrice');
     
-    let requestBody = `conversation_id=${conversationId}&event_date=${eventDate}&event_time=${eventTime}&event_location=${encodeURIComponent(eventLocation)}`;
+    let requestBody = `conversation_id=${conversationId}&event_type=${encodeURIComponent(eventType)}&event_date=${eventDate}&event_time=${eventTime}&event_location=${encodeURIComponent(eventLocation)}`;
     
     // Only include final price if the field is editable (deposit not paid)
     if (!priceField.readOnly && finalPrice) {
@@ -510,6 +514,9 @@ async function updateBooking() {
         <span class="close" onclick="closeModal('editModal')">&times;</span>
         <h2>Edit Booking Details</h2>
         <input type="hidden" id="editConversationId">
+        
+        <label>Event Type:</label>
+        <input type="text" id="editEventType" style="width: 100%; padding: 10px; margin: 10px 0;">
         
         <label>Event Date:</label>
         <input type="date" id="editEventDate" style="width: 100%; padding: 10px; margin: 10px 0;">

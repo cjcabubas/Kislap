@@ -894,11 +894,22 @@ class WorkerController
             
             // Collect updates
             $updates = [];
-            $allowedFields = ['event_date', 'event_time', 'event_location', 'worker_notes', 'package_id'];
+            $allowedFields = ['event_date', 'event_time', 'event_location', 'worker_notes', 'package_id', 'final_price', 'budget', 'event_type'];
             
             foreach ($allowedFields as $field) {
-                if (isset($_POST[$field]) && $_POST[$field] !== '') {
-                    $updates[$field] = $_POST[$field];
+                if (isset($_POST[$field])) {
+                    // Handle numeric fields properly, including 0 values
+                    if (in_array($field, ['final_price', 'budget'])) {
+                        // Only update numeric fields if they have a valid numeric value
+                        if (is_numeric($_POST[$field]) && $_POST[$field] !== '') {
+                            $updates[$field] = (float)$_POST[$field];
+                        }
+                    } else {
+                        // For non-numeric fields, update if not empty
+                        if ($_POST[$field] !== '') {
+                            $updates[$field] = $_POST[$field];
+                        }
+                    }
                 }
             }
             

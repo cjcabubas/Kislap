@@ -45,6 +45,13 @@ class PaymentRepository extends BaseRepository
         try {
             $this->conn->beginTransaction();
 
+            // Get worker ID for statistics update
+            $stmt = $this->conn->prepare(
+                "SELECT c.worker_id FROM conversations c WHERE c.conversation_id = ?"
+            );
+            $stmt->execute([$conversationId]);
+            $workerId = $stmt->fetchColumn();
+
             $stmt = $this->conn->prepare(
                 "UPDATE ai_temp_bookings 
              SET full_payment_paid = 1,
@@ -63,6 +70,15 @@ class PaymentRepository extends BaseRepository
             $stmt->execute([$conversationId]);
 
             $this->conn->commit();
+
+            // Update worker statistics after successful completion
+            if ($workerId) {
+                require_once __DIR__ . '/WorkerRepository.php';
+                $workerRepo = new WorkerRepository();
+                $workerRepo->updateWorkerStatistics($workerId);
+                error_log("Updated statistics for worker ID: $workerId after booking completion");
+            }
+
             return true;
         } catch (Exception $e) {
             $this->conn->rollBack();
