@@ -33,15 +33,8 @@ class UserController
             unset($user['profilePhotoUrl']);
         }
 
-        $userStats = $this->getUserStatistics($user['user_id']);
-        
-        // Debug: Log the user stats to see what's being returned
-        error_log("DEBUG UserController: userStats = " . print_r($userStats, true));
-        
-        require_once __DIR__ . '/../model/repositories/ChatRepository.php';
-        $chatRepo = new ChatRepository();
-        $recentBookings = $chatRepo->getUserBookings($user['user_id'], null);
-        $recentBookings = array_slice($recentBookings, 0, 5);
+
+
 
         require "views/user/profile.php";
     }
@@ -50,12 +43,7 @@ class UserController
     // HELPER METHODS
     // ========================================
     
-    private function getUserStatistics(int $userId): array
-    {
-        require_once __DIR__ . '/../model/repositories/UserRepository.php';
-        $userRepo = new UserRepository();
-        return $userRepo->getUserStatistics($userId);
-    }
+
 
     private function uploadProfilePhoto(array $file, int $userId): ?string
     {

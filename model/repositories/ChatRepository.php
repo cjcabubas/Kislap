@@ -333,9 +333,7 @@ class ChatRepository extends BaseRepository
             // If photographer proposed a date, update event date
             if (!empty($tempBooking['worker_proposed_date'])) {
                 $fields = ['event_date = worker_proposed_date'];
-                if (!empty($tempBooking['worker_proposed_time'])) {
-                    $fields[] = 'event_time = worker_proposed_time';
-                }
+
                 $stmt = $this->conn->prepare(
                     "UPDATE ai_temp_bookings SET " . implode(', ', $fields) . " WHERE conversation_id = ?"
                 );
@@ -364,8 +362,7 @@ class ChatRepository extends BaseRepository
             $stmt = $this->conn->prepare(
                 "UPDATE ai_temp_bookings 
                  SET worker_proposed_price = NULL, 
-                     worker_proposed_date = NULL, 
-                     worker_proposed_time = NULL,
+                     worker_proposed_date = NULL,
                      worker_notes = ? 
                  WHERE conversation_id = ?"
             );
@@ -523,7 +520,6 @@ class ChatRepository extends BaseRepository
                            CONCAT(u.firstName, ' ', u.lastName) as customer_name,
                            atb.event_type, atb.event_date, atb.event_time, atb.event_location,
                            atb.budget, atb.final_price, atb.deposit_paid, atb.deposit_amount,
-                           atb.special_requests,
                            p.name as package_name, p.price as package_price, p.duration_hours as duration
                     FROM conversations c
                     LEFT JOIN user u ON c.user_id = u.user_id
@@ -586,7 +582,7 @@ class ChatRepository extends BaseRepository
             
             $allowedFields = [
                 'event_date', 'event_time', 'event_location', 'final_price', 
-                'worker_notes', 'package_id', 'event_type', 'special_requests'
+                'worker_notes', 'package_id', 'event_type'
             ];
             
             foreach ($updates as $field => $value) {

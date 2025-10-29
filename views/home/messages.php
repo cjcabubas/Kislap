@@ -274,9 +274,7 @@ $tempBooking = $tempBooking ?? null;
                                 <?php if (!empty($tempBooking['worker_proposed_date'])): ?>
                                     <p><strong>Proposed
                                             Date:</strong> <?php echo date('F d, Y', strtotime($tempBooking['worker_proposed_date'])); ?>
-                                        <?php if (!empty($tempBooking['worker_proposed_time'])): ?>
-                                            at <?php echo date('h:i A', strtotime($tempBooking['worker_proposed_time'])); ?>
-                                        <?php endif; ?>
+
                                     </p>
                                 <?php endif; ?>
                                 <?php if (!empty($tempBooking['worker_notes'])): ?>

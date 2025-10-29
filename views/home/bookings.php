@@ -105,7 +105,7 @@ foreach ($bookings as $booking) {
                     $location = $booking['event_location'] ?? 'Not specified';
                     $price = $booking['final_price'] ?? $booking['budget'] ?? $booking['package_price'] ?? 0;
                     $status = $booking['booking_status'] ?? 'pending';
-                    $notes = $booking['special_requests'] ?? '';
+
                     $createdAt = $booking['created_at'] ?? '';
                     $packageName = $booking['package_name'] ?? null;
                     $photographerSpecialty = $booking['photographer_specialty'] ?? '';
@@ -238,12 +238,7 @@ foreach ($bookings as $booking) {
                                             <span class="proposal-value"><?php echo date('M d, Y', strtotime($booking['worker_proposed_date'])); ?></span>
                                         </div>
                                     <?php endif; ?>
-                                    <?php if (!empty($booking['worker_proposed_time'])): ?>
-                                        <div class="proposal-item">
-                                            <span class="proposal-label">Proposed Time:</span>
-                                            <span class="proposal-value"><?php echo date('h:i A', strtotime($booking['worker_proposed_time'])); ?></span>
-                                        </div>
-                                    <?php endif; ?>
+
                                     <?php if (!empty($booking['worker_notes'])): ?>
                                         <div class="proposal-item full-width">
                                             <span class="proposal-label">Notes:</span>
@@ -619,12 +614,7 @@ foreach ($bookings as $booking) {
                             <span>₱${parseFloat(booking.final_price).toLocaleString()}</span>
                         </div>
                         ` : ''}
-                        ${booking.special_requests ? `
-                        <div class="detail-item full-width">
-                            <strong>Special Requests:</strong>
-                            <span>${booking.special_requests}</span>
-                        </div>
-                        ` : ''}
+
                         ${booking.worker_notes ? `
                         <div class="detail-item full-width">
                             <strong>Photographer Notes:</strong>

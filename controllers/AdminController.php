@@ -764,85 +764,17 @@ class AdminController
 
     private function getActiveBookingsForWorker(int $workerId): array
     {
-        $stmt = $this->conn->prepare("
-            SELECT 
-                b.temp_booking_id,
-                b.conversation_id,
-                b.worker_id,
-                b.event_type,
-                b.event_date,
-                b.event_location,
-                b.final_price,
-                b.deposit_amount,
-                b.deposit_paid,
-                b.deposit_paid_at,
-                c.user_id,
-                c.booking_status,
-                u.firstName as user_firstName,
-                u.lastName as user_lastName,
-                u.email as user_email,
-                w.firstName as worker_firstName,
-                w.lastName as worker_lastName
-            FROM ai_temp_bookings b
-            JOIN conversations c ON b.conversation_id = c.conversation_id
-            JOIN user u ON c.user_id = u.user_id
-            JOIN workers w ON b.worker_id = w.worker_id
-            WHERE b.worker_id = ? 
-            AND (c.booking_status IN ('pending_ai', 'pending_worker', 'pending_confirmation', 'negotiating', 'confirmed', 'awaiting_deposit', 'deposit_paid', 'in_progress', 'awaiting_final_payment', 'requires_info') 
-                 OR c.booking_status = '' 
-                 OR c.booking_status IS NULL)
-            AND b.completed_at IS NULL
-            AND b.cancelled_by IS NULL
-        ");
-        
-        $stmt->execute([$workerId]);
-        $bookings = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
-
-        
-        return $bookings;
+        return $this->repo->getActiveBookingsForWorker($workerId);
     }
 
     private function cancelBookingDueToSuspension(array $booking, string $reason, ?string $suspendedUntil): void
     {
-        // Update booking status to cancelled
-        $stmt = $this->conn->prepare("
-            UPDATE ai_temp_bookings 
-            SET cancellation_reason = ?, 
-                cancelled_by = 'system',
-                updated_at = NOW()
-            WHERE temp_booking_id = ?
-        ");
-        
-        $cancellationReason = "Booking cancelled due to photographer suspension. Reason: " . $reason;
-        $stmt->execute([$cancellationReason, $booking['temp_booking_id']]);
-
-        // Update conversation status
-        $stmt = $this->conn->prepare("
-            UPDATE conversations 
-            SET booking_status = 'cancelled',
-                updated_at = NOW()
-            WHERE conversation_id = ?
-        ");
-        $stmt->execute([$booking['conversation_id']]);
+        $this->repo->cancelBookingDueToSuspension($booking, $reason, $suspendedUntil);
     }
 
     private function processDepositRefund(array $booking): void
     {
-        // In a real system, this would integrate with payment processor
-        // For now, we'll log the refund and update the booking
-        
-        $stmt = $this->conn->prepare("
-            UPDATE ai_temp_bookings 
-            SET deposit_paid = 0,
-                deposit_paid_at = NULL,
-                updated_at = NOW()
-            WHERE temp_booking_id = ?
-        ");
-        $stmt->execute([$booking['temp_booking_id']]);
-
-        // Log the refund for accounting
-        error_log("REFUND PROCESSED: Booking ID {$booking['temp_booking_id']}, Amount: {$booking['deposit_amount']}, User: {$booking['user_email']}");
+        $this->repo->processDepositRefund($booking);
     }
 
     private function sendSuspensionNotificationMessage(array $booking, string $reason, ?string $suspendedUntil): void

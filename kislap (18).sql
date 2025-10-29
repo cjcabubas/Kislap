@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 29, 2025 at 12:29 PM
+-- Generation Time: Oct 29, 2025 at 12:58 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -62,11 +62,8 @@ CREATE TABLE `ai_temp_bookings` (
   `event_time` time DEFAULT NULL,
   `event_location` text DEFAULT NULL,
   `budget` decimal(10,2) DEFAULT NULL,
-  `worker_proposed_price` decimal(10,2) DEFAULT NULL,
   `final_price` decimal(10,2) DEFAULT NULL,
-  `special_requests` text DEFAULT NULL,
   `worker_proposed_date` date DEFAULT NULL,
-  `worker_proposed_time` time DEFAULT NULL,
   `worker_notes` text DEFAULT NULL,
   `deposit_amount` decimal(10,2) DEFAULT NULL,
   `deposit_paid` tinyint(1) DEFAULT 0,

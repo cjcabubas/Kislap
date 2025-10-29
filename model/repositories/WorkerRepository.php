@@ -490,4 +490,37 @@ class WorkerRepository extends BaseRepository
             return false;
         }
     }
+
+    // ========================================
+    // EARNINGS CALCULATION
+    // ========================================
+    
+    public function getCompletedBookingsEarnings(int $workerId): float
+    {
+        try {
+            $stmt = $this->conn->prepare("
+                SELECT SUM(COALESCE(atb.final_price, 0)) as total_completed_revenue
+                FROM conversations c
+                JOIN ai_temp_bookings atb ON c.conversation_id = atb.conversation_id
+                WHERE c.worker_id = ? 
+                AND c.booking_status = 'completed'
+                AND atb.final_price IS NOT NULL
+                AND atb.final_price > 0
+            ");
+            
+            $stmt->execute([$workerId]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            $totalRevenue = floatval($result['total_completed_revenue'] ?? 0);
+            
+            // Deduct 10% platform fee
+            $workerEarnings = $totalRevenue * 0.9;
+            
+            return $workerEarnings;
+            
+        } catch (Exception $e) {
+            error_log("Error calculating completed bookings earnings: " . $e->getMessage());
+            return 0.0;
+        }
+    }
 }

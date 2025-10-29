@@ -241,8 +241,8 @@ class WorkerController
         $stats['total_revenue'] = ($stats['total_revenue'] ?? 0) * 0.9;
         $stats['avg_booking_value'] = ($stats['avg_booking_value'] ?? 0) * 0.9;
         
-        // Calculate earnings from completed bookings only (minus 30% platform fee)
-        $completedEarnings = $this->getCompletedBookingsEarnings($workerId);
+        // Calculate earnings from completed bookings only (minus 10% platform fee)
+        $completedEarnings = $this->repo->getCompletedBookingsEarnings($workerId);
         
         $earningsData = [
             'total_earnings' => $completedEarnings,
@@ -1857,42 +1857,6 @@ class WorkerController
         file_put_contents($logFile, $logEntry, FILE_APPEND | LOCK_EX);
     }
 
-    /**
-     * Calculate earnings from completed bookings only (minus 30% platform fee)
-     */
-    private function getCompletedBookingsEarnings(int $workerId): float
-    {
-        try {
-            // Use the repository's connection
-            $conn = $this->repo->getConnection();
-            
-            $stmt = $conn->prepare("
-                SELECT SUM(COALESCE(atb.final_price, 0)) as total_completed_revenue
-                FROM conversations c
-                JOIN ai_temp_bookings atb ON c.conversation_id = atb.conversation_id
-                WHERE c.worker_id = ? 
-                AND c.booking_status = 'completed'
-                AND atb.final_price IS NOT NULL
-                AND atb.final_price > 0
-            ");
-            
-            $stmt->execute([$workerId]);
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            
-            $totalRevenue = floatval($result['total_completed_revenue'] ?? 0);
-            
-            // Deduct 30% platform fee
-            $workerEarnings = $totalRevenue * 0.7;
-            
-            // Debug: Log detailed calculation
-            error_log("DEBUG EARNINGS: Total Revenue = $totalRevenue, Worker Earnings (70%) = $workerEarnings");
-            
-            return $workerEarnings;
-            
-        } catch (Exception $e) {
-            error_log("Error calculating completed bookings earnings: " . $e->getMessage());
-            return 0.0;
-        }
-    }
+
 
 }

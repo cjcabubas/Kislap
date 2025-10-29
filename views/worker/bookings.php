@@ -336,7 +336,7 @@ function showBookingDetails(booking) {
             <div><strong>Budget:</strong> ₱${parseFloat(booking.budget || 0).toLocaleString()}</div>
             ${booking.final_price ? `<div><strong>Final Price:</strong> ₱${parseFloat(booking.final_price).toLocaleString()}</div>` : ''}
             ${booking.deposit_amount ? `<div><strong>Deposit:</strong> ₱${parseFloat(booking.deposit_amount).toLocaleString()}</div>` : ''}
-            ${booking.special_requests ? `<div><strong>Special Requests:</strong> ${booking.special_requests}</div>` : ''}
+
             ${booking.worker_notes ? `<div><strong>Your Notes:</strong> ${booking.worker_notes}</div>` : ''}
         </div>
     `;
