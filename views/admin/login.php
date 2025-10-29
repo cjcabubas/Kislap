@@ -12,9 +12,6 @@
 </head>
 
 <body>
-<?php 
-require __DIR__ . '/../shared/navbar.php';
-?>
 
 <div class="form-wrapper">
     <?php if (isset($_SESSION['notification'])): ?>
@@ -25,17 +22,19 @@ require __DIR__ . '/../shared/navbar.php';
     <?php endif; ?>
 
 <form class="form" method="POST" action="/Kislap/index.php?controller=Admin&action=handleLogin">
+    <h2>Admin Login</h2>
+    
     <div class="form-group">
-        <label for="email">Email or Phone Number</label>
+        <label for="username">Admin Username</label>
         <input id="username" type="text" name="username" required placeholder="Enter Admin Username">
     </div>
 
     <div class="form-group">
-        <label for="password">Password</label>
-        <input id="password" type="password" name="password" required placeholder="Enter your Password">
+        <label for="password">Admin Password</label>
+        <input id="password" type="password" name="password" required placeholder="Enter Admin Password">
     </div>
 
-    <button type="submit">Login</button>
+    <button type="submit">Login as Admin</button>
 </form>
 </div>
 </body>

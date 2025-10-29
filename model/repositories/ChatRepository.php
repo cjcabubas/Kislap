@@ -118,11 +118,16 @@ class ChatRepository extends BaseRepository
             ? "CONCAT(w.firstName, ' ', w.lastName)"
             : "CONCAT(u.firstName, ' ', u.lastName)";
 
+        $otherUserPhoto = $userType === 'user'
+            ? "w.profile_photo AS worker_profile_photo"
+            : "u.profilePhotoUrl AS user_profile_photo";
+
         $sql = "
             SELECT 
                 c.conversation_id,
                 c.type,
                 $otherUserName AS other_user_name,
+                $otherUserPhoto,
                 lm.message_text AS last_message,
                 lm.sent_at AS last_message_time,
                 (SELECT COUNT(*) FROM messages m 
@@ -147,7 +152,14 @@ class ChatRepository extends BaseRepository
 
         $stmt = $this->conn->prepare($sql);
         $stmt->execute([$userType, $userId]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Debug: Log the SQL query and results
+        error_log("DEBUG: getConversationsForUser SQL: " . $sql);
+        error_log("DEBUG: getConversationsForUser params: userType=$userType, userId=$userId");
+        error_log("DEBUG: getConversationsForUser result: " . print_r($result, true));
+        
+        return $result;
     }
 
     public function updateConversationType(int $conversationId, string $type): bool

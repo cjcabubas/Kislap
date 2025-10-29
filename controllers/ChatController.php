@@ -41,6 +41,10 @@ class ChatController
         $userType = $user ? 'user' : ($worker ? 'worker' : null);
 
         $conversations = $this->chatRepo->getConversationsForUser($userId, $userType);
+        
+        // Debug: Log conversations data
+        error_log("DEBUG: ChatController - User ID: $userId, User Type: $userType");
+        error_log("DEBUG: ChatController - Conversations: " . print_r($conversations, true));
 
         $activeConversationId = $_GET['conversation_id'] ?? null;
         $activeConversation = null;
@@ -57,6 +61,10 @@ class ChatController
                     ? $activeConversation['worker_id']
                     : $activeConversation['user_id'];
                 $recipientInfo = $this->chatRepo->getRecipientInfo($recipientId, $userType);
+
+                // Debug: Log recipient info
+                error_log("DEBUG: ChatController - Recipient ID: $recipientId, User Type: $userType");
+                error_log("DEBUG: ChatController - Recipient Info: " . print_r($recipientInfo, true));
 
                 $recipientInfo['conversation_type'] = $activeConversation['type'];
                 $recipientInfo['booking_status'] = $activeConversation['booking_status'];
@@ -140,8 +148,28 @@ class ChatController
             $messageText = trim($_POST['message'] ?? '');
             $userId = $user['user_id'] ?? $worker['worker_id'];
             $userType = $user ? 'user' : 'worker';
+            
+            // Handle file upload
+            $uploadedImagePath = null;
+            
+            // Debug: Log file upload attempt
+            error_log("DEBUG: sendMessage - FILES: " . print_r($_FILES, true));
+            
+            if (!empty($_FILES['attachment']) && $_FILES['attachment']['error'] === UPLOAD_ERR_OK) {
+                error_log("DEBUG: sendMessage - Processing file upload");
+                $uploadedImagePath = $this->handleImageUpload($_FILES['attachment'], $userId, $userType);
+                error_log("DEBUG: sendMessage - Upload result: " . ($uploadedImagePath ?? 'FAILED'));
+                
+                if ($uploadedImagePath) {
+                    // If image uploaded successfully, use special format in message_text
+                    $messageText = $messageText ? $messageText . "\n[IMAGE:$uploadedImagePath]" : "[IMAGE:$uploadedImagePath]";
+                    error_log("DEBUG: sendMessage - Final message text: " . $messageText);
+                }
+            } else {
+                error_log("DEBUG: sendMessage - No file or file error: " . ($_FILES['attachment']['error'] ?? 'NO_FILE'));
+            }
 
-            if (!$conversationId || !$messageText) {
+            if (!$conversationId || (!$messageText && !$uploadedImagePath)) {
                 echo json_encode(['success' => false, 'error' => 'Missing required fields']);
                 exit;
             }
@@ -183,6 +211,61 @@ class ChatController
             ]);
         }
         exit;
+    }
+
+    // ========================================
+    // FILE UPLOAD HANDLING
+    // ========================================
+    
+    private function handleImageUpload(array $file, int $userId, string $userType): ?string
+    {
+        try {
+            error_log("DEBUG: handleImageUpload - File info: " . print_r($file, true));
+            
+            // Validate file
+            $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+            $maxSize = 5 * 1024 * 1024; // 5MB
+            
+            error_log("DEBUG: handleImageUpload - File type: " . $file['type'] . ", Size: " . $file['size']);
+            
+            if (!in_array($file['type'], $allowedTypes)) {
+                throw new Exception('Invalid file type. Only images are allowed. Got: ' . $file['type']);
+            }
+            
+            if ($file['size'] > $maxSize) {
+                throw new Exception('File too large. Maximum size is 5MB. Got: ' . $file['size']);
+            }
+            
+            // Create upload directory
+            $uploadDir = $_SERVER['DOCUMENT_ROOT'] . '/Kislap/uploads/chat/';
+            error_log("DEBUG: handleImageUpload - Upload dir: " . $uploadDir);
+            
+            if (!is_dir($uploadDir)) {
+                error_log("DEBUG: handleImageUpload - Creating directory");
+                mkdir($uploadDir, 0755, true);
+            }
+            
+            // Generate unique filename
+            $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+            $filename = 'chat_' . $userId . '_' . time() . '_' . uniqid() . '.' . $extension;
+            $uploadPath = $uploadDir . $filename;
+            $webPath = '/Kislap/uploads/chat/' . $filename;
+            
+            error_log("DEBUG: handleImageUpload - Upload path: " . $uploadPath);
+            error_log("DEBUG: handleImageUpload - Web path: " . $webPath);
+            
+            // Move uploaded file
+            if (move_uploaded_file($file['tmp_name'], $uploadPath)) {
+                error_log("DEBUG: handleImageUpload - Upload successful");
+                return $webPath;
+            } else {
+                throw new Exception('Failed to upload file. move_uploaded_file returned false.');
+            }
+            
+        } catch (Exception $e) {
+            error_log('Image upload error: ' . $e->getMessage());
+            return null;
+        }
     }
 
     // ========================================

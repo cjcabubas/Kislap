@@ -78,9 +78,26 @@ $tempBooking = $tempBooking ?? null;
                 <?php else: ?>
                     <?php foreach ($conversations as $conv): ?>
                         <?php
+                        // Debug: Check userType at start of loop
+                        error_log("DEBUG: Loop start - userType: '$userType'");
+                        
                         $convId = $conv['conversation_id'] ?? 0;
                         $otherUserName = $conv['other_user_name'] ?? 'Unknown User';
-                        $lastMessage = $conv['last_message'] ?? 'No messages yet';
+                        $rawLastMessage = $conv['last_message'] ?? 'No messages yet';
+                        
+                        // Process last message to show nice preview for images
+                        $lastMessage = $rawLastMessage;
+                        if (preg_match('/\[IMAGE:.*?\]/', $lastMessage)) {
+                            // Check if there's text along with the image
+                            $textOnly = preg_replace('/\[IMAGE:.*?\]/', '', $lastMessage);
+                            $textOnly = trim($textOnly);
+                            
+                            if (!empty($textOnly)) {
+                                $lastMessage = "📷 " . $textOnly;
+                            } else {
+                                $lastMessage = "📷 Photo";
+                            }
+                        }
                         $lastMessageTime = $conv['last_message_time'] ?? '';
                         $unreadCount = $conv['unread_count'] ?? 0;
                         $isActive = isset($activeConversation['conversation_id']) && $convId == $activeConversation['conversation_id'];
@@ -89,7 +106,52 @@ $tempBooking = $tempBooking ?? null;
                              onclick="loadConversation(<?php echo $convId; ?>)">
                             <div class="conversation-header">
                                 <div class="user-avatar">
-                                    <?php echo strtoupper(substr($otherUserName, 0, 2)); ?>
+                                    <?php
+                                    // Get the other user's profile photo
+                                    $otherUserPhoto = null;
+                                    
+                                    // Debug: Check userType and available fields
+                                    error_log("DEBUG: Sidebar - userType: '$userType', worker_profile_photo: " . ($conv['worker_profile_photo'] ?? 'NOT_SET') . ", user_profile_photo: " . ($conv['user_profile_photo'] ?? 'NOT_SET'));
+                                    
+                                    // Fix: Handle both 'user' and 'Customer' values (in case of variable modification)
+                                    if ($userType === 'user' || $userType === 'Customer') {
+                                        // Current user is a customer, so other user is a worker
+                                        $otherUserPhoto = $conv['worker_profile_photo'] ?? null;
+                                        error_log("DEBUG: Sidebar - Branch: user/customer, selected worker_profile_photo: " . ($otherUserPhoto ?? 'NULL'));
+                                    } else {
+                                        // Current user is a worker, so other user is a customer
+                                        $otherUserPhoto = $conv['user_profile_photo'] ?? null;
+                                        error_log("DEBUG: Sidebar - Branch: worker, selected user_profile_photo: " . ($otherUserPhoto ?? 'NULL'));
+                                    }
+                                    
+                                    // Debug: Log conversation photo data
+                                    error_log("DEBUG: Conversation sidebar - Conv ID: {$convId}, User Type: {$userType}, Photo: " . ($otherUserPhoto ?? 'NULL'));
+                                    error_log("DEBUG: Conversation sidebar - Full conv data: " . print_r($conv, true));
+                                    
+                                    if ($otherUserPhoto) {
+                                        // Handle different path formats for users vs workers
+                                        if (strpos($otherUserPhoto, '/Kislap/') === 0) {
+                                            // User path format: /Kislap/uploads/user/...
+                                            $cleanPath = $otherUserPhoto;
+                                        } else {
+                                            // Worker path format: uploads/workers/...
+                                            $cleanPath = '/Kislap/' . ltrim($otherUserPhoto, '/');
+                                        }
+                                        
+                                        $fullPath = $_SERVER['DOCUMENT_ROOT'] . $cleanPath;
+                                        
+                                        // Debug: Log conversation photo paths
+                                        error_log("DEBUG: Conversation sidebar - Conv ID: {$convId}, Original: $otherUserPhoto, Clean: $cleanPath, Exists: " . (file_exists($fullPath) ? 'YES' : 'NO'));
+                                        
+                                        if (file_exists($fullPath)) {
+                                            echo '<img src="' . htmlspecialchars($cleanPath) . '" alt="' . htmlspecialchars($otherUserName) . '">';
+                                        } else {
+                                            echo strtoupper(substr($otherUserName, 0, 2));
+                                        }
+                                    } else {
+                                        echo strtoupper(substr($otherUserName, 0, 2));
+                                    }
+                                    ?>
                                 </div>
                                 <div class="conversation-info">
                                     <div class="conversation-name"><?php echo htmlspecialchars($otherUserName); ?></div>
@@ -119,12 +181,36 @@ $tempBooking = $tempBooking ?? null;
                             <?php
                             $recipientName = $recipientInfo['name'] ?? 'User';
                             $recipientPicture = $recipientInfo['profile_picture'] ?? null;
-                            if ($recipientPicture && file_exists($_SERVER['DOCUMENT_ROOT'] . $recipientPicture)):
-                                ?>
-                                <img src="<?php echo htmlspecialchars($recipientPicture); ?>" alt="Profile">
-                            <?php else: ?>
-                                <?php echo strtoupper(substr($recipientName, 0, 2)); ?>
-                            <?php endif; ?>
+                            
+                            // Debug: Log recipient info data
+                            error_log("DEBUG: Chat header - Recipient Name: $recipientName, Picture: " . ($recipientPicture ?? 'NULL'));
+                            error_log("DEBUG: Chat header - Full recipient info: " . print_r($recipientInfo, true));
+                            
+                            // Clean up the path and check if file exists
+                            if ($recipientPicture) {
+                                // Handle different path formats for users vs workers
+                                if (strpos($recipientPicture, '/Kislap/') === 0) {
+                                    // User path format: /Kislap/uploads/user/...
+                                    $cleanPath = $recipientPicture;
+                                } else {
+                                    // Worker path format: uploads/workers/...
+                                    $cleanPath = '/Kislap/' . ltrim($recipientPicture, '/');
+                                }
+                                
+                                $fullPath = $_SERVER['DOCUMENT_ROOT'] . $cleanPath;
+                                
+                                // Debug: Log the paths for troubleshooting
+                                error_log("DEBUG: Recipient avatar - Original: $recipientPicture, Clean: $cleanPath, Full: $fullPath, Exists: " . (file_exists($fullPath) ? 'YES' : 'NO'));
+                                
+                                if (file_exists($fullPath)) {
+                                    echo '<img src="' . htmlspecialchars($cleanPath) . '" alt="Profile">';
+                                } else {
+                                    echo strtoupper(substr($recipientName, 0, 2));
+                                }
+                            } else {
+                                echo strtoupper(substr($recipientName, 0, 2));
+                            }
+                            ?>
                         </div>
                         <div class="chat-user-details">
                             <h3><?php echo htmlspecialchars($recipientName); ?></h3>
@@ -220,25 +306,73 @@ $tempBooking = $tempBooking ?? null;
                                 <?php endif; ?>
                                 <div class="message-avatar">
                                     <?php
-                                    // get sender profile pic
-                                    $senderPicture = null;
-                                    if ($isSent) {
-                                        $senderPicture = $user['profilePhotoUrl'] ?? $worker['profile_photo'] ?? null;
+                                    // Skip avatar for bot messages
+                                    if ($senderId == 0 || $senderType === 'bot' || $senderType === 'ai') {
+                                        echo '<div class="bot-avatar"><i class="fas fa-robot"></i></div>';
                                     } else {
-                                        $senderPicture = $recipientInfo['profile_picture'] ?? null;
-                                    }
+                                        // Get sender profile pic
+                                        $senderPicture = null;
+                                        if ($isSent) {
+                                            $senderPicture = $user['profilePhotoUrl'] ?? $worker['profile_photo'] ?? null;
+                                        } else {
+                                            $senderPicture = $recipientInfo['profile_picture'] ?? null;
+                                        }
 
-                                    if ($senderPicture && file_exists($_SERVER['DOCUMENT_ROOT'] . $senderPicture)):
-                                        ?>
-                                        <img src="<?php echo htmlspecialchars($senderPicture); ?>" alt="Avatar">
-                                    <?php else: ?>
-                                        <?php echo strtoupper(substr($senderName, 0, 2)); ?>
-                                    <?php endif; ?>
+                                        // Clean up the path and check if file exists
+                                        if ($senderPicture) {
+                                            // Handle different path formats for users vs workers
+                                            if (strpos($senderPicture, '/Kislap/') === 0) {
+                                                // User path format: /Kislap/uploads/user/...
+                                                $cleanPath = $senderPicture;
+                                            } else {
+                                                // Worker path format: uploads/workers/...
+                                                $cleanPath = '/Kislap/' . ltrim($senderPicture, '/');
+                                            }
+                                            
+                                            $fullPath = $_SERVER['DOCUMENT_ROOT'] . $cleanPath;
+                                            
+                                            if (file_exists($fullPath)) {
+                                                echo '<img src="' . htmlspecialchars($cleanPath) . '" alt="Avatar">';
+                                            } else {
+                                                echo strtoupper(substr($senderName, 0, 2));
+                                            }
+                                        } else {
+                                            echo strtoupper(substr($senderName, 0, 2));
+                                        }
+                                    }
+                                    ?>
                                 </div>
                                 <div class="message-content">
-                                    <div class="message-bubble">
-                                        <?php echo nl2br(htmlspecialchars($messageText)); ?>
-                                    </div>
+                                    <?php
+                                    // Parse images from message text
+                                    $displayText = $messageText;
+                                    $images = [];
+                                    
+                                    // Extract images
+                                    if (preg_match_all('/\[IMAGE:(.*?)\]/', $messageText, $matches)) {
+                                        foreach ($matches[1] as $imagePath) {
+                                            $images[] = $imagePath;
+                                        }
+                                        // Remove image tags from display text
+                                        $displayText = preg_replace('/\[IMAGE:(.*?)\]/', '', $displayText);
+                                        $displayText = trim($displayText);
+                                    }
+                                    ?>
+                                    
+                                    <?php if (!empty($displayText)): ?>
+                                        <div class="message-bubble">
+                                            <?php echo nl2br(htmlspecialchars($displayText)); ?>
+                                        </div>
+                                    <?php endif; ?>
+                                    
+                                    <?php foreach ($images as $imagePath): ?>
+                                        <div class="message-image">
+                                            <img src="<?php echo htmlspecialchars($imagePath); ?>" 
+                                                 alt="Shared image" 
+                                                 onclick="openImageModal('<?php echo htmlspecialchars($imagePath); ?>')"
+                                                 style="max-width: 300px; max-height: 300px; border-radius: 8px; cursor: pointer;">
+                                        </div>
+                                    <?php endforeach; ?>
                                     <?php if ($attachmentPath): ?>
                                         <div class="message-attachment">
                                             <img src="<?php echo htmlspecialchars($attachmentPath); ?>"
@@ -435,12 +569,12 @@ $tempBooking = $tempBooking ?? null;
                 <div class="message-input-area">
                     <form id="messageForm">
                         <div class="input-wrapper">
-                            <button type="button" class="attachment-btn"
-                                    onclick="document.getElementById('fileInput').click()">
-                                <i class="fas fa-paperclip"></i>
+                            <button type="button" class="attachment-btn" id="attachmentBtn"
+                                    onclick="document.getElementById('fileInput').click()" 
+                                    title="Send Photo">
+                                <i class="fas fa-camera"></i>
                             </button>
-                            <input type="file" id="fileInput" accept="image/*" style="display: none;"
-                                   onchange="handleFileSelect(event)">
+                            <input type="file" id="fileInput" accept="image/*" style="display: none;">
                             <div class="message-input">
                                 <textarea id="messageText" name="message" placeholder="Type a message..." rows="1"
                                           required></textarea>
@@ -470,6 +604,10 @@ $tempBooking = $tempBooking ?? null;
         const currentUserId = <?php echo($user['user_id'] ?? $worker['worker_id'] ?? 'null'); ?>;
         const currentUserType = <?php echo $user ? "'user'" : "'worker'"; ?>;
         const recipientName = '<?php echo addslashes($recipientInfo['name'] ?? 'Recipient'); ?>';
+        
+        // Profile photo data
+        const currentUserPhoto = '<?php echo addslashes($user['profilePhotoUrl'] ?? $worker['profile_photo'] ?? ''); ?>';
+        const recipientPhoto = '<?php echo addslashes($recipientInfo['profile_picture'] ?? ''); ?>';
 
         console.log('Chat initialized:', {
             conversationId: activeConversationId,
@@ -481,6 +619,54 @@ $tempBooking = $tempBooking ?? null;
         const sendBtn = document.getElementById('sendBtn');
         const fileInput = document.getElementById('fileInput');
         const searchInput = document.getElementById('searchConversations');
+        
+        // Define file select handler
+        function handleFileSelect(event) {
+            console.log('DEBUG: handleFileSelect called');
+            const file = event.target.files[0];
+            const attachmentBtn = document.getElementById('attachmentBtn');
+            
+            console.log('DEBUG: Selected file:', file);
+            console.log('DEBUG: Attachment button:', attachmentBtn);
+            
+            if (file) {
+                console.log('DEBUG: File details:', {
+                    name: file.name,
+                    type: file.type,
+                    size: file.size
+                });
+                
+                // Show file selected state
+                attachmentBtn.innerHTML = '<i class="fas fa-check-circle"></i>';
+                attachmentBtn.style.color = '#28a745';
+                attachmentBtn.title = `Selected: ${file.name}`;
+                
+                console.log('DEBUG: Button updated to checkmark');
+                
+                // Show preview (optional)
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        console.log('DEBUG: Image loaded for preview');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            } else {
+                console.log('DEBUG: No file selected, resetting button');
+                // Reset button state
+                attachmentBtn.innerHTML = '<i class="fas fa-camera"></i>';
+                attachmentBtn.style.color = '';
+                attachmentBtn.title = 'Send Photo';
+            }
+        }
+
+        // Add file input event listener
+        if (fileInput) {
+            fileInput.addEventListener('change', handleFileSelect);
+            console.log('DEBUG: File input event listener added');
+        } else {
+            console.log('DEBUG: File input not found!');
+        }
 
         const displayedMessageIds = new Set();
         let isSubmitting = false;
@@ -508,6 +694,48 @@ $tempBooking = $tempBooking ?? null;
                 }
             });
         }
+
+        // ========================================
+        // AVATAR HELPER FUNCTION
+        // ========================================
+        
+        function getAvatarHTML(isBot, isSent, senderName) {
+            if (isBot) {
+                return '<div class="bot-avatar"><i class="fas fa-robot"></i></div>';
+            }
+            
+            let photoPath = '';
+            if (isSent) {
+                photoPath = currentUserPhoto;
+            } else {
+                photoPath = recipientPhoto;
+            }
+            
+            // Clean up empty or whitespace-only paths
+            photoPath = photoPath ? photoPath.trim() : '';
+            
+            if (photoPath && photoPath !== '') {
+                // Handle different path formats for users vs workers
+                let cleanPath = '';
+                if (photoPath.startsWith('/Kislap/')) {
+                    // User path format: /Kislap/uploads/user/...
+                    cleanPath = photoPath;
+                } else {
+                    // Worker path format: uploads/workers/...
+                    cleanPath = '/Kislap/' + photoPath.replace(/^\/+/, '');
+                }
+                
+                const initials = senderName.substring(0, 2).toUpperCase();
+                
+                return `<img src="${cleanPath}" alt="Avatar" style="width:100%; height:100%; object-fit:cover;" 
+                            onerror="this.style.display='none'; this.parentNode.innerHTML='${initials}';">`;
+            } else {
+                // No photo - show initials directly
+                return senderName.substring(0, 2).toUpperCase();
+            }
+        }
+
+
 
         // ========================================
         // SEND MESSAGE
@@ -540,7 +768,10 @@ $tempBooking = $tempBooking ?? null;
             formData.append('conversation_id', activeConversationId);
             formData.append('message', message);
             if (file) {
+                console.log('DEBUG: Sending file:', file.name, file.type, file.size);
                 formData.append('attachment', file);
+            } else {
+                console.log('DEBUG: No file selected');
             }
 
             try {
@@ -582,6 +813,12 @@ $tempBooking = $tempBooking ?? null;
                     messageText.value = '';
                     fileInput.value = '';
                     messageText.style.height = 'auto';
+                    
+                    // Reset attachment button
+                    const attachmentBtn = document.getElementById('attachmentBtn');
+                    attachmentBtn.innerHTML = '<i class="fas fa-camera"></i>';
+                    attachmentBtn.style.color = '';
+                    attachmentBtn.title = 'Send Photo';
                 } else {
                     alert('Error: ' + (result.error || 'Could not send message'));
                 }
@@ -625,8 +862,25 @@ $tempBooking = $tempBooking ?? null;
                 messageClass = 'received';
             }
 
-            // Format message text
-            let formattedText = msg.message_text
+            // Format message text and handle images
+            let formattedText = msg.message_text;
+            let imageHTML = '';
+            
+            // Extract images from message text
+            const imageRegex = /\[IMAGE:(.*?)\]/g;
+            let match;
+            while ((match = imageRegex.exec(formattedText)) !== null) {
+                const imagePath = match[1];
+                imageHTML += `<div class="message-image">
+                    <img src="${imagePath}" alt="Shared image" onclick="openImageModal('${imagePath}')" style="max-width: 300px; max-height: 300px; border-radius: 8px; cursor: pointer;">
+                </div>`;
+                // Remove the image tag from text
+                formattedText = formattedText.replace(match[0], '');
+            }
+            
+            // Format remaining text
+            formattedText = formattedText
+                .trim()
                 .replace(/\n/g, '<br>')
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
@@ -635,17 +889,11 @@ $tempBooking = $tempBooking ?? null;
             messageGroup.innerHTML = `
             ${isBot ? '<div class="bot-badge"><i class="fas fa-robot"></i> AI</div>' : ''}
             <div class="message-avatar">
-                ${senderName.substring(0, 2).toUpperCase()}
+                ${getAvatarHTML(isBot, isSent, senderName)}
             </div>
             <div class="message-content">
-                <div class="message-bubble">
-                    ${formattedText}
-                </div>
-                ${msg.attachment_path ? `
-                    <div class="message-attachment">
-                        <img src="${msg.attachment_path}" alt="Attachment">
-                    </div>
-                ` : ''}
+                ${formattedText ? `<div class="message-bubble">${formattedText}</div>` : ''}
+                ${imageHTML}
                 <span class="message-time">${formatTime(msg.sent_at)}</span>
             </div>
         `;
@@ -1190,6 +1438,115 @@ $tempBooking = $tempBooking ?? null;
             window.location.href = '?controller=Home&action=bookings';
         }
     }
+
+    // ========================================
+    // IMAGE MODAL
+    // ========================================
+    
+    window.openImageModal = function(imagePath) {
+        // Remove existing modal if any
+        const existingModal = document.getElementById('imageModal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+        
+        // Create modal
+        const modal = document.createElement('div');
+        modal.id = 'imageModal';
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s ease;
+        `;
+        
+        // Add CSS animation
+        if (!document.getElementById('imageModalStyles')) {
+            const style = document.createElement('style');
+            style.id = 'imageModalStyles';
+            style.textContent = `
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                @keyframes scaleIn {
+                    from { transform: scale(0.8); opacity: 0; }
+                    to { transform: scale(1); opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        modal.innerHTML = `
+            <div style="
+                position: relative; 
+                width: 90vw; 
+                height: 90vh; 
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                animation: scaleIn 0.3s ease;
+            ">
+                <img src="${imagePath}" style="
+                    max-width: calc(90vw - 40px); 
+                    max-height: calc(90vh - 40px); 
+                    width: auto;
+                    height: auto;
+                    border-radius: 12px;
+                    object-fit: contain;
+                    display: block;
+                    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+                    border: 2px solid rgba(255, 107, 0, 0.3);
+                ">
+                <button onclick="closeImageModal()" style="
+                    position: absolute;
+                    top: 10px;
+                    right: 10px;
+                    background: linear-gradient(135deg, #ff6b00, #ff8533);
+                    color: white;
+                    border: none;
+                    border-radius: 50%;
+                    width: 40px;
+                    height: 40px;
+                    cursor: pointer;
+                    font-size: 20px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    box-shadow: 0 4px 15px rgba(255, 107, 0, 0.4);
+                    z-index: 10001;
+                    transition: all 0.2s ease;
+                    font-weight: bold;
+                " onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">&times;</button>
+
+            </div>
+        `;
+        
+        // Close on background click
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeImageModal();
+            }
+        });
+        
+        document.body.appendChild(modal);
+    };
+    
+    window.closeImageModal = function() {
+        const modal = document.getElementById('imageModal');
+        if (modal) {
+            modal.remove();
+        }
+    };
 
     // ========================================
     // NOTIFICATION SYSTEM

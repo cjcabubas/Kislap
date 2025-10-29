@@ -443,16 +443,60 @@ body {
     object-fit: cover;
 }
 
+.bot-avatar {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    color: #fff;
+    font-size: 16px;
+}
+
 .message-content {
     max-width: 65%;
     min-width: 0;
     display: flex;
     flex-direction: column;
+}
+
+.message-image {
+    margin: 5px 0;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.message-image img {
+    max-width: 250px;
+    max-height: 250px;
+    width: auto;
+    height: auto;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    display: block;
+}
+
+.message-image img:hover {
+    transform: scale(1.02);
+}
+
+/* Align sent message images to the right */
+.message-group.sent .message-image {
+    justify-content: flex-end;
+}
+
+/* Align received message images to the left */
+.message-group.received .message-image {
+    justify-content: flex-start;
+}
     gap: 8px;
 }
 
 .message-group.sent .message-content {
     align-items: flex-end;
+    max-width: 60%; /* Slightly smaller to avoid overlap */
 }
 
 .message-bubble {

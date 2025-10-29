@@ -109,6 +109,7 @@ foreach ($bookings as $booking) {
                     $createdAt = $booking['created_at'] ?? '';
                     $packageName = $booking['package_name'] ?? null;
                     $photographerSpecialty = $booking['photographer_specialty'] ?? '';
+                    $notes = $booking['worker_notes'] ?? '';
 
                     // Map database status to display status
                     $displayStatus = $status;
@@ -166,11 +167,32 @@ foreach ($bookings as $booking) {
                         <div class="booking-header">
                             <div class="photographer-info">
                                 <div class="photographer-avatar">
-                                    <?php if ($photographerAvatar): ?>
-                                        <img src="<?php echo htmlspecialchars($photographerAvatar); ?>" alt="<?php echo htmlspecialchars($photographerName); ?>">
+                                    <?php 
+                                    // Clean up the path and check if file exists
+                                    if ($photographerAvatar) {
+                                        // Handle different path formats for users vs workers
+                                        if (strpos($photographerAvatar, '/Kislap/') === 0) {
+                                            // User path format: /Kislap/uploads/user/...
+                                            $cleanPath = $photographerAvatar;
+                                        } else {
+                                            // Worker path format: uploads/workers/...
+                                            $cleanPath = '/Kislap/' . ltrim($photographerAvatar, '/');
+                                        }
+                                        
+                                        $fullPath = $_SERVER['DOCUMENT_ROOT'] . $cleanPath;
+                                        
+                                        // Debug: Log the paths for troubleshooting
+                                        error_log("DEBUG: Photographer avatar - Original: $photographerAvatar, Clean: $cleanPath, Full: $fullPath, Exists: " . (file_exists($fullPath) ? 'YES' : 'NO'));
+                                        
+                                        if (file_exists($fullPath)):
+                                    ?>
+                                        <img src="<?php echo htmlspecialchars($cleanPath); ?>" alt="<?php echo htmlspecialchars($photographerName); ?>" loading="lazy">
                                     <?php else: ?>
                                         <?php echo strtoupper(substr($photographerName, 0, 2)); ?>
                                     <?php endif; ?>
+                                    <?php } else { ?>
+                                        <?php echo strtoupper(substr($photographerName, 0, 2)); ?>
+                                    <?php } ?>
                                 </div>
                                 <div class="photographer-details">
                                     <h3><?php echo htmlspecialchars($photographerName); ?></h3>

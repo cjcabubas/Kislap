@@ -5,7 +5,6 @@ require_once __DIR__ . '/../model/repositories/AdminRepository.php';
 class AdminController
 {
     private AdminRepository $repo;
-    private PDO $conn;
 
     // ========================================
     // CONSTRUCTOR
@@ -14,8 +13,6 @@ class AdminController
     public function __construct()
     {
         $this->repo = new AdminRepository();
-        $this->conn = new PDO("mysql:host=localhost;dbname=kislap", "root", "");
-        $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
 
     // ========================================
@@ -954,26 +951,53 @@ class AdminController
      */
     private function forceLogoutWorker(int $workerId): void
     {
-        // Get the session save path
-        $sessionPath = session_save_path();
-        if (empty($sessionPath)) {
-            $sessionPath = sys_get_temp_dir();
-        }
-
-        // Look for session files
-        $sessionFiles = glob($sessionPath . '/sess_*');
-        
-        foreach ($sessionFiles as $sessionFile) {
-            $sessionData = file_get_contents($sessionFile);
-            
-            // Check if this session contains the worker we want to logout
-            if (strpos($sessionData, '"worker_id";i:' . $workerId . ';') !== false || 
-                strpos($sessionData, '"worker_id";s:' . strlen($workerId) . ':"' . $workerId . '";') !== false) {
-                
-                // Delete the session file to force logout
-                unlink($sessionFile);
-                break;
+        try {
+            // Get the session save path
+            $sessionPath = session_save_path();
+            if (empty($sessionPath)) {
+                $sessionPath = sys_get_temp_dir();
             }
+
+            // Check if session path is readable
+            if (!is_readable($sessionPath)) {
+                error_log("Session path not readable: " . $sessionPath);
+                return;
+            }
+
+            // Look for session files
+            $sessionFiles = glob($sessionPath . '/sess_*');
+            
+            if ($sessionFiles === false) {
+                error_log("Failed to read session files from: " . $sessionPath);
+                return;
+            }
+            
+            foreach ($sessionFiles as $sessionFile) {
+                // Check if file is readable before trying to read it
+                if (!is_readable($sessionFile)) {
+                    continue;
+                }
+                
+                $sessionData = @file_get_contents($sessionFile);
+                
+                // Skip if we couldn't read the file
+                if ($sessionData === false) {
+                    continue;
+                }
+                
+                // Check if this session contains the worker we want to logout
+                if (strpos($sessionData, '"worker_id";i:' . $workerId . ';') !== false || 
+                    strpos($sessionData, '"worker_id";s:' . strlen($workerId) . ':"' . $workerId . '";') !== false) {
+                    
+                    // Delete the session file to force logout
+                    if (is_writable($sessionFile)) {
+                        @unlink($sessionFile);
+                    }
+                    break;
+                }
+            }
+        } catch (Exception $e) {
+            error_log("Error in forceLogoutWorker: " . $e->getMessage());
         }
     }
 
