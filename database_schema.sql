@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 29, 2025 at 12:58 PM
+-- Generation Time: Oct 29, 2025 at 05:53 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -62,6 +62,7 @@ CREATE TABLE `ai_temp_bookings` (
   `event_time` time DEFAULT NULL,
   `event_location` text DEFAULT NULL,
   `budget` decimal(10,2) DEFAULT NULL,
+  `worker_proposed_price` decimal(10,2) DEFAULT NULL,
   `final_price` decimal(10,2) DEFAULT NULL,
   `worker_proposed_date` date DEFAULT NULL,
   `worker_notes` text DEFAULT NULL,
@@ -77,6 +78,16 @@ CREATE TABLE `ai_temp_bookings` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `ai_temp_bookings`
+--
+
+INSERT INTO `ai_temp_bookings` (`temp_booking_id`, `conversation_id`, `worker_id`, `package_id`, `package_selection`, `event_type`, `event_date`, `event_time`, `event_location`, `budget`, `worker_proposed_price`, `final_price`, `worker_proposed_date`, `worker_notes`, `deposit_amount`, `deposit_paid`, `deposit_paid_at`, `full_payment_paid`, `full_payment_paid_at`, `completed_at`, `rated_at`, `cancellation_reason`, `cancelled_by`, `created_at`, `updated_at`) VALUES
+(1, 1, 25, 9, 1, 'Birthday', '2025-10-30', '08:00:00', 'Arellano, Dagupan', 7500.00, 7500.00, 7500.00, NULL, 'whole day fee', 3750.00, 1, '2025-10-29 15:03:59', 0, NULL, NULL, NULL, NULL, NULL, '2025-10-29 14:54:05', '2025-10-29 15:06:42'),
+(2, 2, 25, NULL, NULL, 'Birthday Party', '2024-12-20', '02:51:00', 'Dagupan', NULL, NULL, 3000.00, NULL, NULL, 1500.00, 1, '2025-10-29 16:09:39', 1, '2025-10-29 16:17:32', '2025-10-29 16:17:32', '2025-10-29 16:18:08', NULL, NULL, '2025-10-29 15:11:49', '2025-10-29 16:18:08'),
+(3, 3, 23, 8, 3, 'Wedding', '2025-11-21', NULL, 'Dagupan', 100000.00, NULL, 50000.00, NULL, 'that isnt pang masa', NULL, 0, NULL, 0, NULL, NULL, NULL, NULL, NULL, '2025-10-29 15:34:22', '2025-10-29 15:38:04'),
+(4, 4, 10, 12, 2, 'Corporate Event', '2025-10-28', NULL, 'Dagupan', 10000.00, NULL, NULL, NULL, NULL, NULL, 1, '2025-10-29 16:34:09', 1, '2025-10-29 16:34:16', '2025-10-29 16:34:16', '2025-10-29 16:35:16', NULL, NULL, '2025-10-29 16:11:27', '2025-10-29 16:35:16');
 
 --
 -- Triggers `ai_temp_bookings`
@@ -430,6 +441,16 @@ CREATE TABLE `conversations` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `conversations`
+--
+
+INSERT INTO `conversations` (`conversation_id`, `user_id`, `worker_id`, `type`, `booking_status`, `created_at`, `updated_at`) VALUES
+(1, 1, 25, 'direct', 'confirmed', '2025-10-29 14:54:05', '2025-10-29 15:00:31'),
+(2, 15, 25, 'direct', 'completed', '2025-10-29 15:11:49', '2025-10-29 16:17:32'),
+(3, 15, 23, 'direct', 'cancelled', '2025-10-29 15:34:22', '2025-10-29 15:48:18'),
+(4, 15, 10, 'direct', 'completed', '2025-10-29 16:11:27', '2025-10-29 16:34:16');
+
 -- --------------------------------------------------------
 
 --
@@ -445,6 +466,85 @@ CREATE TABLE `messages` (
   `is_read` tinyint(1) DEFAULT 0,
   `sent_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `messages`
+--
+
+INSERT INTO `messages` (`message_id`, `conversation_id`, `sender_id`, `sender_type`, `message_text`, `is_read`, `sent_at`) VALUES
+(1, 1, 0, '', 'Hi! I\'m here to help you book a photographer. 📸\n\nWhat type of event are you planning?\n(e.g., Wedding, Birthday, Portrait, Corporate)', 0, '2025-10-29 14:54:05'),
+(2, 1, 1, 'user', 'Birthday', 0, '2025-10-29 14:54:15'),
+(3, 1, 0, '', 'Great! When is your **Birthday** scheduled?\n(e.g., December 25, 2024 or 12/25/2024)', 0, '2025-10-29 14:54:15'),
+(4, 1, 1, 'user', 'October 30 2025', 0, '2025-10-29 14:54:48'),
+(5, 1, 0, '', 'Perfect! Where will the event take place?\n(e.g., Manila, Quezon City, or specific venue)', 0, '2025-10-29 14:54:48'),
+(6, 1, 1, 'user', 'Arellano, Dagupan', 0, '2025-10-29 14:55:01'),
+(7, 1, 0, '', 'Almost done! What\'s your budget for photography?\n(e.g., 10000 or 15000)', 0, '2025-10-29 14:55:01'),
+(8, 1, 1, 'user', '5000', 0, '2025-10-29 14:55:05'),
+(9, 1, 0, '', 'Perfect! Here\'s a summary of your event:\n\n📸 Event: Birthday\n📅 Date: October 30, 2025\n📍 Location: Arellano, Dagupan\n💰 Budget: ₱5,000.00\n\nHere are the recommended packages below. **Type the package number (1, 2, or 3)** to select one:', 0, '2025-10-29 14:55:05'),
+(10, 1, 1, 'user', '1', 0, '2025-10-29 14:55:09'),
+(11, 1, 0, '', 'Perfect choice! 🎉\n\nYour booking request has been sent to the photographer.\n\n📋 **Booking Summary:**\n📸 Event: Birthday\n📅 Date: October 30, 2025\n📍 Location: Arellano, Dagupan\n💰 Budget: ₱5,000.00\n📦 Package: Unlimited Photobooth Session\n\nThe photographer will review your request and respond here. You can now chat with them directly!', 0, '2025-10-29 14:55:09'),
+(12, 1, 25, 'worker', 'Hello Cj', 0, '2025-10-29 14:56:49'),
+(13, 1, 25, 'worker', 'okay naba yung mga details and youre all set for me to accept your bookings?', 0, '2025-10-29 14:57:09'),
+(14, 1, 1, 'user', 'i have a special request', 0, '2025-10-29 14:57:21'),
+(15, 1, 1, 'user', 'is it possible ba for you to stay the whole event (its a 24 hour event)', 0, '2025-10-29 14:57:36'),
+(16, 1, 1, 'user', 'id also like kung ito yung design\n[IMAGE:/Kislap/uploads/chat/chat_1_1761749885_69022b7d3af48.jpg]', 0, '2025-10-29 14:58:05'),
+(17, 1, 25, 'worker', 'thats possible pero magkaka changes tayo sa price.', 0, '2025-10-29 14:59:31'),
+(18, 1, 25, 'worker', 'lemme send you a proposal', 0, '2025-10-29 14:59:39'),
+(19, 1, 25, 'worker', 'I\'ve reviewed your booking request. I\'d like to propose a price of ₱7,500.00\n\nNote: whole day fee', 0, '2025-10-29 15:00:09'),
+(20, 1, 1, 'user', 'thats fine with me na', 0, '2025-10-29 15:00:27'),
+(21, 1, 1, 'user', 'I accept your proposal! Let\'s proceed with the booking.', 0, '2025-10-29 15:00:31'),
+(22, 1, 1, 'user', '✅ Down payment of ₱3,750.00 has been processed successfully! The photographer has been notified.', 0, '2025-10-29 15:03:59'),
+(23, 1, 25, 'worker', 'at what time exactly on october 30?', 0, '2025-10-29 15:06:20'),
+(24, 1, 1, 'user', '8 am', 0, '2025-10-29 15:06:23'),
+(25, 2, 0, '', 'Hi! I\'m here to help you book a photographer. 📸\n\nWhat type of event are you planning?\n(e.g., Wedding, Birthday, Portrait, Corporate)', 0, '2025-10-29 15:11:49'),
+(26, 2, 15, 'user', 'I would like to talk to a human agent', 0, '2025-10-29 15:11:55'),
+(27, 2, 0, '', 'I\'ll connect you with the photographer now. They\'ll respond to you shortly! 👋', 0, '2025-10-29 15:11:55'),
+(28, 2, 25, 'worker', 'Hello!', 0, '2025-10-29 15:12:07'),
+(29, 2, 15, 'user', 'okay so ill be having a wedding on december 20 2025', 0, '2025-10-29 15:27:41'),
+(30, 2, 25, 'worker', 'where will it be held', 0, '2025-10-29 15:28:32'),
+(31, 2, 15, 'user', 'Dagupan', 0, '2025-10-29 15:29:02'),
+(32, 2, 25, 'worker', 'okay i see let me finalize everything', 0, '2025-10-29 15:30:05'),
+(33, 2, 15, 'user', 'okay great send me a screenshot', 0, '2025-10-29 15:31:50'),
+(34, 2, 25, 'worker', 'oh my usual fee is actually 4.5k so ill be charging that', 0, '2025-10-29 15:32:44'),
+(35, 2, 15, 'user', 'thats fine with me', 0, '2025-10-29 15:32:49'),
+(36, 2, 25, 'worker', '✅ I\'ve accepted your booking! Please proceed with the 50% down payment to confirm.', 0, '2025-10-29 15:33:14'),
+(37, 3, 0, '', 'Hi! I\'m here to help you book a photographer. 📸\n\nWhat type of event are you planning?\n(e.g., Wedding, Birthday, Portrait, Corporate)', 0, '2025-10-29 15:34:22'),
+(38, 3, 15, 'user', 'wedding', 0, '2025-10-29 15:34:29'),
+(39, 3, 0, '', 'Great! When is your **Wedding** scheduled?\n(e.g., December 25, 2024 or 12/25/2024)', 0, '2025-10-29 15:34:29'),
+(40, 3, 15, 'user', 'november 21', 0, '2025-10-29 15:34:43'),
+(41, 3, 0, '', 'Perfect! Where will the event take place?\n(e.g., Manila, Quezon City, or specific venue)', 0, '2025-10-29 15:34:43'),
+(42, 3, 15, 'user', 'Dagupan', 0, '2025-10-29 15:34:47'),
+(43, 3, 0, '', 'Almost done! What\'s your budget for photography?\n(e.g., 10000 or 15000)', 0, '2025-10-29 15:34:47'),
+(44, 3, 15, 'user', '100000', 0, '2025-10-29 15:34:57'),
+(45, 3, 0, '', 'Perfect! Here\'s a summary of your event:\n\n📸 Event: Wedding\n📅 Date: November 21, 2025\n📍 Location: Dagupan\n💰 Budget: ₱100,000.00\n\nHere are the recommended packages below. **Type the package number (1, 2, or 3)** to select one:', 0, '2025-10-29 15:34:57'),
+(46, 3, 15, 'user', '3', 0, '2025-10-29 15:35:13'),
+(47, 3, 0, '', 'Perfect choice! 🎉\n\nYour booking request has been sent to the photographer.\n\n📋 **Booking Summary:**\n📸 Event: Wedding\n📅 Date: November 21, 2025\n📍 Location: Dagupan\n💰 Budget: ₱100,000.00\n📦 Package: Premium Portrait Experience\n\nThe photographer will review your request and respond here. You can now chat with them directly!', 0, '2025-10-29 15:35:14'),
+(48, 3, 23, 'worker', 'I\'ve reviewed your booking request. I\'d like to propose a price of ₱50,000.00\n\nNote: the budget is pang masa', 0, '2025-10-29 15:37:07'),
+(49, 3, 15, 'user', 'I cannot accept this proposal. Reason: that isnt pang masa', 0, '2025-10-29 15:38:04'),
+(50, 3, 23, 'worker', '❌ I\'ve declined your booking request.\n\nReason: Too far', 0, '2025-10-29 15:48:18'),
+(51, 3, 15, 'user', 'okay maybe next time!', 0, '2025-10-29 15:49:03'),
+(52, 2, 15, 'user', 'lemme check my bookings first', 0, '2025-10-29 15:50:15'),
+(53, 2, 15, 'user', '✅ Down payment of ₱1,500.00 has been processed successfully! The photographer has been notified.', 0, '2025-10-29 16:09:39'),
+(54, 4, 0, '', 'Hi! I\'m here to help you book a photographer. 📸\n\nWhat type of event are you planning?\n(e.g., Wedding, Birthday, Portrait, Corporate)', 0, '2025-10-29 16:11:27'),
+(55, 4, 15, 'user', 'Corporate menu photoshoot', 0, '2025-10-29 16:11:39'),
+(56, 4, 0, '', 'Great! When is your **Corporate Event** scheduled?\n(e.g., December 25, 2024 or 12/25/2024)', 0, '2025-10-29 16:11:39'),
+(57, 4, 15, 'user', 'october 28', 0, '2025-10-29 16:11:49'),
+(58, 4, 0, '', 'Perfect! Where will the event take place?\n(e.g., Manila, Quezon City, or specific venue)', 0, '2025-10-29 16:11:49'),
+(59, 4, 15, 'user', 'dagupan', 0, '2025-10-29 16:11:52'),
+(60, 4, 0, '', 'Almost done! What\'s your budget for photography?\n(e.g., 10000 or 15000)', 0, '2025-10-29 16:11:52'),
+(61, 4, 15, 'user', '10000', 0, '2025-10-29 16:11:55'),
+(62, 4, 0, '', 'Perfect! Here\'s a summary of your event:\n\n📸 Event: Corporate Event\n📅 Date: October 28, 2025\n📍 Location: Dagupan\n💰 Budget: ₱10,000.00\n\nHere are the recommended packages below. **Type the package number (1, 2, or 3)** to select one:', 0, '2025-10-29 16:11:55'),
+(63, 4, 15, 'user', '2', 0, '2025-10-29 16:11:58'),
+(64, 4, 0, '', 'Perfect choice! 🎉\n\nYour booking request has been sent to the photographer.\n\n📋 **Booking Summary:**\n📸 Event: Corporate Event\n📅 Date: October 28, 2025\n📍 Location: Dagupan\n💰 Budget: ₱10,000.00\n📦 Package: Medium Product Photography Session\n\nThe photographer will review your request and respond here. You can now chat with them directly!', 0, '2025-10-29 16:11:58'),
+(65, 4, 10, 'worker', 'hihi is that all correct?', 0, '2025-10-29 16:13:26'),
+(66, 4, 15, 'user', 'yep', 0, '2025-10-29 16:13:32'),
+(67, 4, 10, 'worker', 'okay then ill confirm it', 0, '2025-10-29 16:13:40'),
+(68, 4, 10, 'worker', '✅ I\'ve accepted your booking! Please proceed with the 50% down payment to confirm.', 0, '2025-10-29 16:14:04'),
+(69, 2, 15, 'user', '🎉 Final payment of ₱1,500.00 has been processed. Thank you for using our service! Please rate your experience.', 0, '2025-10-29 16:17:32'),
+(70, 2, 15, 'user', '⭐ I\'ve rated this service 5/5 stars. Review: Kim was excellent everyone was talking about how great he is!', 0, '2025-10-29 16:18:08'),
+(71, 4, 15, 'user', '✅ Down payment of ₱5,000.00 has been processed successfully! The photographer has been notified.', 0, '2025-10-29 16:34:09'),
+(72, 4, 15, 'user', '🎉 Final payment of ₱5,000.00 has been processed. Thank you for using our service! Please rate your experience.', 0, '2025-10-29 16:34:16'),
+(73, 4, 15, 'user', '⭐ I\'ve rated this service 4/5 stars. Review: Diego was great but he looked so serious while taking the photos and it made me feel nervous around him. But he was great overall.', 0, '2025-10-29 16:35:16');
 
 -- --------------------------------------------------------
 
@@ -478,7 +578,11 @@ INSERT INTO `packages` (`package_id`, `worker_id`, `name`, `description`, `price
 (5, 12, 'Premium Portrait Experience', 'Full creative session with multiple outfits and locations. Includes advanced retouching, mood-based color grading, and all best shots edited.\r\n', 4000.00, 3, 40, 5, 'active', '2025-10-28 03:28:27', '2025-10-28 03:28:27'),
 (6, 23, 'Basic Portrait Session', 'Short Portrait Session', 1500.00, 1, 15, 3, 'active', '2025-10-28 12:06:54', '2025-10-28 12:06:54'),
 (7, 23, 'Standard Portrait Session', 'Quick but High Quality Session', 2500.00, 2, 25, 5, 'active', '2025-10-28 12:06:54', '2025-10-28 12:06:54'),
-(8, 23, 'Premium Portrait Experience', '4k Resolution!', 4000.00, 3, 40, 5, 'active', '2025-10-28 12:06:54', '2025-10-28 12:06:54');
+(8, 23, 'Premium Portrait Experience', '4k Resolution!', 4000.00, 3, 40, 5, 'active', '2025-10-28 12:06:54', '2025-10-28 12:06:54'),
+(9, 25, 'Unlimited Photobooth Session', 'take pictures all you can photobooth service with props included!', 4500.00, 5, 1000, 1, 'active', '2025-10-29 12:53:53', '2025-10-29 12:53:53'),
+(10, 11, 'Unlisawa Photobooth Session', 'Unlimited photobooth session with props!', 10000.00, 3, 1000, 3, 'active', '2025-10-29 13:25:14', '2025-10-29 13:25:14'),
+(11, 10, 'Basic Product Photo Session', 'The Basic Product Photography Session is designed for businesses or individuals looking to showcase their products with professional, high-quality images. This package includes a 1-hour photoshoot, perfect for capturing up to 3 products. You’ll receive 15 carefully edited photos, highlighting your products with attention to detail and creativity. This package is ideal for e-commerce, social media, and promotional materials, with fast delivery to help you get your products to market quickly.', 1500.00, 3, 20, 3, 'active', '2025-10-29 13:32:42', '2025-10-29 13:32:42'),
+(12, 10, 'Medium Product Photography Session', 'The Medium Product Photography Session is ideal for businesses or brands that need a bit more variety and detail in their product shots. This package includes a 1-hour photoshoot, allowing for up to 5 products to be professionally photographed. You’ll receive 15 high-quality, edited images that showcase your products from different angles and in creative settings, perfect for online stores, catalogs, and social media marketing. Quick turnaround ensures you can get your products out there with ease.', 3000.00, 3, 25, 2, 'active', '2025-10-29 13:32:42', '2025-10-29 13:32:42');
 
 -- --------------------------------------------------------
 
@@ -496,6 +600,21 @@ CREATE TABLE `password_reset_otps` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `password_reset_otps`
+--
+
+INSERT INTO `password_reset_otps` (`id`, `email`, `otp_code`, `user_type`, `expires_at`, `is_used`, `created_at`) VALUES
+(1, 'cjplaysgames83@gmail.com', '667263', 'user', '2025-10-29 12:06:20', 1, '2025-10-29 12:06:16'),
+(2, 'cjplaysgames83@gmail.com', '935389', 'user', '2025-10-29 12:06:50', 1, '2025-10-29 12:06:20'),
+(3, 'gila.mendiguarin.up@phinmaed.com', '181346', 'user', '2025-10-29 12:31:25', 1, '2025-10-29 12:29:42'),
+(4, 'kitu.alano.up@phinmaed.com', '949973', 'worker', '2025-10-29 12:44:46', 1, '2025-10-29 12:44:43'),
+(5, 'kitu.alano.up@phinmaed.com', '364404', 'worker', '2025-10-29 12:45:30', 1, '2025-10-29 12:44:46'),
+(6, 'kitu.alano.up@phinmaed.com', '491599', 'worker', '2025-10-29 12:45:52', 1, '2025-10-29 12:45:30'),
+(7, 'kitu.alano.up@phinmaed.com', '567821', 'worker', '2025-10-29 12:46:42', 1, '2025-10-29 12:46:20'),
+(8, 'cjplaysgames83@gmail.com', '161896', 'user', '2025-10-29 14:48:44', 1, '2025-10-29 14:48:12'),
+(9, 'cjplaysgames83@gmail.com', '434665', 'user', '2025-10-29 16:51:50', 1, '2025-10-29 16:51:29');
+
 -- --------------------------------------------------------
 
 --
@@ -511,6 +630,14 @@ CREATE TABLE `ratings` (
   `review` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `ratings`
+--
+
+INSERT INTO `ratings` (`rating_id`, `conversation_id`, `user_id`, `worker_id`, `rating`, `review`, `created_at`) VALUES
+(3, 2, 15, 25, 5, 'Kim was excellent everyone was talking about how great he is!', '2025-10-29 16:18:08'),
+(4, 4, 15, 10, 4, 'Diego was great but he looked so serious while taking the photos and it made me feel nervous around him. But he was great overall.', '2025-10-29 16:35:16');
 
 -- --------------------------------------------------------
 
@@ -536,7 +663,7 @@ CREATE TABLE `user` (
 --
 
 INSERT INTO `user` (`user_id`, `lastName`, `firstName`, `middleName`, `email`, `phoneNumber`, `password`, `address`, `profilePhotoUrl`, `createdAt`) VALUES
-(1, 'Cabubas', 'Christian', 'Caguiat', 'cjplaysgames83@gmail.com', '09193695376', '$2y$10$okQI9RoOghP5fc.HE7HK9.pzokVB6npq.CDWPogECPqyywH7EGUxu', '231, Tapuac District, Dagupan City, Pangasinan', '/Kislap/uploads/user/profile_photos/profile_1_1761731660_eb8cb9c3aad0b381.avif', '2025-10-26 15:59:38'),
+(1, 'Cabubas', 'Cj', 'Caguiat', 'cjplaysgames83@gmail.com', '09193695376', '$2y$10$0UQEV9MwBBYJrAbUfcXIdOeuPhC.s5Qu6egoEW.6bxvJ4GoLafXdW', '231, Tapuac District, Dagupan City, Pangasinan', '/Kislap/uploads/user/profile_photos/profile_1_1761749466_33944f168482fcd0.avif', '2025-10-26 15:59:38'),
 (2, 'Ari', 'Lester', '', 'lesterari@outlook.com', '09991234343', '$2y$10$3TBUAIDI8tc3Qc24c.tk1e3hcrARFuX0yHMatKTfwuY2/UpmJMKTS', '445, Las Vegas Street, Binmaley, Pangasinan', NULL, '2025-10-27 09:51:31'),
 (3, 'Balonzo', 'Mildred', 'Torio', 'balonzomildred@gmail.com', '09291113534', '$2y$10$iRrdRV2pRDgwx8hemgU4K.V5CRHmZrSxxMDypooHH9F7/p2nVWt02', '424 Fiesta Communities, Mexico, Pampanga', NULL, '2025-10-27 09:55:02'),
 (4, 'Morales', 'Antonio', 'Villanueva', 'antonio.morales@live.com', '09371234567', '$2y$10$y4Nch5rbjrE2Ha3nkz0uVuSEmdCvg2BLTbAvDbowjVVtRaMjKxnbi', '7816 Batangas St., Barangay San Isidro, Batangas City, Batangas', NULL, '2025-10-27 10:17:48'),
@@ -548,7 +675,10 @@ INSERT INTO `user` (`user_id`, `lastName`, `firstName`, `middleName`, `email`, `
 (10, 'Alonzo', 'Hazel', 'Martinez', 'hazel.alonzo@aol.com', '09191456789', '$2y$10$4J0jTrEMtj5Z.pRunpT6cO0uPd5TbHlNn/om7i6SPPGAbCDgJpAmK', '8973 Zinnia St., Barangay Banilad, Cebu City, Cebu', NULL, '2025-10-27 10:22:03'),
 (11, 'Cruz', 'Isabel', 'Del Rosario', 'isabel.cruz@gmail.com', '09361122334', '$2y$10$rZPRXnnHh8Ju0NrwzfQhge80sbZUgBf/QeD8wjv5ALjZNS7g9.XZW', '6785 Jasmine St., Barangay Talamban, Cebu City, Cebu', NULL, '2025-10-27 10:22:45'),
 (12, 'Gonzales', 'Mikaella', NULL, 'mikaella@gmail.com', '09224569081', '$2y$10$MBYYVd8kguS8ChCVAMsyi.BrKA7IEvEv6m71YSFpkJzuKd30J9YQa', '231 Herrero Street, Dagupan, Pangasinan', NULL, '2025-10-29 08:02:55'),
-(13, 'Martinez', 'Crystal James', 'Fernandez', 'crystal@gmail.com', '09442223434', '$2y$10$I2Z6Nr0.uw8UaCtSzxU9jeKweWHKEZCg8KP.gIF50OmCAqo8k.ziq', '231, Mayombo Dist., Dagupan, Pangasinan', NULL, '2025-10-29 09:29:05');
+(13, 'Martinez', 'Crystal James', 'Fernandez', 'crystal@gmail.com', '09442223434', '$2y$10$I2Z6Nr0.uw8UaCtSzxU9jeKweWHKEZCg8KP.gIF50OmCAqo8k.ziq', '231, Mayombo Dist., Dagupan, Pangasinan', NULL, '2025-10-29 09:29:05'),
+(14, 'Mendiguarin', 'Gian', 'Lavandero', 'gila.mendiguarin.up@phinmaed.com', '09318400461', '$2y$10$TLyeHmTSUKh4nANR3AyXfOz6Pr0xATdLTSEIXePHZVJUTEQLWyAWe', '475 Naguilayan Highway, Binmaley, Pangasinan', '/Kislap/uploads/user/profile_photos/profile_14_1761741358_d7e17cef953e5263.jpg', '2025-10-29 12:28:43'),
+(15, 'Caguiat', 'Gabriel', 'Lopez', 'gabriel@gmail.com', '09232333244', '$2y$10$3ZhYQczjYZS8wHqik59Zi.AAPLRydFTuBmptTG3bOgNaPwDSQ/WlC', '231 Fiesta Communities, Mexico City, Pampanga', NULL, '2025-10-29 14:47:16'),
+(16, 'Cenelo', 'Kim', NULL, 'cenelo@gmail.com', '09193697653', '$2y$10$V.jFmpujWdiSFXeQcQsive1LaBLv3PKIqHPyp7BY9qYg8p9vkXKvy', '231 Lucao, Dagupan, Pangasinan', NULL, '2025-10-29 16:44:11');
 
 -- --------------------------------------------------------
 
@@ -597,8 +727,8 @@ INSERT INTO `workers` (`worker_id`, `application_id`, `status`, `suspended_until
 (7, 6, 'active', NULL, NULL, NULL, NULL, 'Valdez', 'Camille', '', 'camille.valdez@gmail.com', '09371234560', '$2y$10$SWMs88YwEDYF3heLzEI0AOID21d0qcZnRs/2u4HgOhcc2bjtXSEsO', '222 Mango St., Brgy. Pasonanca, Zamboanga City, Zamboanga del Sur', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-27 17:51:13', '2025-10-27 17:51:13', 0.00),
 (8, 5, 'active', NULL, NULL, NULL, NULL, 'Ilagan', 'Rafael', 'Torres', 'rafael.ilagan@protonmail.com', '09271234901', '$2y$10$XscyCKLI3t9TSSwhrYKpmeDnJdS98LYPrx1E4S/UZSXS7hgKLtZ6u', '9 Laurel Lane, Brgy. San Isidro, Cagayan de Oro, Misamis Oriental', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-27 17:51:19', '2025-10-28 06:29:30', 0.00),
 (9, 4, 'active', NULL, NULL, NULL, NULL, 'Mercado', 'Beatrice', 'Gomez', 'bea.mercado@mail.com', '09181234890', '$2y$10$rsJIq5UikdexzEnCtEVfJOj2w0lH0czsaVk06Khaomm.djsKziDX.', '101 San Miguel St., Brgy. Burgos, Batangas City, Batangas', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-27 17:51:24', '2025-10-27 17:51:24', 0.00),
-(10, 3, 'active', NULL, NULL, NULL, NULL, 'Cruz', 'Diego', 'Ramos', 'diego.cruz@outlook.com', '09391234789', '$2y$10$OWgqbgTuqN.LqPTb7Y3zlu3PvSuEGeJ.zGCi5Ov4NyBUvauyb0z5.', '78 Magsaysay Rd., Brgy. Centro, Tagbilaran, Bohol', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-27 17:51:28', '2025-10-27 17:51:28', 0.00),
-(11, 2, 'active', NULL, NULL, NULL, NULL, 'Flores', 'Anna', '', 'anna.flores@yahoo.com', '09281234678', '$2y$10$yM7CO8CRnXz0dw3tvXp7xufRNsxvDw17DxbcjGUePXEDymaWvj2EC', '45 Mabini Ave., Brgy. Poblacion, Iloilo City, Iloilo', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-27 17:51:32', '2025-10-27 17:51:32', 0.00),
+(10, 3, 'active', NULL, NULL, NULL, NULL, 'Cruz', 'Diego', 'Ramos', 'diego.cruz@outlook.com', '09391234789', '$2y$10$OWgqbgTuqN.LqPTb7Y3zlu3PvSuEGeJ.zGCi5Ov4NyBUvauyb0z5.', '78 Magsaysay Rd., Brgy. Centro, Tagbilaran, Bohol', 'product', 4, 'Hi, I’m Diego, a professional product photographer with a passion for capturing the essence of every item I shoot. Whether it’s high-end luxury goods, tech gadgets, or everyday essentials, I focus on highlighting the unique details that make each product stand out. My approach is all about precision, lighting, and creativity, ensuring every image is visually striking and true to the product\'s character. I work closely with my clients to understand their vision and deliver high-quality photos that elevate their brand and help drive sales.', 'uploads/workers/10/worker10_profile_1761744762_59bec72b3631ccdd.avif', 1, 1, 5000.00, '2025-10-27 17:51:28', '2025-10-29 16:41:37', 4.00),
+(11, 2, 'active', NULL, NULL, NULL, NULL, 'Flores', 'Anna', '', 'anna.flores@yahoo.com', '09281234678', '$2y$10$yM7CO8CRnXz0dw3tvXp7xufRNsxvDw17DxbcjGUePXEDymaWvj2EC', '45 Mabini Ave., Brgy. Poblacion, Iloilo City, Iloilo', 'photobooth', 1, 'Hi, I’m Anna Flores, and I specialize in organizing professional photo booth experiences that add fun and creativity to any event. Whether it’s a wedding, corporate gathering, or private celebration, my goal is to make sure every guest has a blast and leaves with a memorable keepsake. I’m passionate about providing top-notch service, and I pay close attention to every detail to ensure things run smoothly. From custom backdrops to personalized props, I love bringing that extra touch of excitement to each event, so everyone has a great time!', 'uploads/workers/11/worker11_profile_1761744314_131fad6fd64bf432.avif', 0, 0, 0.00, '2025-10-27 17:51:32', '2025-10-29 13:25:14', 0.00),
 (12, 1, 'active', NULL, NULL, NULL, NULL, 'Navarro', 'Miguel', 'Santos', 'miguel.navarro@gmail.com', '09171234567', '$2y$10$WfQwbX19RhDSNmUxV0FIKeFkNUJs6iy9berhaoGS5vvqBGlpNO5eO', '12 Rizal St., Brgy. San Jose, Lucena City, Quezon', 'portrait', 4, 'Hi, I’m Miguel, a photographer who captures genuine moments and emotions through my lens. I focus on creating clean, natural, and creative shots that tell real stories — whether it’s portraits, events, or everyday life', 'uploads/workers/12/worker12_profile_1761622494_f4c87e8d9f984259.avif', 0, 0, 0.00, '2025-10-27 17:51:35', '2025-10-29 11:20:16', 0.00),
 (13, 15, 'active', NULL, NULL, NULL, NULL, 'De Guzman', 'Victor', 'Navarro', 'victor.dguzman@protonmail.com', '09391234569', '$2y$10$Iz8szcEQujNaHbO98mv3WukiI5Xxiq9kCKU1miKn7VtZSevomqfCO', '77 Sampaloc St., Brgy. Divisoria, Tarlac City, Tarlac', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-28 10:38:28', '2025-10-28 10:38:28', 0.00),
 (14, 14, 'active', NULL, NULL, NULL, NULL, 'Tan', 'Elaine', 'Yu', 'elaine.tan@gmail.com', '09291234568', '$2y$10$3YtzPYMiUS7asEXy6A.OK.cehDvTc3/RGOEe0BOYe91Xl/QqjMHIC', '19 Orchid Way, Brgy. Bagong Silang, Baguio City, Benguet', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-28 10:38:33', '2025-10-28 10:38:33', 0.00),
@@ -608,9 +738,9 @@ INSERT INTO `workers` (`worker_id`, `application_id`, `status`, `suspended_until
 (20, 17, 'active', NULL, NULL, NULL, NULL, 'Fabillar', 'Jonah', 'Cruz', 'jonah.fabillar@gmail.com', '09281234571', '$2y$10$FYgbNr3.CCeodrcHctf6z.jwCF7DesRiJhAoy5kgMgfpFmYdk7TYC', '402 Pearl St., Brgy. Baybay, Legazpi City, Albay', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-28 10:49:49', '2025-10-28 10:49:49', 0.00),
 (21, 16, 'active', NULL, NULL, NULL, NULL, 'Manalo', 'Rica', 'Santos', 'rica.manalo@yahoo.com', '09171234570', '$2y$10$K0euKLQpferIzA3REa27buMkszXiH9uxBxq87trzQCOF1g1RELwUW', '5 Palm Grove, Brgy. Poblacion, Roxas City, Capiz', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-28 10:49:52', '2025-10-28 10:49:52', 0.00),
 (22, 20, 'active', NULL, NULL, NULL, NULL, 'Salazar', 'Faye', 'Navarro', 'faye.salazar@outlook.com', '09291234574', '$2y$10$f/ooOupmflo4slCzns.YA.NTMKLukuuxBEzuOQoyB8HlFQvGonI/.', '9 Camia St., Brgy. San Miguel, Dumaguete City, Negros Oriental', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-28 10:55:12', '2025-10-28 16:30:07', 0.00),
-(23, 31, 'active', NULL, NULL, NULL, NULL, 'Cruz', 'Marlon', 'Gomez', 'marlon.cruz@gmail.com', '09181234585', '$2y$10$qHOcaxQ4axoxD7H29OvgL.UpjiOqh9cDSKxjPOdoCtKhtxxztI5/C', '123 Juniper St., Brgy. Malanday, Valenzuela City, Metro Manila', 'portrait', 17, 'Hi, I’m Marlon – a portrait photographer passionate about capturing the real you. I believe in creating images that tell a story, whether it\'s in the studio or on location. My goal is to make you feel at ease so your true personality shines through.\r\n\r\nWith every shoot, I focus on the details that bring out your best self – the moments, expressions, and light that make each portrait unique. Whether it\'s a professional headshot or a personal portrait, I’m here to help you look and feel your best.\r\n\r\nLet’s connect and create something memorable.', 'uploads/workers/23/worker23_profile_1761735470_54ff2d47e13aca75.avif', 0, 0, 0.00, '2025-10-28 12:01:03', '2025-10-29 11:20:16', 0.00),
+(23, 31, 'active', NULL, NULL, NULL, NULL, 'Cruz', 'Marlon', 'Gomez', 'marlon.cruz@gmail.com', '09181234585', '$2y$10$qHOcaxQ4axoxD7H29OvgL.UpjiOqh9cDSKxjPOdoCtKhtxxztI5/C', '123 Juniper St., Brgy. Malanday, Valenzuela City, Metro Manila', 'portrait', 17, 'Hi, I’m Marlon – a portrait photographer passionate about capturing the real you. I believe in creating images that tell a story, whether it\'s in the studio or on location. My goal is to make you feel at ease so your true personality shines through.\r\n\r\nWith every shoot, I focus on the details that bring out your best self – the moments, expressions, and light that make each portrait unique. Whether it\'s a professional headshot or a personal portrait, I’m here to help you look and feel your best.\r\n\r\nLet’s connect and create something memorable.', 'uploads/workers/23/worker23_profile_1761735470_54ff2d47e13aca75.avif', 0, 1, 0.00, '2025-10-28 12:01:03', '2025-10-29 16:41:37', 0.00),
 (24, 25, 'active', NULL, NULL, NULL, NULL, 'Lomboy', 'Arlene', 'Quinto', 'arlene.lomboy@icloud.com', '09191234579', '$2y$10$W11miF/ThJTH86LBkZwHOeVW00neeyVllxTmH7GnXrY3/nIuxTl1a', '88 Coconut Ln., Brgy. Baybay, Calbayog City, Samar', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-29 01:33:34', '2025-10-29 09:19:38', 0.00),
-(25, 32, 'active', NULL, NULL, NULL, NULL, 'Alano', 'Kim', '', 'miko@gmail.com', '09123467891', '$2y$10$nUdt8Tt6CIXUzFMuNFO51uJqOaE15xRM3.GGTPXNgh9frekjxgwLe', '123 Malued, Mindanao', 'photobooth', 3, 'Professional Bitch', 'uploads/workers/25/worker25_profile_1761702028_3834d27f799bdb30.png', 0, 0, 0.00, '2025-10-29 01:34:38', '2025-10-29 09:18:37', 0.00),
+(25, 32, 'active', NULL, NULL, NULL, NULL, 'Alano', 'Kim Gerick', 'Tuazon', 'kitu.alano.up@phinmaed.com', '09123467891', '$2y$10$yIQhGr9Tc1PFBarAY0KzVubEizIrAKm4GCT3Wur/Vxg26c.Ex9XcK', '115 Heroes St., Poblacion, Lingayen, Pangasinan', 'photobooth', 3, 'Hi, I’m Kim Gerick Alano, and I specialize in organizing photo booth experiences that add fun and creativity to any event. Whether it’s a wedding, corporate gathering, or private party, I’m all about making sure every guest walks away with a memorable experience. I’m passionate about providing high-quality service with an attention to detail, and I love seeing the joy on people’s faces when they capture special moments. My goal is to create seamless, stress-free events that leave lasting impressions. I’m committed to delivering professionalism with a personal touch, ensuring everyone has a great time!', 'uploads/workers/25/worker25_profile_1761742433_0e6895a97d87c508.jpg', 1, 2, 5000.00, '2025-10-29 01:34:38', '2025-10-29 16:41:37', 5.00),
 (26, 30, 'active', NULL, NULL, NULL, NULL, 'Delos Reyes', 'Cynthia', 'Aquino', 'cynthia.delosreyes@zoho.com', '09391234584', '$2y$10$4C6q7H5G2hfIeuEPZu/L6.Jhlg.hGH5PcqyHgwRzlzEkZ22GBFbgy', '118 Palm St., Brgy. Bagumbayan, Davao City, Davao del Sur', '', 0, NULL, NULL, 0, 0, 0.00, '2025-10-29 08:05:27', '2025-10-29 09:19:47', 0.00);
 
 -- --------------------------------------------------------
@@ -791,13 +921,13 @@ INSERT INTO `worker_works` (`work_id`, `worker_id`, `image_path`, `uploaded_at`)
 (146, 25, 'uploads/workers/25/worker25_work1.jpg', '2025-10-29 01:34:38'),
 (147, 25, 'uploads/workers/25/worker25_work2.jpg', '2025-10-29 01:34:38'),
 (148, 25, 'uploads/workers/25/worker25_work3.jpg', '2025-10-29 01:34:38'),
-(149, 25, 'uploads/workers/25/worker25_work4.jpg', '2025-10-29 01:34:38'),
 (150, 26, 'uploads/workers/26/worker26_work1.avif', '2025-10-29 08:05:27'),
 (151, 26, 'uploads/workers/26/worker26_work2.avif', '2025-10-29 08:05:27'),
 (152, 26, 'uploads/workers/26/worker26_work3.avif', '2025-10-29 08:05:27'),
 (153, 26, 'uploads/workers/26/worker26_work4.avif', '2025-10-29 08:05:27'),
 (154, 26, 'uploads/workers/26/worker26_work5.avif', '2025-10-29 08:05:27'),
-(155, 26, 'uploads/workers/26/worker26_work6.avif', '2025-10-29 08:05:27');
+(155, 26, 'uploads/workers/26/worker26_work6.avif', '2025-10-29 08:05:27'),
+(156, 25, 'uploads/workers/25/worker25_work_1761742433_6ac5e3b85c53ada7.jpg', '2025-10-29 12:53:53');
 
 --
 -- Indexes for dumped tables
@@ -944,7 +1074,7 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT for table `ai_temp_bookings`
 --
 ALTER TABLE `ai_temp_bookings`
-  MODIFY `temp_booking_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `temp_booking_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `application`
@@ -968,37 +1098,37 @@ ALTER TABLE `application_works`
 -- AUTO_INCREMENT for table `conversations`
 --
 ALTER TABLE `conversations`
-  MODIFY `conversation_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `conversation_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `messages`
 --
 ALTER TABLE `messages`
-  MODIFY `message_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `message_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=74;
 
 --
 -- AUTO_INCREMENT for table `packages`
 --
 ALTER TABLE `packages`
-  MODIFY `package_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `package_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `password_reset_otps`
 --
 ALTER TABLE `password_reset_otps`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `ratings`
 --
 ALTER TABLE `ratings`
-  MODIFY `rating_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `rating_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `workers`
@@ -1016,7 +1146,7 @@ ALTER TABLE `worker_availability`
 -- AUTO_INCREMENT for table `worker_works`
 --
 ALTER TABLE `worker_works`
-  MODIFY `work_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=156;
+  MODIFY `work_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=157;
 
 --
 -- Constraints for dumped tables

@@ -103,6 +103,19 @@ class Validator
             return ['valid' => false, 'message' => ucfirst($type) . ' cannot have consecutive spaces or special characters'];
         }
         
+        // Check proper capitalization - first letter must be uppercase
+        if (!preg_match('/^[A-Z]/', $name)) {
+            return ['valid' => false, 'message' => ucfirst($type) . ' must start with a capital letter'];
+        }
+        
+        // Check that each word in the name starts with a capital letter
+        $words = preg_split('/[\s\-\'\.]+/', $name);
+        foreach ($words as $word) {
+            if (!empty($word) && !preg_match('/^[A-Z]/', $word)) {
+                return ['valid' => false, 'message' => ucfirst($type) . ' must have each word start with a capital letter (e.g., "John Doe", "Mary-Jane")'];
+            }
+        }
+        
         return ['valid' => true, 'message' => 'Valid ' . $type];
     }
     

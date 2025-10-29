@@ -364,8 +364,34 @@ class WorkerController
                 exit;
             }
 
-            // Validate phone number format
+            // Validate name formats
             require_once __DIR__ . '/../model/Validator.php';
+            
+            $firstNameValidation = Validator::validateName($profileData['firstName'], 'first name');
+            if (!$firstNameValidation['valid']) {
+                $_SESSION['error'] = $firstNameValidation['message'];
+                header("Location: index.php?controller=Worker&action=profile&edit=true");
+                exit;
+            }
+            
+            $lastNameValidation = Validator::validateName($profileData['lastName'], 'last name');
+            if (!$lastNameValidation['valid']) {
+                $_SESSION['error'] = $lastNameValidation['message'];
+                header("Location: index.php?controller=Worker&action=profile&edit=true");
+                exit;
+            }
+            
+            // Validate middle name if provided
+            if (!empty($profileData['middleName'])) {
+                $middleNameValidation = Validator::validateName($profileData['middleName'], 'middle name');
+                if (!$middleNameValidation['valid']) {
+                    $_SESSION['error'] = $middleNameValidation['message'];
+                    header("Location: index.php?controller=Worker&action=profile&edit=true");
+                    exit;
+                }
+            }
+
+            // Validate phone number format
             $phoneValidation = Validator::validatePhoneNumber($profileData['phoneNumber']);
             if (!$phoneValidation['valid']) {
                 error_log("Phone validation failed: " . $phoneValidation['message']);

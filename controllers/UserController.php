@@ -127,8 +127,28 @@ class UserController
                 throw new Exception('First name and last name are required');
             }
 
-            // Validate phone number
+            // Validate name formats
             require_once __DIR__ . '/../model/Validator.php';
+            
+            $firstNameValidation = Validator::validateName($firstName, 'first name');
+            if (!$firstNameValidation['valid']) {
+                throw new Exception($firstNameValidation['message']);
+            }
+            
+            $lastNameValidation = Validator::validateName($lastName, 'last name');
+            if (!$lastNameValidation['valid']) {
+                throw new Exception($lastNameValidation['message']);
+            }
+            
+            // Validate middle name if provided
+            if (!empty($middleName)) {
+                $middleNameValidation = Validator::validateName($middleName, 'middle name');
+                if (!$middleNameValidation['valid']) {
+                    throw new Exception($middleNameValidation['message']);
+                }
+            }
+
+            // Validate phone number
             $phoneValidation = Validator::validatePhoneNumber($phoneNumber);
             if (!$phoneValidation['valid']) {
                 throw new Exception($phoneValidation['message']);
