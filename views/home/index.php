@@ -96,9 +96,9 @@
                 <div class="feature-icon">
                     <i class="fas fa-shield-alt"></i>
                 </div>
-                <h3 class="feature-title">Secure Payments</h3>
+                <h3 class="feature-title">User Friendly</h3>
                 <p class="feature-description">
-                    Protected transactions with escrow services ensure both photographers and clients feel confident in every booking.
+                    Escrow services protect both photographers and clients by holding the payment safely until the job is done, ensuring everyone feels secure and confident throughout the booking process.
                 </p>
             </div>
 
