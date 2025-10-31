@@ -923,7 +923,7 @@ class AdminController
 
     private function isEmailTestMode(): bool
     {
-        return true; // Set to false in production
+        return true;
     }
 
     private function logCancellationEmail(string $to, string $subject, string $message): void

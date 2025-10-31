@@ -148,11 +148,9 @@ class ChatController
             $messageText = trim($_POST['message'] ?? '');
             $userId = $user['user_id'] ?? $worker['worker_id'];
             $userType = $user ? 'user' : 'worker';
-            
-            // Handle file upload
+
             $uploadedImagePath = null;
-            
-            // Debug: Log file upload attempt
+
             error_log("DEBUG: sendMessage - FILES: " . print_r($_FILES, true));
             
             if (!empty($_FILES['attachment']) && $_FILES['attachment']['error'] === UPLOAD_ERR_OK) {
@@ -161,7 +159,6 @@ class ChatController
                 error_log("DEBUG: sendMessage - Upload result: " . ($uploadedImagePath ?? 'FAILED'));
                 
                 if ($uploadedImagePath) {
-                    // If image uploaded successfully, use special format in message_text
                     $messageText = $messageText ? $messageText . "\n[IMAGE:$uploadedImagePath]" : "[IMAGE:$uploadedImagePath]";
                     error_log("DEBUG: sendMessage - Final message text: " . $messageText);
                 }
@@ -221,8 +218,7 @@ class ChatController
     {
         try {
             error_log("DEBUG: handleImageUpload - File info: " . print_r($file, true));
-            
-            // Validate file
+
             $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
             $maxSize = 5 * 1024 * 1024; // 5MB
             
@@ -235,8 +231,7 @@ class ChatController
             if ($file['size'] > $maxSize) {
                 throw new Exception('File too large. Maximum size is 5MB. Got: ' . $file['size']);
             }
-            
-            // Create upload directory
+
             $uploadDir = $_SERVER['DOCUMENT_ROOT'] . '/Kislap/uploads/chat/';
             error_log("DEBUG: handleImageUpload - Upload dir: " . $uploadDir);
             
@@ -244,8 +239,7 @@ class ChatController
                 error_log("DEBUG: handleImageUpload - Creating directory");
                 mkdir($uploadDir, 0755, true);
             }
-            
-            // Generate unique filename
+
             $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
             $filename = 'chat_' . $userId . '_' . time() . '_' . uniqid() . '.' . $extension;
             $uploadPath = $uploadDir . $filename;
@@ -274,7 +268,6 @@ class ChatController
     
     private function processAiMessage(int $conversationId, string $userMessage, array $conversation): array
     {
-        // Check if conversation is cancelled - don't process AI responses
         if ($conversation['booking_status'] === 'cancelled') {
             return [
                 'botMessage' => null,
@@ -296,7 +289,6 @@ class ChatController
             return ['botMessage' => $botMessage, 'packages' => []];
         }
 
-        // Check if user is responding to "no packages available" question
         if ($this->allDetailsCollected($tempBooking) && $this->wantsPhotographerAfterNoPackages($userMessage)) {
             $this->chatRepo->updateConversationType($conversationId, 'direct');
             $this->chatRepo->updateConversationStatus($conversationId, 'pending_worker');
@@ -459,7 +451,6 @@ class ChatController
             );
 
             if (empty($packages)) {
-                // Automatically redirect to photographer when no packages available
                 $this->chatRepo->updateConversationType($conversationId, 'direct');
                 $this->chatRepo->updateConversationStatus($conversationId, 'pending_worker');
 
@@ -518,15 +509,11 @@ class ChatController
         ];
         
         $lowerMessage = strtolower(trim($message));
-
-        // Check for positive responses
         foreach ($positiveKeywords as $keyword) {
             if (stripos($lowerMessage, $keyword) !== false) {
                 return true;
             }
         }
-
-        // Check for simple affirmative responses
         if (in_array($lowerMessage, ['y', 'yes', 'yep', 'yeah', 'sure', 'ok', 'okay'])) {
             return true;
         }
@@ -582,13 +569,12 @@ class ChatController
 
     private function parseDate(string $message): ?string
     {
-        // Try strtotime first
+
         $timestamp = strtotime($message);
         if ($timestamp !== false && $timestamp > strtotime('-1 year')) {
             return date('Y-m-d', $timestamp);
         }
 
-        // Try common patterns: "october 25" or "oct 25"
         if (preg_match('/(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s+(\d{1,2})/i', $message, $matches)) {
             $month = $matches[1];
             $day = $matches[2];
@@ -604,7 +590,6 @@ class ChatController
             }
         }
 
-        // Try "MM/DD" or "MM-DD"
         if (preg_match('/(\d{1,2})[\/\-](\d{1,2})/', $message, $matches)) {
             $month = $matches[1];
             $day = $matches[2];
@@ -744,19 +729,15 @@ class ChatController
             exit;
         }
 
-        // Check if there's already an incomplete booking
         $existingConversation = $this->chatRepo->findIncompleteBooking($user['user_id'], $workerId);
         
         if ($existingConversation) {
-            // Redirect to existing conversation
             header("Location: index.php?controller=Chat&action=view&conversation_id=" . $existingConversation['conversation_id']);
             exit;
         }
 
-        // Create new AI conversation for booking
         $conversationId = $this->chatRepo->createAiConversation($user['user_id'], $workerId);
-        
-        // Redirect to the new conversation
+
         header("Location: index.php?controller=Chat&action=view&conversation_id=" . $conversationId);
         exit;
     }
@@ -780,11 +761,11 @@ class ChatController
         }
 
         try {
-            // Update booking status to cancelled
+
             $success = $this->chatRepo->updateBookingStatus($conversationId, 'cancelled');
             
             if ($success) {
-                // Send cancellation message
+
                 $this->chatRepo->saveMessage(
                     $conversationId,
                     $user['user_id'],

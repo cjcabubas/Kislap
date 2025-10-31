@@ -36,19 +36,16 @@ class RatingController
             exit;
         }
 
-        // Validate rating is between 1-5
         if ($rating < 1 || $rating > 5) {
             echo json_encode(['success' => false, 'error' => 'Invalid rating value']);
             exit;
         }
 
-        // Check if already rated
         if ($this->ratingRepo->hasUserRated($conversationId, $user['user_id'])) {
             echo json_encode(['success' => false, 'error' => 'You have already rated this service']);
             exit;
         }
 
-        // Get worker_id from conversation
         $conversation = $this->chatRepo->getConversationById($conversationId);
         if (!$conversation) {
             echo json_encode(['success' => false, 'error' => 'Conversation not found']);
@@ -57,9 +54,7 @@ class RatingController
 
         $workerId = $conversation['worker_id'];
 
-        // Save rating
         if ($this->ratingRepo->saveRating($conversationId, $user['user_id'], $workerId, $rating, $review)) {
-            // Send thank you message
             $this->chatRepo->saveMessage(
                 $conversationId,
                 $user['user_id'],

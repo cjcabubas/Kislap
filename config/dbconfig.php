@@ -1,8 +1,8 @@
 <?php
 $host = 'localhost';
-$db   = 'kislap';  // replace with your phpMyAdmin database name
-$user = 'root';                // default XAMPP username
-$pass = '';                    // default XAMPP password
+$db   = 'kislap';
+$user = 'root';
+$pass = '';
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";

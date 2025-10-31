@@ -394,7 +394,7 @@ class AuthController
 
         // Check if OTP was verified with extended timeout (30 minutes)
         $otpVerifiedTime = $_SESSION['otp_verified_time'] ?? 0;
-        $timeoutDuration = 30 * 60; // 30 minutes in seconds
+        $timeoutDuration = 30 * 60;
         
         if (empty($_SESSION['otp_verified']) || empty($_SESSION['otp_email']) || (time() - $otpVerifiedTime) > $timeoutDuration) {
             header("Location: index.php?controller=Auth&action=forgotPassword");
@@ -420,7 +420,6 @@ class AuthController
         $newPassword = $_POST['new_password'] ?? '';
         $confirmPassword = $_POST['confirm_password'] ?? '';
 
-        // Verify session state with extended timeout (30 minutes)
         $otpVerifiedTime = $_SESSION['otp_verified_time'] ?? 0;
         $timeoutDuration = 30 * 60; // 30 minutes in seconds
         
@@ -565,8 +564,8 @@ class AuthController
             // Gmail SMTP settings
             $smtpHost = 'smtp.gmail.com';
             $smtpPort = 587;
-            $smtpUsername = 'kislaphelpdesk@gmail.com'; // Gmail address
-            $smtpPassword = 'vbvp uokz yyfa hfnf';      // Gmail App Password
+            $smtpUsername = 'kislaphelpdesk@gmail.com';
+            $smtpPassword = 'vbvp uokz yyfa hfnf';
             
             // Create socket connection to Gmail SMTP
             $socket = fsockopen($smtpHost, $smtpPort, $errno, $errstr, 30);
@@ -697,9 +696,6 @@ class AuthController
         }
     }
 
-    /**
-     * Send email using basic mail function (fallback)
-     */
     private function sendWithBasicMail(string $to, string $subject, string $message, string $fromEmail, string $fromName): bool
     {
         $headers = [
@@ -714,9 +710,6 @@ class AuthController
         return mail($to, $subject, $message, $headersString);
     }
 
-    /**
-     * Generate OTP email template
-     */
     private function getOTPEmailTemplate(string $otpCode, string $userName): string
     {
         $greeting = !empty($userName) ? "Hello {$userName}," : "Hello,";
@@ -775,17 +768,11 @@ class AuthController
         ";
     }
 
-    /**
-     * Check if we're in test mode (for development)
-     */
     private function isTestMode(): bool
     {
         return false; // Production mode - send real emails
     }
 
-    /**
-     * Log email instead of sending (for development)
-     */
     private function logEmail(string $to, string $subject, string $message): bool
     {
         $logEntry = [

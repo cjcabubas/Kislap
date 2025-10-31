@@ -34,7 +34,6 @@ class PaymentController
             exit;
         }
 
-        // Get booking amount
         $totalAmount = $this->paymentRepo->getBookingAmount($conversationId);
         if (!$totalAmount) {
             echo json_encode(['success' => false, 'error' => 'Booking not found']);
@@ -43,9 +42,7 @@ class PaymentController
 
         $depositAmount = $totalAmount * 0.5;
 
-        // Process payment (simulation)
         if ($this->paymentRepo->processDepositPayment($conversationId)) {
-            // Send confirmation message
             $this->chatRepo->saveMessage(
                 $conversationId,
                 $user['user_id'],
@@ -81,7 +78,6 @@ class PaymentController
             exit;
         }
 
-        // Get booking amount
         $totalAmount = $this->paymentRepo->getBookingAmount($conversationId);
         if (!$totalAmount) {
             echo json_encode(['success' => false, 'error' => 'Booking not found']);
@@ -90,9 +86,8 @@ class PaymentController
 
         $remainingBalance = $totalAmount * 0.5;
 
-        // Process payment (simulation)
         if ($this->paymentRepo->processFullPayment($conversationId)) {
-            // Send completion message
+
             $this->chatRepo->saveMessage(
                 $conversationId,
                 $user['user_id'],
