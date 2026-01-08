@@ -60,17 +60,6 @@
     </div>
 </section>
 
-<!-- Content Section (for adding more content below) -->
-<section class="content-section">
-    <div class="content-container">
-        <h2 class="section-title">Ready to Expand?</h2>
-        <p class="section-description">
-            This is where you can add more content sections below the hero.
-            The design maintains the Kislap theme and is fully responsive.
-        </p>
-    </div>
-</section>
-
 <!-- Features Section -->
 <section class="features-section">
     <div class="features-container">
